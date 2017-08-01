@@ -175,16 +175,11 @@ public with sharing class RFQOpportunityDao extends BaseDao {
         RfQItemDao dao = RFQItemDao.getInstance();
         if(rfqItems != null) {
             for (RFQ_Item__c item : rfqItems) {
-                system.debug('SF-199 Line 163 highestStatus: '+highestStatus);
                 if (item.Status__c != RFQItemDao.STATUS_NO_BID && !RFQItemDao.STATUS_CLOSED.contains(item.Status__c) && (highestStatus == null || dao.statusGreaterOrEqual(item, highestStatus.Status__c))) {
-                   system.debug('SF-199 Line 165 highestStatus: '+highestStatus);
-                 system.debug('SF-199 Line 166 item.Status__c: '+item.Status__c);
-
-                    highestStatus = item;
+                     highestStatus = item;
                 }    
             }
         }
-        system.debug('SF-199 Line 172 highestStatus: '+highestStatus);
         return highestStatus;
     }
 }
