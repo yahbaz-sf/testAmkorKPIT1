@@ -51,7 +51,6 @@ public with sharing class RFQOpportunityDao extends BaseDao {
             }
             
            
-            
            /* if(item.Status__c == RFQItemDao.STATUS_Qual) {
                 stage = 'Qual';
             } else if(item.Status__c == RFQItemDao.STATUS_PROGRAM_WIN) { 
