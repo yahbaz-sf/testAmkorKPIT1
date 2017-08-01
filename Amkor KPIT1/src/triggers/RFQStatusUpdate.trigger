@@ -98,7 +98,7 @@ trigger RFQStatusUpdate on RFQ_Item__c (after insert, after update) {
             }
         }
     }
-    
+    // Test update
     //SALESFORCE-118 abhay  : Sales ability to update RFQI Status from Cancel to Win/Loss.
     /*if(Trigger.isAfter && (Trigger.isUpdate || Trigger.isInsert || Trigger.IsDelete )) {
     
