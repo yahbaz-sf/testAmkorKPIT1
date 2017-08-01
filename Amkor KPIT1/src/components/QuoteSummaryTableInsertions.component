@@ -1,0 +1,84 @@
+<apex:component >
+	<apex:attribute name="wrappers" type="RFQItemWrapper[]" description="The Related Items"/>
+	<apex:attribute name="factories" type="map" description="map of all factories" />
+
+	<apex:dataTable value="{!wrappers}" var="wrapper" styleClass="summaryTable" border="1">
+			<apex:column >
+				<apex:facet name="header">Customer Project/Device Name</apex:facet>
+				<apex:outputText value="{!wrapper.rfqItem.Project_Device__c}" />
+			</apex:column>
+
+			<apex:column >
+				<apex:facet name="header">Test Type</apex:facet>
+				<apex:outputText value="{!wrapper.specificRfqItem['Test_Type__c']}" />
+			</apex:column>
+
+			<apex:column >
+				<apex:facet name="header">Forecast</apex:facet>
+				<apex:outputText value="{0}">
+					<apex:param value="{!wrapper.rfqItem.Forecast__c}" />
+				</apex:outputText>
+
+			</apex:column>
+
+			<apex:column >
+				<apex:facet name="header">Amkor Quoted Price ($)</apex:facet>
+				<apex:outputText value="{0, number, ###,##0.00000} {1}">
+					<apex:param value="{!wrapper.rfqItem.Price_To_Customer__c}" />
+					<!--Adds a label like ' / Minute' to the Price to customer - AMK-1825-->
+					<apex:param value="{!wrapper.rfqItem.BU_Price_Label__c}" />
+				</apex:outputText>
+				
+			</apex:column>
+
+			<apex:column >
+				<apex:facet name="header">Amkor Post Test Services Price ($)</apex:facet>
+				<apex:outputText value="{0, number, ###,##0.00000}">
+					<apex:param value="{!wrapper.specificRfqItem['Post_Price_To_Customer__c']}" />
+				</apex:outputText>
+				
+			</apex:column>
+
+
+			<apex:column >
+				<apex:facet name="header">Quote #</apex:facet>
+				<apex:outputText value="{!wrapper.rfqItem.Name}" />
+				<apex:outputText rendered="{!wrapper.rfqItem.Parent_RFQ_Item__c != null}" value=" - added service to {!wrapper.rfqItem.Parent_RFQ_Item__r.Name}" />				
+			</apex:column>
+
+			<apex:column >
+			<apex:facet name="header">Insertion Test Configuration Details</apex:facet>
+			<apex:dataTable value="{!wrapper.insertionConfigurations}" var="config" border=".5">
+				<apex:column >
+				<apex:facet name="header">Factories</apex:facet>
+					<apex:outputText value="{!config['Factory_Selected__c']}" />
+				</apex:column>
+				<apex:column >
+				<apex:facet name="header">Tester Models</apex:facet>
+					<apex:outputText value="{!config['Tester_Model__c']}" />
+				</apex:column>
+				<apex:column >
+				<apex:facet name="header">Tester Owners</apex:facet>
+					<apex:outputText value="{!config['Tester__c']}" />
+				</apex:column>
+				<apex:column >
+				<apex:facet name="header">Handler Models</apex:facet>
+					<apex:outputText value="{!config['Handler_Model__c']}" />
+				</apex:column>
+				<apex:column >
+				<apex:facet name="header">Handler Owners</apex:facet>
+					<apex:outputText value="{!config['Handler__c']}" />
+				</apex:column>
+			</apex:dataTable>
+			</apex:column>
+			<apex:column >
+				<apex:facet name="header">Amkor CPN</apex:facet>
+				<apex:outputText value="{!wrapper.rfqItem.Configured_Part_Number__r.Name}" />
+			</apex:column>
+			<apex:column >
+				<apex:facet name="header">NRE Inclusion</apex:facet>
+				<apex:outputText value="{!wrapper.rfqItem.NRE_Inclusion__c}" />
+			</apex:column>
+
+		</apex:dataTable>
+</apex:component>

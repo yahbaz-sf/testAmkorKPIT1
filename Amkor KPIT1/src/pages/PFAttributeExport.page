@@ -1,0 +1,43 @@
+<apex:page showHeader="true" sidebar="true" controller="PFAttributeExportController" contentType="application/vnd.ms-excel#{!fileName}.xls" cache="true">
+
+	<apex:dataTable value="{!attributes}" var="attribute" border="1">
+		<apex:column headerValue="Attribute Name">
+			<apex:outputText value="{!attribute.fieldLabel}" />
+
+		</apex:column>
+
+
+		<apex:column headerValue="Data Type">
+			<apex:outputText value="{!attribute.dataType}" />
+		</apex:column>
+
+
+		<apex:column headerValue="Picklist Values">
+			
+			<apex:repeat value="{!attribute.picklistValues}" var="picklistValue">
+				<apex:outputText value="{!picklistValue}" />
+				<br/>
+			</apex:repeat>
+			
+		</apex:column>
+
+
+		<apex:column headerValue="Default Value">
+			<apex:outputText value="{!attribute.defaultValue}" />
+		</apex:column>
+
+		<apex:column headerValue="Is CPN Attribute">
+			<apex:outputText value="{!attribute.isCpnAttribute}" />
+		</apex:column>
+
+		<apex:column headerValue="CPN Interface Name">
+			<apex:outputText value="{!attribute.sapName}" />
+		</apex:column>
+
+		<apex:column headerValue="RFQI Section">
+			<apex:outputText value="{!attribute.sectionType}" />
+		</apex:column>
+
+	</apex:dataTable>
+	
+</apex:page>

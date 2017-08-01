@@ -1,0 +1,236 @@
+<!-- 
+*   	RKRSSNFR_AdvancedSearch page is used to display, update and save the News Advanced Search criterias.
+*	
+*       Author  :   Wilson Ng
+*  
+-->
+<apex:page standardController="Account" extensions="Rknews.RKRSSNFR_AdvancedSearchController" tabStyle="Account" action="{!init}" id="myPage" >
+	
+<style>
+.rich-tab-header{
+	padding:.5em;
+	height:1em;
+	border-radius:.5em .5em 0 0;
+	
+	font-family: Arial, Helvetica, sans-serif; font-size: 1em; font-weight:bold; color:#F0F0F0; text-decoration: none;  
+	border-top: 1px solid #bbe4f5;
+	border-bottom: 1px solid #43AEDA;
+	border-right: 2px solid #bbe4f5;
+	border-left: 1px solid #65B0CF;
+} 
+.rich-tab-active {
+	background:#4197DE; /* for non-css3 browsers */
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#8AC3EF', endColorstr='#0774D1'); /* for IE */
+	background:-webkit-gradient(linear, left top, left bottom, from(#8AC3EF), to(#0774D1)); /* for webkit browsers */
+	background:-moz-linear-gradient(top,  #8AC3EF,  #0774D1); /* for firefox 3.6+ */
+	border-top: 1px solid #bad8ef;
+	border-bottom: 1px solid #085A99;
+	
+	border-right: 0;
+	color:white;
+}
+.rich-tab-inactive{
+	background:#77CEF4; /* for non-css3 browsers */
+	color:#EEE;
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#aae2fa', endColorstr='#60C5F1'); /* for IE */
+	background:-webkit-gradient(linear, left top, left bottom, from(#aae2fa), to(#60C5F1)); /* for webkit browsers */
+	background:-moz-linear-gradient(top,  #aae2fa,  #60C5F1); /* for firefox 3.6+ */
+}
+.rich-tbpnl-tb-sel{
+	background:#4197DE; /* for non-css3 browsers */
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#8AC3EF', endColorstr='#0774D1'); /* for IE */
+	background:-webkit-gradient(linear, left top, left bottom, from(#8AC3EF), to(#0774D1)); /* for webkit browsers */
+	background:-moz-linear-gradient(top,  #8AC3EF,  #0774D1); /* for firefox 3.6+ */
+	border-top: 1px solid #bad8ef;
+	border-bottom: 1px solid #085A99;
+	
+	color:white;
+}
+.rich-tabhdr-side-cell{
+	border:0;
+}
+.rich-tabhdr-side-border{
+	background-image:none;
+}
+.rich-tabpanel-content {
+	font-size:inherit;
+}
+.note-item{
+	color:#888;
+}
+.page-message{
+	margin:1em;
+}
+</style>
+
+	<apex:PageMessages />
+    
+	<apex:form id="frm" >
+		<apex:sectionHeader title="{!$Label.rknews__RKRSSNFR_AdvancedSearch_Title}" subtitle="{!Account.Name}"/>
+		
+		<apex:outputPanel styleClass="page-message" layout="block">
+			<apex:outputText escape="false" value="{!$Label.rknews__RKRSSNFR_AdvancedSearch_InstructionalText}" >
+				<apex:param value="{!accountLabels[0]}" />
+				<apex:param value="{!accountLabels[1]}" />
+				<apex:param value="{!contactLabels[0]}" />
+				<apex:param value="{!contactLabels[1]}" />
+			</apex:outputText>
+		</apex:outputPanel>
+
+		<apex:outputPanel styleClass="page-message" layout="block">
+			<apex:outputText escape="false" value="{!$Label.rknews__RKRSSNFR_AdvancedSearch_CurrentlyUsing}">
+				<apex:param value="{!Account.Name}" />
+				<apex:param value="{!currSearchType}" />
+				<apex:param value="{!currSearchValue}" />
+			</apex:outputText>
+		</apex:outputPanel>
+		
+		<apex:tabPanel switchType="client" value="{!tabInFocus}" id="theTabPanel">
+			<apex:tab label="Simple Search" name="theSimpleTab" id="theSimpleTab">
+				<apex:PageBlock mode="edit" id="pbMainSimpleScreen" >
+					<apex:pageBlockButtons >
+						<apex:commandButton action="{!save}" value="Save" id="btnsave"/>
+						<apex:commandButton action="{!cancel}" value="Cancel" id="btnCancel"/>
+						<apex:commandButton action="{!reset}" value="Clear" id="btnReset" reRender="theTabPanel" status="tabstatus"/>
+						<apex:actionStatus id="tabstatus" stopText="" startText=" processing">
+							<apex:facet name="start">
+								<img src="{!URLFOR($Resource.RKNews ,'img/loading.gif')}" />
+							</apex:facet>
+							<apex:facet name="stop" />
+						</apex:actionStatus>
+					</apex:pageBlockButtons>
+		
+					<apex:PageBlockSection title="{!$Label.rknews__RKRSSNFR_AdvancedSearch_Override_simple}" columns="1" id="pbsecSimpleSearch" >
+					
+						<apex:pageBlockSectionItem id="pbSimple">
+							<apex:OutputLabel Value="{!$Label.rknews__RKRSSNFR_AdvancedSearch_Simple_search}" id="lblSimple" styleClass="FontBold" />
+							<apex:InputText value="{!Account.Rknews__News_Search_Override__c}" id="iNSimple" size="30" maxlength="255" />
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem rendered="{!currSearchType=='advanced'}"/>
+						<apex:pageBlockSectionItem rendered="{!currSearchType=='advanced'}">
+							<apex:outputText styleClass="note-item" escape="false" value="{!$Label.rknews__RKRSSNFR_AdvancedSearch_SimpleOverridden}" />
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem rendered="{!$Profile.Name=='System Administrator'}"/>
+						<apex:pageBlockSectionItem rendered="{!$Profile.Name=='System Administrator'}">
+							<apex:outputText styleClass="note-item" escape="false" value="{!$Label.rknews__RKRSSNFR_AdvancedSearch_AdminNote}" >
+								<apex:param value="{!accountLabels[0]}" />
+							</apex:outputText>
+						</apex:pageBlockSectionItem>
+					</apex:PageBlockSection>
+				</apex:PageBlock>
+			</apex:tab>
+		
+			<apex:tab label="Advanced Search" name="theAdvancedTab" id="theAdvancedTab">
+				<apex:PageBlock mode="edit" id="pbMainAdvancedScreen" >
+					<apex:pageBlockButtons >
+						<apex:commandButton action="{!save}" value="Save" id="btnsave2"/>
+						<apex:commandButton action="{!cancel}" value="Cancel" id="btnCancel2"/>
+						<apex:commandButton action="{!reset}" value="Clear" id="btnReset2" reRender="theTabPanel" status="tabstatus2"/>
+						<apex:actionStatus id="tabstatus2" stopText="" startText=" processing">
+							<apex:facet name="start">
+								<img src="{!URLFOR($Resource.RKNews ,'img/loading.gif')}" />
+							</apex:facet>
+							<apex:facet name="stop" />
+						</apex:actionStatus>
+					</apex:pageBlockButtons>
+					
+					<apex:PageBlockSection title="{!$Label.rknews__RKRSSNFR_AdvancedSearch_Find_news_stories}" columns="1" id="pbsecAdvancedSearch1" >
+						
+						<!-- All, Any, Exact and None input fields -->					
+						<apex:pageBlockSectionItem id="pbAll">
+							<apex:OutputLabel Value="{!$Label.rknews__RKRSSNFR_AdvancedSearch_All_these_words}" id="lblAll" styleClass="FontBold" />
+							<apex:outputPanel >
+								<apex:InputText value="{!advRecordAll.SearchValue}" id="iNAll" size="30" maxlength="255" />
+								<apex:OutputLabel Value="occurring" style="padding: 10px; color: #4A4A56; font-size: 91%; font-weight: bold;"/>
+								<apex:selectList size="1" value="{!advRecordAll.SearchOperator}">
+									<apex:selectOptions value="{!occurrenceOptions}"/>
+								</apex:selectList>
+							</apex:outputPanel>
+						</apex:pageBlockSectionItem>
+						
+						<apex:pageBlockSectionItem id="pbAny">
+							<apex:OutputLabel Value="{!$Label.rknews__RKRSSNFR_AdvancedSearch_At_least_one_of_these_words}" id="lblAny" styleClass="FontBold" />
+							<apex:outputPanel >
+								<apex:InputText value="{!advRecordAny.SearchValue}" id="iNAny" size="30" maxlength="255" />
+								<apex:OutputLabel Value="occurring" style="padding: 10px; color: #4A4A56; font-size: 91%; font-weight: bold;"/>
+								<apex:selectList size="1" value="{!advRecordAny.SearchOperator}">
+									<apex:selectOptions value="{!occurrenceOptions}"/>
+								</apex:selectList>
+							</apex:outputPanel>
+						</apex:pageBlockSectionItem>
+						
+						<apex:pageBlockSectionItem id="pbExact">
+							<apex:OutputLabel Value="{!$Label.rknews__RKRSSNFR_AdvancedSearch_This_exact_phrase}" id="lblExact" styleClass="FontBold" />
+							<apex:outputPanel >
+								<apex:InputText value="{!advRecordExact.SearchValue}" id="iNExact" size="30" maxlength="255" />
+								<apex:OutputLabel Value="occurring" style="padding: 10px; color: #4A4A56; font-size: 91%; font-weight: bold;"/>
+								<apex:selectList size="1" value="{!advRecordExact.SearchOperator}">
+									<apex:selectOptions value="{!occurrenceOptions}"/>
+								</apex:selectList>
+							</apex:outputPanel>
+						</apex:pageBlockSectionItem>
+						
+						<apex:pageBlockSectionItem id="pbNone">
+							<apex:OutputLabel Value="{!$Label.rknews__RKRSSNFR_AdvancedSearch_None_of_these_words}" id="lblNone" styleClass="FontBold" />
+							<apex:outputPanel >
+								<apex:InputText value="{!advRecordNone.SearchValue}" id="iNNone" size="30" maxlength="255" />
+								<apex:OutputLabel Value="occurring" style="padding: 10px; color: #4A4A56; font-size: 91%; font-weight: bold;"/>
+								<apex:selectList size="1" value="{!advRecordNone.SearchOperator}">
+									<apex:selectOptions value="{!occurrenceOptions}"/>
+								</apex:selectList>
+							</apex:outputPanel>
+						</apex:pageBlockSectionItem>
+					</apex:PageBlockSection>
+					
+					<!-- Source and Location input fields -->
+					<apex:PageBlockSection title="{!$Label.rknews__RKRSSNFR_AdvancedSearch_Then_narrow}" columns="1" id="pbsecAdvancedSearch2" >
+		
+						<apex:pageBlockSectionItem id="pbSource">
+							<apex:OutputLabel Value="Source" id="lblSource" styleClass="FontBold" />
+							<apex:outputPanel >
+								<apex:InputText value="{!advRecordSource.SearchValue}" id="iNSource" size="30" maxlength="255" />
+								<apex:outputText style="color: #4A4A56; font-size: 91%; font-style: italic;" value="(news source ID, for example, 'New York Times')" />
+							</apex:outputPanel>
+						</apex:pageBlockSectionItem>
+							
+						<apex:pageBlockSectionItem id="pbLocation">
+							<apex:OutputLabel Value="Location" id="lblLocation" styleClass="FontBold" />
+							<apex:outputPanel >
+								<apex:InputText value="{!advRecordLocation.SearchValue}" id="iNLocation" size="30" maxlength="255" />
+								<apex:outputText style="color: #4A4A56; font-size: 91%; font-style: italic;" value="(country or 2-letter state or province, for example, 'Canada' or 'NY')" />
+							</apex:outputPanel>
+						</apex:pageBlockSectionItem>
+
+						<apex:pageBlockSectionItem rendered="{!currSearchType=='simple'}"/>
+						<apex:pageBlockSectionItem rendered="{!currSearchType=='simple'}">
+							<apex:outputText styleClass="note-item" escape="false" value="{!$Label.rknews__RKRSSNFR_AdvancedSearch_AdvancedOverrideNote}" />
+						</apex:pageBlockSectionItem>
+					</apex:PageBlockSection>
+					
+					<!-- Generated output fields - DEBUG ONLY (<url>&debug=1)-->
+					<apex:PageBlockSection rendered="{!$CurrentPage.parameters.debug != null}" title="View Google News advanced search generated results..." columns="1" id="pbsecAdvancedSearch3" >
+						
+						<apex:pageBlockSectionItem id="pbGenerate">
+							<apex:outputPanel >
+								<apex:OutputLabel Value="Google News Advanced Search" id="lblGenerate" styleClass="FontBold" /><br/>
+								<apex:commandButton action="{!nothing}" rerender="iNGenerate" image="{!URLFOR($Resource.Rknews__RKNews ,'img/view_refresh.png')}" title="Regenerate results" status="refreshstatus"/>
+								<apex:actionStatus id="refreshstatus" stopText="" startText="">
+								<apex:facet name="start">
+									<img src="{!URLFOR($Resource.RKNews ,'img/loading.gif')}" />
+								</apex:facet>
+								<apex:facet name="stop" />
+							</apex:actionStatus>
+							</apex:outputPanel>
+							<apex:InputTextArea cols="100" rows="3" disabled="true" value="{!generateGoogleNewsSearch}" id="iNGenerate"/>
+						</apex:pageBlockSectionItem>
+					</apex:PageBlockSection>
+					
+				</apex:PageBlock>
+		
+			</apex:tab>
+			
+		</apex:tabPanel>
+	
+	</apex:form>
+
+</apex:page>

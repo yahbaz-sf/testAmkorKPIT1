@@ -1,0 +1,3 @@
+<apex:page standardController="Opportunity" extensions="First_Rain.FROpportunityControllerExt" tabStyle="opportunity"> 
+<apex:iframe src="https://apps.firstrain.com/sfdcnextgen/001/dynamic/opportunity.do?sessionId={!$Api.Session_ID}&opportunityid={!opportunity.id}&accountid={!opportunity.Account.id}&accountname={!URLENCODE(opportunity.Account.name)}&entrprsid={!enterpriseId}&userid={!$User.Id}&userEmail={!$User.Email}&userFirstName={!URLENCODE($User.FirstName)}&userLastName={!URLENCODE($User.LastName)}&type=opportunity&accesstoken={!accesstoken}&displayName={!URLENCODE(opportunity.name)}&restUrl={!resturl}" height="513px" id="frAccountIframe"/> 
+</apex:page>

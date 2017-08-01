@@ -1,0 +1,30 @@
+<apex:page showHeader="false" sidebar="false" standardController="Account" extensions="AccountTeamMemberController"> 
+    <apex:form >
+    <apex:pageMessages id="messages" />
+        <apex:pageBlock title="Team Members" id="pb">
+        <apex:outputPanel id="output">
+            <apex:pageBlockTable var="mem" value="{!mems}" summary="Team Members" id="pbt">
+                <apex:column headerValue="Action" width="6%">
+                    <apex:commandLink action="{!deleteMember}" reRender="output, messages">
+                        Del
+                        <apex:param value="{!mem.Id}" name="delId" />
+                        <apex:param value="{!mem.UserId}" name="uId" />
+                    </apex:commandLink>
+                </apex:column>
+                <apex:column value="{!mem.UserId}" width="40%" onclick="window.open('/{!mem.UserId}')"/>
+                <apex:column width="40%" >
+                    <apex:outputField value="{!mem.TeamMemberRole}"/>
+                </apex:column>
+            </apex:pageBlockTable>
+            <apex:outputPanel rendered="{!showbutton}">
+            <apex:outputLabel value="User: " />
+            <apex:inputField value="{!newMem.UserId}" required="false" />
+            <apex:outputLabel value="Team Role: " />
+            <apex:inputField value="{!newMem.TeamMemberRole}" required="false"  />
+           <apex:commandButton value="Add" action="{!addMember}" reRender="output, messages" />
+           </apex:outputPanel>
+        </apex:outputPanel>
+        </apex:pageBlock>
+    </apex:form>
+    <script type="text/javascript">function setFocusOnLoad() {}</script>
+</apex:page>

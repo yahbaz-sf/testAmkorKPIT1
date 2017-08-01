@@ -1,0 +1,65 @@
+<apex:page controller="RFQItemGroupEscalationController">
+<apex:pageMessages />
+
+<script type="text/javascript">
+    var inProgress = false;
+    function resetProgress() {
+        inProgress = false;
+    }
+
+</script>
+
+<apex:form id="form" >
+    <apex:sectionHeader title="" subtitle="Group Item Escalation" description=""/>
+
+    <apex:pageBlock id="head">
+	    <apex:pageBlockSection showHeader="false" columns="2">
+	        <apex:outputField value="{!rfq.Name}"/> 
+	        <apex:outputField value="{!rfq.SBU_Name__c}" />
+
+	    </apex:pageBlockSection>
+	</apex:pageBlock>
+    
+	<c:RFQItemEscalationConsiderations /> 
+	
+	<apex:pageBlock id="pricing" rendered="{!IF(escalateItems.size > 0, true, false)}">
+	    <!-- apex:pageBlockTable with selectable Items, and summary of their prices and stuff -->
+	    <apex:pageBlockTable value="{!escalateItems}" var="holder">
+	    	<apex:column >
+	    		<apex:inputCheckbox value="{!holder.selected}" />
+	    	</apex:column>
+	    	<apex:column value="{!holder.rfqItem.Name}" headervalue="Item Number" /> 
+	    	<apex:column value="{!holder.rfqItem.Package_Family__r.Name}" headervalue="Package Family" />
+	    	<apex:column value="{!holder.rfqItem.Customer_Target_Price__c}" />
+	    	<apex:column value="{!holder.rfqItem.Sales_Target_Price__c}" />
+	    	<apex:column value="{!holder.rfqItem.Competitor__c}" />
+	    	<apex:column value="{!holder.rfqItem.Competitor_AU_Inclusive_Price__c}" />
+	    	<apex:column value="{!holder.rfqItem.BU_Price__c}" />
+	    	<apex:column value="{!holder.rfqItem.Price_To_Customer__c}" />
+			<apex:column value="{!holder.rfqItem.End_Market_Segment__c}" />
+	    </apex:pageBlockTable> 
+
+	    <apex:commandButton value="Select All" action="{!selectAll}" immediate="true" />
+	    <apex:commandButton value="Select None" action="{!selectNone}" immediate="true" />
+	</apex:pageBlock>
+	
+	<apex:pageBlock id="submit" rendered="{!IF(escalateItems.size > 0, true, false)}"> 
+
+	     <apex:pageBlockButtons >
+	         <apex:commandButton value="Submit for Escalation" action="{!escalate}" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();"/>
+	         <apex:commandButton immediate="true" value="Cancel" action="{!cancelEscalation}"/>
+	     </apex:pageBlockButtons>
+
+	     <apex:pageBlockSection showHeader="false" columns="1">
+	         <apex:inputField required="true" value="{!escalation.Reason__c}"/>
+	         <apex:inputField style="width: 400px" required="true" value="{!escalation.Comments__c}"/>
+	    </apex:pageBlockSection>
+
+	</apex:pageBlock>
+
+	<apex:pageBlock rendered="{!IF(escalateItems.size == 0, true, false)}">
+		<apex:commandButton immediate="true" value="Return to RFQ" action="{!cancelEscalation}"/>
+	</apex:pageBlock>
+	
+</apex:form>
+</apex:page>

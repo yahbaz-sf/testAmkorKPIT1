@@ -1,0 +1,17 @@
+<apex:page standardController="CM_Margin_Version__c" extensions="CMMarginVersionController" action="{!setupEditAction}"> 
+<apex:form >
+<apex:sectionHeader title="CM Margin Version" subtitle="Edit CM Margin Version"/>
+<apex:pageBlock >
+	<apex:pageBlockButtons >
+		<apex:commandButton value="Save" action="{!saveAction}"/>
+		<apex:commandButton value="Cancel" action="{!cancelAction}" immediate="true"/>
+	</apex:pageBlockButtons>
+	<apex:pageBlockSection columns="2">
+		<apex:pageBlockSectionItem />
+		<apex:outputField value="{!rec.Status__c}"/>
+		<apex:outputField value="{!rec.Name}"/>	
+		<apex:outputField value="{!rec.Version__c}"/>	
+	</apex:pageBlockSection>
+</apex:pageBlock>
+</apex:form>
+</apex:page>

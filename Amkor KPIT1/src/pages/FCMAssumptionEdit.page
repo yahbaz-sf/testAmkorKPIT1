@@ -1,0 +1,44 @@
+<apex:page standardController="FCM_Assumption__c" extensions="FCMAssumptionController" action="{!setupAction}">
+<apex:form >
+<apex:sectionHeader title="FCM Assumption" subtitle="View FCM Assumption"/>
+<apex:pageBlock >
+	<apex:pageBlockButtons >
+		<apex:commandButton value="Save" action="{!saveAction}"/>
+		<apex:commandButton value="Cancel" action="{!cancelAction}" immediate="true"/>
+	</apex:pageBlockButtons>
+	<apex:pageBlockSection columns="1">
+		<apex:inputField value="{!rec.Name}"/>
+		<apex:inputField value="{!rec.Factory__c}"/>
+		<apex:inputField value="{!rec.Package_Family__c}"/>
+	</apex:pageBlockSection>
+	<apex:pageBlockSection columns="2" title="Values">
+		<apex:inputField value="{!rec.Annual_Fac_Cost_Sqft__c}"/>
+		<apex:inputField value="{!rec.Available_Hours_Per_Week__c}"/>
+		<apex:inputField value="{!rec.Cum_Yield_Percent__c}"/>
+		<apex:inputField value="{!rec.Direct_Labor_Rate__c}"/>
+		<apex:inputField value="{!rec.Equipment_Life__c}"/>
+		<apex:inputField value="{!rec.FCM_Is_Dedicated__c}"/>
+		<apex:inputField value="{!rec.Forecast_Factor_1__c}"/>
+		<apex:inputField value="{!rec.Forecast_Factor_2__c}"/>
+		<apex:inputField value="{!rec.Forecast_Factor_3__c}"/>
+		<apex:inputField value="{!rec.Manuf_OH_To_Process_Cost__c}"/>
+		<apex:inputField value="{!rec.Material_Brokerage_Percent__c}"/>
+		<apex:inputField value="{!rec.Material_Freight_Percent__c}"/>
+		<apex:inputField value="{!rec.Material_Tooling_Percent__c}"/>
+		<apex:inputField value="{!rec.Off_Equipment_Direct_To_Direct__c}"/>
+		<apex:inputField value="{!rec.QA_Cost_To_Process_Cost__c}"/>
+		<apex:inputField value="{!rec.Service_Cost_To_Process_Cost__c}"/>
+		<apex:inputField value="{!rec.Utilization_Efficiency_Percent__c}"/>
+		<apex:inputField value="{!rec.Utilization_Efficiency_Compound_Percent__c}"/>
+		<apex:inputField value="{!rec.Work_Weeks_Year__c}"/>
+		<apex:inputField value="{!rec.Utilization_Efficiency_Percent_T1__c}"/>
+		<apex:inputField value="{!rec.Utilization_Efficiency_Percent_T2__c}"/>
+		<apex:inputField value="{!rec.Utilization_Efficiency_Percent_T3__c}"/>
+		<apex:inputField value="{!rec.Utilization_Efficiency_Percent_T4__c}"/>
+		<apex:inputField value="{!rec.Utilization_Efficiency_Percent_T5__c}"/>
+		<apex:inputField value="{!rec.Utilization_Efficiency_Percent_T6__c}"/>
+		<apex:inputField value="{!rec.Utilization_Efficiency_Percent_T7__c}"/>
+	</apex:pageBlockSection>
+</apex:pageBlock>
+</apex:form>
+</apex:page>

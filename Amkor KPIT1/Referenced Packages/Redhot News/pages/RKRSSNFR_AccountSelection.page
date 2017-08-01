@@ -1,0 +1,203 @@
+<apex:page id="RKRSSNFR_AccountSelection" controller="Rknews.RKRSSNFR_AccountSelectionController" tabStyle="Account" title="{!Title}">
+	
+	<apex:stylesheet value="{!URLFOR($Resource.Rknews__jQueryUI ,'css/cupertino/jquery-ui-1.8.12.custom.css')}" />
+	<apex:stylesheet value="{!URLFOR($Resource.Rknews__RKNews,'css/AccountSelection.css')}" />
+	
+	<apex:includeScript value="{!URLFOR($Resource.Rknews__jQueryUI ,'js/jquery-1.5.1.min.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.Rknews__jQueryUI ,'js/jquery-ui-1.8.12.custom.min.js')}" />
+	<apex:includeScript value="{!$Resource.Rknews__TouchPunch}" />
+	<script type="text/javascript">
+		var j$ = $.noConflict();
+		jQuery(document).ready(function() {
+			basicHtmlLoad();
+			initParams();
+		});
+		String.format = String.prototype.format = function() {
+			var i=0;
+			var string = (typeof(this) == "function" && !(i++)) ? arguments[0] : this; 
+		
+			for (; i < arguments.length; i++)
+				string = string.replace(/\{\d+?\}/, arguments[i]);
+		
+			return string;
+		}
+		
+		function CustomSort(){
+ 			j$("#sortable1,#sortable2").sortable({
+ 				connectWith: ".connectedSortable",
+ 				scroll: true,
+ 				placeholder: "sortable-placeholder",
+ 				dropOnEmpty: true}).disableSelection();
+		}
+		
+		function removeAccountSelection(accId,accName)
+		{
+			// This string can not be added in the custom label because it not accessible here
+			var answer = confirm("Are you sure you want to remove "+accName+" from user account selection?"); 
+			if(answer && accId != null){
+				j$('#sortable2').children().each(function(){
+				var accSelectedId = j$(this).attr("id");
+				if(j$(this).attr("id") == accId)
+					j$(this).remove();
+				});
+			}
+		}
+		
+		function SaveAccountSelectionId(){
+			var accSelectedId = "";
+			var children = 0;
+			j$('#sortable2').children().each(function(){
+				accSelectedId += j$(this).attr("id") +",";
+            	children = children +1;
+            });
+			
+			if(children > 10){
+				var errMsg = String.format('{!$Label.RKRSSNFR_MaxAccountSelectionNotification}',"{!accountLabels[1]}", children-10); 
+				popup(errMsg);return false;
+			}
+			
+			var accSel = document.getElementById('{!$Component.RKRSSNFR_AccountSelection.frm.accSelectedIds}');
+			if(accSel != null) {
+				accSel.value = accSelectedId;
+			}
+			return true;
+		}
+		
+		function Search(){
+			if(j$('input[id*="txtSearch"]').val() == ''){
+				popup('{!$Label.RKRSSNFR_AccountSelection_BlankSearchText}');return false;}
+ 			else{
+ 				SearchAccount();}
+		}
+		
+		function popup(message) {
+			// get the screen height and width  
+		    var maskHeight = j$(document).height();  
+		    var maskWidth = j$(window).width();
+		     
+		    // calculate the values for center alignment
+		    var dialogTop =  (maskHeight/3) - (j$('#dialog-box').height());  
+		    var dialogLeft = (maskWidth/2) - (j$('#dialog-box').width()/2); 
+		     
+		    // assign values to the overlay and dialog box
+		    j$('#dialog-overlay').css({height:maskHeight, width:maskWidth}).show();
+		    j$('#dialog-box').css({top:dialogTop, left:dialogLeft}).show();
+		     
+		    // display the message
+		    j$('#dialog-message').html(message);
+		}
+	
+		function basicHtmlLoad(){
+			j$('a.btn-ok, #dialog-overlay, #dialog-box').click(function () {     
+		        j$('#dialog-overlay, #dialog-box').hide();       
+		        return false;
+		    });
+		     
+		    j$(window).resize(function () {
+		        //only do it if the dialog box is not hidden
+		        if (!j$('#dialog-box').is(':hidden')) popup();       
+		    });
+		}
+		
+	</script>
+	
+	<apex:sectionHeader title="{!Title}" subtitle="{!SubTitle}"/>
+	<apex:PageMessages id="pgMsg"></apex:PageMessages>
+	<apex:Form id="frm">
+	
+		<apex:inputHidden id="accSelectedIds" value="{!SelectedAccountIds}" />
+	
+		<!-- FIRST LOADING ACTION -->
+		<apex:actionFunction name="initParams" action="{!domReady}" rerender="pbAccSelection,pgMsg" oncomplete="CustomSort()" status="loading"/>
+		
+		<!--  ON CHANGE THE PICKLIST VALUES -->
+		<apex:actionFunction name="ControllerAction" action="{!UpdateAccountsforSelection}" rerender="pgMsg,Opsortable,repeatlstAccount,customSearchPanel" status="loading" oncomplete="CustomSort()">
+			<apex:param name="value" value=""/>
+		</apex:actionFunction>
+		
+		<apex:actionFunction name="SearchAccount" action="{!Search}" rerender="pgMsg,Opsortable,repeatlstAccount" status="loading" oncomplete="CustomSort()">
+			<apex:param name="value" value=""/>
+		</apex:actionFunction>
+		
+		<apex:outputPanel layout="block" styleClass="InstructionalText" >
+			<apex:OutputText escape="false" value="{!HTMLENCODE(InstructionalText)}" />
+		</apex:outputPanel>
+
+		<apex:outputPanel id="theToolbar" layout="block" styleClass="toolbar">
+			<apex:outputLabel value="Filter:"/>&nbsp;
+
+			<apex:selectList value="{!Selection}" multiselect="false" size="1" onchange="ControllerAction(this.value);" id="AccSelectionPickList">
+				<apex:selectOptions value="{!AccountSelection}"/>
+			</apex:selectList>
+
+			<apex:outputPanel id="customSearchPanel">
+				<apex:outputPanel styleClass="search-controls" rendered="{!Selection == CustomSearchString}" >
+					<apex:inputText id="txtSearch" value="{!SearchText}" />
+					<apex:commandbutton value="Search" action="{!search}" id="btnSearch" onClick="return Search();" rerender="pgMsg,Opsortable,repeatlstAccount"/>
+					<script type="text/javascript">
+						// override the enter key press in the search text box
+						j$("[id*=txtSearch]").keypress(function(event) {
+							if(event.which == 13) {
+								Search();
+								return false;
+							}
+						});
+					</script>
+				</apex:outputPanel>
+			</apex:outputPanel>
+
+			<!--  ON PAGE or ACTION LOAD -->
+			<apex:actionStatus id="loading" onstart="document.body.style.cursor='wait';j$('.loading-message-area').fadeIn();return true;" 
+						onStop="document.body.style.cursor='default';j$('.loading-message-area').fadeOut();return true;" styleclass="loading-status">
+			</apex:actionStatus>
+			<span class="loading-message-area" style="display:none;">
+				<img src="{!URLFOR($Resource.RKNews ,'img/loading.gif')}" /><span class="loading-status">{!$Label.RKRSSNFR_Loading}</span>
+			</span>
+		</apex:outputPanel>
+		
+		<apex:PageBlock title="" mode="edit" tabStyle="Account" id="pbAccSelection">
+		
+			<apex:pageBlockButtons id="pbButtonCmd">
+				<apex:commandButton value="{!$Label.rknews__RKRSSNFR_Save}" id="btnSave" action="{!save}" onclick="return SaveAccountSelectionId();" />
+				<apex:commandButton value="{!$Label.rknews__RKRSSNFR_Cancel}" id="btnCancel" action="{!cancel}" /> 
+			</apex:pageBlockButtons>
+			
+			<apex:PageBlockSection columns="2" >					
+				<apex:pageBlockSectionItem id="pbAccounts">
+					<apex:OutputPanel id="Opsortable" layout="block" style="min-width:350px" >
+						<apex:outputLabel value="Available:" style="font-weight: bold;"/>
+						<ul id="sortable1" class="connectedSortable" >
+							<apex:repeat value="{!lstAccount}" var="Acc" id="repeatlstAccount">
+								<li class="ui-state-default" id="{!Acc.Id}">{!Acc.Name}</li>
+							</apex:repeat>
+						</ul>
+					</apex:OutputPanel>
+				</apex:pageBlockSectionItem>
+				
+				<apex:pageBlockSectionItem id="pbSelectedAccounts">
+					<apex:OutputPanel id="Opsortable2" layout="block" style="min-width:350px" >
+						<apex:outputLabel value="Selected:" style="font-weight: bold;"/>
+						<ul id="sortable2" class="connectedSortable" title="Selected Account" >
+							<apex:repeat value="{!lstSelectedAccount}" var="Acc" id="repeatlstAccountSelected">
+								<li class="ui-state-default" id="{!Acc.Id}">{!Acc.Name}</li>
+							</apex:repeat>
+						</ul>
+					</apex:OutputPanel>
+				</apex:pageBlockSectionItem>
+			</apex:PageBlockSection>
+			
+		</apex:PageBlock>
+
+		<!-- MESSAGE BOX UI -->
+		<div id="dialog-overlay"></div>
+		<div id="dialog-box">
+			<div class="dialog-content">
+				<div id="dialog-message"></div>
+				<div id="dialog-buttons">
+					<a href="#" class="btn">{!$Label.RKRSSNFR_Close}</a>
+				</div>
+			</div>
+		</div>
+
+	</apex:Form>
+</apex:page>

@@ -1,0 +1,44 @@
+<apex:page standardController="CM_Margin_Version__c" extensions="CMMarginVersionController" action="{!setupViewAction}">  
+<apex:form >
+<apex:sectionHeader title="CM Margin Version" subtitle="View CM Margin Version"/>
+<apex:pageBlock >
+	<apex:pageBlockButtons >
+		<apex:commandButton value="Edit" action="{!editAction}" rendered="{!isPending}"/>
+		<apex:commandButton value="Delete" action="{!deleteAction}" rendered="{!isPending}" onclick="return confirm('Are you sure you wish to delete this Version?')"/>
+		<apex:commandButton value="Make Active" action="{!makeActiveAction}" rendered="{!isPending}"/>
+		<apex:commandButton value="Make New Pending" action="{!makePendingAction}" rendered="{!(isActive && !hasPending)}"/>
+		<apex:commandButton value="View Pending" action="{!showPendingAction}" rendered="{!((isActive || isArchive || isDeleted) && hasPending)}"/>
+		<apex:commandButton value="View Active" action="{!showActiveAction}" rendered="{!((isPending || isArchive || isDeleted) && hasActive)}"/> 
+	</apex:pageBlockButtons>
+	<apex:pageBlockSection columns="2">
+		<apex:outputField value="{!rec.Product_Group__c}" />
+		<apex:outputField value="{!rec.Status__c}"/>
+		<apex:outputField value="{!rec.Name}"/>	
+		<apex:outputField value="{!rec.Version__c}"/>	
+	</apex:pageBlockSection>
+</apex:pageBlock>
+<apex:tabPanel switchType="server" selectedTab="margin" id="tabPanel">
+
+<apex:tab label="Margins" name="margin" id="margin">
+<apex:pageBlock title="Margins">
+	<apex:pageBlockButtons location="top" rendered="{!isPending}">
+		<apex:commandButton value="New Margin" action="{!URLFOR($Action.CM_Margin__c.New, $ObjectType.CM_Margin__c)+'&versionId='+rec.id}"/>
+	</apex:pageBlockButtons>
+	<apex:pageBlockTable value="{!marginList}" var="marginRow"> 
+		<apex:column >
+	    	<apex:facet name="header">{!$ObjectType.CM_Margin__c.fields.name.label}</apex:facet> 
+			<apex:outputLink value="/{!marginRow.id}">{!marginRow.name}</apex:outputLink>
+	   	</apex:column> 
+	   	<apex:column value="{!marginRow.Tier__c}"/>
+	   	<apex:column value="{!marginRow.Volume_Floor__c}"/>
+	   	<apex:column value="{!marginRow.Wire_Material__c}"/>
+	   	<apex:column value="{!marginRow.Margin__c}"/>
+	   	<apex:column value="{!marginRow.Package_Family__c}"/>
+	   	<apex:column value="{!marginRow.Lead_Count__c}"/>
+	</apex:pageBlockTable>
+</apex:pageBlock>
+</apex:tab>
+
+</apex:tabPanel>
+</apex:form>
+</apex:page>

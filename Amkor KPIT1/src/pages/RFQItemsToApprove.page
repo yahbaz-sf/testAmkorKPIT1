@@ -1,0 +1,122 @@
+<apex:page controller="RFQItemsToApproveController" tabStyle="Account" showHeader="false" >
+    <apex:pageBlock >
+        <apex:pageBlockButtons location="top">
+            <apex:outputLink styleClass="btn" style="text-decoration: none" value="#" onclick="window.top.location.href = '/apex/RFQMassReassign'">Mass Reassign</apex:outputLink>
+        </apex:pageBlockButtons>
+
+     <h2 style="font-size: 1.3em">Items To Approve</h2>
+       <apex:pageBlockTable width="100%" style="font-size: .9em; vertical-align: top" cellpadding="1px" cellspacing="1px" value="{!itemsToApprove}" var="item">
+       
+            <apex:column headerValue="Actions                        ">
+                    <apex:outputLink style="color: #015ba7" styleClass="actionLink" value="#" onclick="window.top.location.href = '/apex/RFQReassign?id={!item.workItem.ProcessInstance.TargetObjectId}&retURL=/home/home.jsp'">Reassign</apex:outputLink>
+                    <apex:outputText value="|"/>
+                    <!-- //Lalit - 03-Mar-2017 : Salesforce-114 :Reject change to 'Return to Sales' during BU process for RFQI ! -->
+                    <!-- <apex:outputLink style="color: #015ba7" styleClass="actionLink" value="#" onclick="window.top.location.href = '/apex/RFQProcessInstance?id={!item.pInst.targetobjectId}&cancelURL=/home/home.jsp'">Approve/Reject</apex:outputLink>!-->
+                    <apex:outputLink style="color: #015ba7" styleClass="actionLink" value="#" onclick="window.top.location.href = '/apex/RFQProcessInstance?id={!item.pInst.targetobjectId}&cancelURL=/home/home.jsp'">Approve/Return To Sales</apex:outputLink>
+            </apex:column>
+       
+            <apex:column headerValue="Related To">
+                    <!-- Abhay - 03-Jun-2017 : Salesforce-224 added comditions for rendering output link to redirect TestServicesBD user to Sales Screen -->
+                    <apex:outputLink rendered="{!item.isRFQItem && !item.IsSales && ($Profile.Name == 'TestServicesBusDev')}" value="#" onclick="window.top.location.href = '/apex/RFQItemView?id={!item.pInst.targetObjectId}'">{!item.pInst.targetobject.name} </apex:outputLink>
+                    <apex:outputLink rendered="{!item.isRFQItem && !item.IsSales && ($Profile.Name != 'TestServicesBusDev')}" value="#" onclick="window.top.location.href = '/apex/RFQBUItemView?id={!item.pInst.targetObjectId}'">{!item.pInst.targetobject.name} </apex:outputLink>
+                    <apex:outputLink rendered="{!item.isRFQItem && item.IsSales}" value="#" onclick="window.top.location.href = '/apex/RFQItemView?id={!item.pInst.targetObjectId}'">{!item.pInst.targetobject.name} </apex:outputLink>
+                    <apex:outputLink rendered="{!!item.isRFQItem}" value="#" onclick="window.top.location.href = '/{!item.pInst.targetObjectId}'">{!item.pInst.targetobject.name} </apex:outputLink>
+            </apex:column>
+
+             <apex:column headerValue="Assigned To">
+                    <apex:outputText value="{!item.workItem.actor.Name}" />
+            </apex:column>
+
+            <apex:column headerValue="RFQ">
+                    <apex:outputLink rendered="{!item.isRFQItem}" value="#" onclick="window.top.location.href = '/apex/RFQView?id={!item.rfqItem.RFQ__c}'">{!item.rfqItem.RFQ__r.Name}</apex:outputLink>
+            </apex:column>
+
+            <apex:column headerValue="Submitted">
+                    <apex:outputField value="{!item.workItem.createdDate}" />
+            </apex:column>
+
+            <apex:column headerValue="Status">
+                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.Status__c}" />
+            </apex:column>
+
+            <apex:column headerValue="SBU Name">
+                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.RFQ__r.SBU_Name__r.Name}" />
+            </apex:column>
+
+            <apex:column headerValue="Cust Project/Device">
+                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.Project_Device__c}" />
+            </apex:column>
+         
+            <apex:column headerValue="Family">
+                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.Package_Family__r.Name}" />
+            </apex:column>
+
+            <apex:column headerValue="Volume">
+                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.Volume__c}" />
+            </apex:column>
+
+            <apex:column headerValue="BU Price">
+                <apex:outputText rendered="{!item.isRFQItem}" value="{0,number,#,##0.00000}">
+                    <apex:param value="{!item.rfqItem.BU_Price__c}" />
+                </apex:outputText>  
+            </apex:column>
+
+            <apex:column headerValue="% GM">
+                    <apex:outputText rendered="{!item.isRFQItem}" value="{0,number,#,##0.00000}">
+                        <apex:param value="{!item.rfqItem.Total_Perc_GM__c}" />
+                    </apex:outputText>  
+            </apex:column>
+
+            <apex:column headerValue="Factory">
+                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.Factory__c}" />
+            </apex:column>
+
+            <apex:column headerValue="Dim - Ball/Leads">
+                    <apex:outputText value="{!item.rfqItem.Dim_XY__c}" />
+            </apex:column>
+
+            <apex:column headerValue="Mold Type">
+                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.Mold_Type__c}" />
+            </apex:column>
+
+            <apex:column headerValue="# Die">
+                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.Number_Of_Die__c}" />
+            </apex:column>
+            
+            <apex:column headerValue="Wire Material / Diameter">
+                    <apex:outputText value="{!item.rfqItem.Wire_Type_And_Diameter__c}" />
+            </apex:column>
+
+            <apex:column headerValue="# Wires">
+                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.Number_Of_Wires__c}" />
+            </apex:column>
+
+            <apex:column headerValue="Tot 3d Wire Length (mm)">
+                    <apex:outputText rendered="{!item.isRFQItem}" value="{0,number,#,##0.00000}">
+                    <apex:param value="{!item.rfqItem.Total_Wire_Length__c}" />
+                     </apex:outputText>
+            </apex:column>
+
+            <apex:column headerValue="AU Base">
+                <apex:outputText rendered="{!item.isRFQItem}" value="{0,number,#,##0.00000}">
+                    <apex:param value="{!item.rfqItem.RFQ__r.SBU_Name__r.Customer_AU_Base_fml__c}" />
+                </apex:outputText>
+            </apex:column>
+
+            <apex:column headerValue="Heat Sink">
+                    <apex:outputText value="{!item.rfqItem.Heatspreader__c}" />
+            </apex:column>
+            
+        </apex:pageBlockTable>
+        <apex:outputText value="No items to approve" rendered="{!!hasItems}"/> 
+    </apex:pageBlock>
+    
+    <script>
+        var intId = setInterval(function(){
+            var _docHeight = (document.height !== undefined) ? document.height : document.body.offsetHeight;
+            parent.postMessage(_docHeight+20,"*");
+            clearInterval(intId);
+        },1000);
+    </script>
+    
+</apex:page>

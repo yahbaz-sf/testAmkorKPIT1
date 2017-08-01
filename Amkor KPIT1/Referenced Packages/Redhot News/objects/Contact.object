@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fields>
+        <fullName>News_Search_Override__c</fullName>
+        <deprecated>false</deprecated>
+        <description>This field will override the default Account Name Search for the Redkite News component.</description>
+        <externalId>false</externalId>
+        <inlineHelpText>This field will override the default Account Name Search for the Redkite News component. Please enter a search term for the news articles that you would like to see for this Account.</inlineHelpText>
+        <label>News Search Override</label>
+        <length>255</length>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+</CustomObject>

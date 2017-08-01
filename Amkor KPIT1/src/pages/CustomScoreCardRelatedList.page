@@ -1,0 +1,34 @@
+<apex:page standardController="Account" showHeader="false" sidebar="false" extensions="CustomScoreCardRelatedListController">
+  <apex:form >
+    <apex:pageblock id="CustomList" mode="maindetail">
+        <apex:outputPanel id="output">
+        <apex:pageBlockTable value="{!lstScoreCard}" var="sc" rendered="{!NOT(ISNULL(lstScoreCard))}">           
+            <!--<apex:column headerValue="Parent Customer" onclick="redirect('{!sc.SBUAccount__c}')">
+                <apex:outputLink >{!parentName}</apex:outputLink>
+            </apex:column>-->
+            <apex:column headerValue="Scorecard Number" onclick="redirect('{!sc.Id}')">
+                <apex:outputLink id="scNum">{!sc.Name}</apex:outputLink>
+            </apex:column>
+            <apex:column headerValue="Scorecard Name" onclick="redirect('{!sc.Id}')">
+                <apex:outputLink id="scLink">{!sc.Customer_Scorecard_Name__c}</apex:outputLink>
+            </apex:column>
+            <apex:column headerValue="Account Number With Name" onclick="redirect('{!sc.SBUAccount__c}')">
+                <apex:outputLink >{!sc.SBUNumberWithName__c}</apex:outputLink>
+            </apex:column>
+            <apex:column value="{!sc.Amkor_Rank__c}" />
+            <apex:column value="{!sc.Customer_Score__c}"/>
+            <apex:column value="{!sc.Customer_Maximum_Score__c}"/>
+            <apex:column value="{!sc.Scorecard_Date__c}"/>       
+            <apex:column value="{!sc.Year__c}"/>
+            <apex:column value="{!sc.Quarter__c}"/>
+        </apex:pageBlockTable>
+        </apex:outputPanel>
+    </apex:pageblock>
+  </apex:form>
+     <script>
+        function redirect(id){
+            top.location = '/'+id;
+           
+            }
+    </script>
+</apex:page>

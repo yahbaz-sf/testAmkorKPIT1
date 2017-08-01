@@ -1,0 +1,9 @@
+<apex:page standardController="RFQ__c" extensions="RFQViewController">
+   <apex:pageMessages />
+   <apex:detail subject="{!rfq.Id}" relatedList="true" showChatter="true"/>
+
+<!-- Tasks   -->  
+<apex:relatedList subject="{!rfq.Id}" list="OpenActivities"/>  
+<apex:relatedList subject="{!rfq.Id}" list="ActivityHistories"/> 
+
+</apex:page>

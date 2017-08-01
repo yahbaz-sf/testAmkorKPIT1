@@ -1,0 +1,214 @@
+<apex:page controller="InSituCah.InSitu_TabViewEditController" standardStylesheets="true"  tabStyle="InSituGen__InSitu_AppSetting__c">
+	<apex:form id="AHCompSettingsForm">
+    	<apex:sectionHeader title="{!HeadingViewDetail}" subtitle="{!SubHeadingViewDetail}"></apex:sectionHeader>
+   	    <apex:messages />
+
+		<apex:pageBlock id="ViewNameInfo"  mode="{!PageMode}" rendered="{!errCode = null}">
+	    	<apex:pageBlockButtons location="Both" id="DefaultButtons">
+		        <apex:commandButton action="{!save}" value="Save" rerender="popupErrMsg" />
+		        <apex:commandButton action="{!returnToPreviousPage}" value="Cancel" />
+	    	</apex:pageBlockButtons>
+
+	        <apex:pageBlockSection title="{!LabelViewNameHeader}" columns="1" >            
+			   <apex:pageBlockSectionItem >
+					<apex:outputLabel value="View Name:" for="txtViewName" />
+					<apex:inputText value="{!ViewName}" id="txtViewName" />
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem rendered="{!NOT(IsNewMode)}" >
+					<apex:outputPanel layout="block" >
+						<table width='100%'>
+		                <tr style="valign=middle" >
+		                    <td class='labelCol'>Created by:</td>
+		                    <td class='dataCol col02'>
+		                    	<apex:outputLink value="{!LEFT(CurrentView.CreatedById,15)}">{!CurrentView.CreatedBy.FirstName} {!CurrentView.CreatedBy.LastName}</apex:outputLink> 
+		                    	<apex:outputText value=", {!CurrentView.CreatedDate}"/>  
+		                    </td>
+		                    <td class='labelCol'>Last Modified by:</td>
+		                    <td class='dataCol'>
+		                    	<apex:outputLink value="{!LEFT(CurrentView.LastModifiedbyId,15)}">{!CurrentView.LastModifiedby.FirstName} {!CurrentView.LastModifiedby.LastName}</apex:outputLink>
+		                    	<apex:outputText value=", {!CurrentView.LastModifiedDate}"/> 
+		                    </td>
+		                </tr>
+		                </table>
+					</apex:outputPanel>
+				</apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+
+	        <apex:pageBlockSection title="{!LabelViewCriteriaHeader}" id="setCriteria" columns="1" >            
+				<apex:pageBlockSectionItem >
+			       	
+			       	<apex:pageBlockTable value="{!SearchCriteria}" var="crit" styleClass="tableClass"  frame="none" width="250px" >
+			            <apex:column headerValue="Field" style="white-space:nowrap;text-align: left;vertical-align:top;padding-top:6px;" >
+		                    <apex:outputPanel layout="block" id="CriteriaField">
+		                        <apex:selectList value="{!crit.CriterionField}" size="1" title="Criterion Field" >
+		                            <apex:selectOptions value="{!crit.CriterionFieldOptions}"/>
+		                            <apex:actionSupport event="onchange" rerender="CriteriaOperator,CriteriaValue" />
+		                        </apex:selectList>
+		                    </apex:outputPanel>
+			            </apex:column>
+	
+			            <apex:column headerValue="Operator" style="white-space:nowrap;text-align: left;vertical-align:top;padding-top:6px;" >
+		                    <apex:outputPanel layout="block" id="CriteriaOperator">
+		                        <apex:selectList value="{!crit.CriterionOperator}" size="1" title="Criteria Operator"  >
+		                            <apex:selectOptions value="{!crit.CriterionOperatorOptions}"/>
+		                            <apex:actionSupport event="onchange" rerender="CriteriaValue" />
+		                        </apex:selectList>
+		                    </apex:outputPanel>
+			            </apex:column>
+	
+			            <apex:column headerValue="Value" style="white-space:nowrap;text-align: left;vertical-align:top;padding-top:6px;" >
+							<apex:outputPanel layout="block" id="CriteriaValue">
+							    <apex:selectList value="{!crit.CriterionValue}" size="1" multiselect="false" title="Criteria Value" rendered="{!crit.ShowCriterionValueOptions}" >
+							        <apex:selectOptions value="{!crit.CriterionValueOptions}"/>
+							    </apex:selectList>
+							    <apex:inputText value="{!crit.CriterionValue}" title="Criteria Value"  rendered="{!crit.ShowCriterionValueInput}" />
+								<apex:image url="{!URLFOR($Resource.InSituCah__InSitu_Down_Arrow)}"  rendered="{!crit.ShowLookupButton}">
+									<apex:actionSupport event="onclick" action="{!crit.doShowLookupSelectPanel}" rerender="CriteriaValue" />
+								</apex:image> 
+							    <apex:selectList value="{!crit.CriterionValues}" size="5" multiselect="true" title="Criteria Value" rendered="{!crit.ShowLookupSelectPanel}" >
+							        <apex:selectOptions value="{!crit.CriterionValueOptions}"/>
+							    </apex:selectList>
+								<apex:outputPanel layout="block" id="CriterionValueButtons" style="padding-top:6px;">
+								    <apex:commandButton action="{!crit.doInsertSelected}" value="Insert" rerender="CriteriaValue" rendered="{!crit.ShowLookupSelectPanel}" />
+								    <apex:commandButton action="{!crit.doHideLookupSelectPanel}" value="Cancel" rerender="CriteriaValue, CriterionValueButtons" rendered="{!crit.ShowLookupSelectPanel}" />
+								</apex:outputPanel>
+							</apex:outputPanel>
+							
+			            </apex:column>
+			            
+			            <apex:column width="99%" style="text-align: left;" >
+	                        <apex:outputPanel layout="block">
+	                            <apex:outputText value="{!crit.CriterionConnector}" />
+	                        </apex:outputPanel>
+	                    </apex:column>
+			            
+					</apex:pageBlockTable>
+				</apex:pageBlockSectionItem>
+					
+				<apex:pageBlockSectionItem >
+			       	<apex:outputPanel layout="block" >
+				       	<apex:outputPanel layout="block" style="top;padding-top:12px;padding-bottom:12px;">
+				       		<apex:outputText value="{!DynamicTypeDesc}" />
+				       	</apex:outputPanel>
+	
+				       	<apex:datatable value="{!DSSearchCriteria}" var="critDS"  frame="none" columnsWidth="250px, 150px" >
+				            <apex:column headerValue="Dynamic Field" >
+			                    <apex:outputPanel layout="block" >
+			                        <apex:selectList value="{!critDS.CriterionField}" size="1" title="Criterion Field" >
+			                            <apex:selectOptions value="{!critDS.CriterionFieldOptions}"/>
+			                            <apex:actionSupport event="onchange" rerender="DSCriteriaOperator" />
+			                        </apex:selectList>
+			                    </apex:outputPanel>
+				            </apex:column>
+		
+				            <apex:column headerValue="Default Operator"  >
+			                    <apex:outputPanel layout="block" id="DSCriteriaOperator">
+			                        <apex:selectList value="{!critDS.CriterionOperator}" size="1" title="Criteria Operator"  >
+			                            <apex:selectOptions value="{!critDS.CriterionOperatorOptions}"/>
+			                        </apex:selectList>
+			                    </apex:outputPanel>
+				            </apex:column>
+						</apex:datatable>
+			       	</apex:outputPanel>
+				</apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+	        <apex:pageBlockSection title="{!LabelViewVisibilityHeader}" columns="1" id="VisibilityOptionsDetails">            
+				<apex:pageBlockSectionItem >
+					<apex:outputPanel layout="block">
+						<table >
+		                <tr>
+		                    <td >
+								<apex:outputPanel layout="block" >
+									<apex:selectRadio id="VisibilityOptions" value="{!selectedVisibilityOption}" layout="pageDirection" immediate="true">
+										<apex:actionSupport event="onchange" action="{!doVisibilityOptionSelected}" rerender="VisibilityOptionsDetails"/>
+										<apex:selectOptions value="{!VisibilityOptions}"/>
+									</apex:selectRadio>
+								</apex:outputPanel>
+		                    </td>
+		                    <td> 
+								<apex:outputPanel layout="block" id="VisibilityOptionsDetails" styleClass="pbSubbody" style="padding-left:70px;">
+									<apex:outputPanel layout="block" rendered="{!ShowProfileSelect}" >
+										<apex:outputPanel layout="block" >
+											<apex:outputLabel value="<b>Select Profile:</b>&nbsp;&nbsp;" for="VisibilityProfile" escape="false" />
+										</apex:outputPanel>
+										<apex:outputPanel layout="block" >
+											<apex:selectList id="VisibilityProfile" value="{!ProfileID}" size="7" >
+												<apex:selectOptions value="{!ProfileOptions}"/>
+											</apex:selectList>
+										</apex:outputPanel>
+									</apex:outputPanel>
+			
+									<apex:outputPanel layout="block" rendered="{!ShowUserSelect}" style="padding-top:16px;" >
+										<apex:outputPanel layout="block" >
+											<apex:outputLabel styleClass="selectTitle" value="<b>Select User:</b>&nbsp;&nbsp;" for="VisibilityUser" escape="false" />
+										</apex:outputPanel>
+										<apex:outputPanel layout="block" >
+							               <apex:inputField id="VisibilityUser" value="{!CurrentView.InSituGen__Scope_User__c}" /> 
+										</apex:outputPanel>
+									</apex:outputPanel>
+			
+								</apex:outputPanel>
+		                    </td>
+		                </tr>
+		                </table>
+					</apex:outputPanel>
+				</apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+       	</apex:pageBlock>
+	
+		<apex:outputPanel id="popupErrMsg">
+			<apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!ShowPopupErrMsg}"/>
+            <apex:outputPanel styleClass="customPopup" layout="block" rendered="{!ShowPopupErrMsg}">
+
+				<apex:outputPanel layout="block">
+					<apex:outputText value="{!PopupErrMsgText}" id="PopupErrMsgText" />
+				</apex:outputPanel>
+
+				<br/>
+
+				<apex:outputPanel layout="block">
+	                <apex:commandButton value="Ok" action="{!cancelPopupErrMsg}" rerender="popupErrMsg"/>
+				</apex:outputPanel>
+	                
+            </apex:outputPanel>
+        </apex:outputPanel>
+		<apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!ShowPopupErrMsg}"/>
+		
+	</apex:form>
+
+	<style type="text/css">
+		.customPopup
+		{
+			background-color: white;
+			border-style: solid;
+			border-width: 2px;
+			left: 50%;
+			padding:10px;
+			position: absolute;
+			z-index: 9999;
+			/* These are the 3 css properties you will need to tweak so the pop 
+			up displays in the center of the screen. First set the width. Then set 
+			margin-left to negative half of what the width is. You can also add 
+			the height property for a fixed size pop up.*/
+			width: 500px;
+			margin-left: -250px;
+			top:250px;
+        }
+    </style>
+
+	<style type="text/css">
+        .popupBackground
+        {
+			background-color:black;
+			opacity: 0.20;
+			filter:alpha(opacity=20);
+			position:absolute;
+			width: 100%;
+			height: 100%;
+			top: 0;
+			left: 0;
+			z-index: 9998;
+		}
+    </style>
+   
+</apex:page>

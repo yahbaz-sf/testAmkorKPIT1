@@ -1,0 +1,129 @@
+<apex:page standardController="RFQ_Item__c" extensions="RFQOpItemEditController">
+
+<c:RFQItemViewStyle />
+
+<style>
+
+    .dataCol.first.last {
+        text-align: left;
+    }
+
+</style>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script type="text/javascript" src="{!$Resource.formulajs}/jstat.min.js"></script>
+<script type="text/javascript" src="{!$Resource.formulajs}/lodash.min.js"></script>
+<script type="text/javascript" src="{!$Resource.formulajs}/moment.min.js"></script>
+<script type="text/javascript" src="{!$Resource.formulajs}/numeral.min.js"></script>
+<script type="text/javascript" src="{!$Resource.formulajs}/numeric.min.js"></script>
+<script type="text/javascript" src="{!$Resource.formulajs}/underscore.string.min.js"></script>
+<script type="text/javascript" src="{!$Resource.formulajs}/formula.js"></script>
+
+<script type="text/javascript">
+    var inProgress = false;
+    function resetProgress() {
+        inProgress = false;
+    }
+    
+    function get(apiName) {
+        return document.getElementsByClassName(apiName)[0].value;
+    }
+
+    function set(apiName, value) {
+        var elements = document.getElementsByClassName(apiName);
+        for(var i = 0; i < elements.length; i++) {
+            
+            if(elements[i].hasOwnProperty('checked')){
+                 elements[i].checked = value;
+            }
+            else {
+                elements[i].value = value;
+            }
+            
+        }
+
+    }
+
+    function fieldChangeEventHook(doCallback,fieldAPIName, sObjectId, script) {
+        if(doCallback) {
+
+            if(script) {
+                eval(script);
+            }
+            else {
+                showProgress();
+                onDefaultDriverChange(fieldAPIName,sObjectId);
+            }
+        }        
+    }
+
+    function showProgress() {
+        document.getElementById('fade').style.display='block';
+    }
+
+    function hideProgress() {
+        document.getElementById('fade').style.display='none';
+
+    }
+</script>
+
+
+<apex:pageMessages id="messages" escape="false" />
+<apex:form id="form" >
+    <apex:sectionHeader title="View/Edit Attributes for this opportunity line item" subtitle="{!wrapper.rfqItem.Name}" description="On this page you can view or edit the attributes of this opportunity item"/>
+
+    <div id="fade">
+        <img id ="spinner" src="{!$Resource.ProgressBar}"/>
+    </div>
+    
+    <apex:pageblock id="mainBody">  
+
+        <apex:pageBlockButtons >
+            <apex:commandButton value="Save" action="{!saveItemAsDraft}" />
+            <apex:commandButton immediate="true" value="Cancel" action="{!cancelItem}" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();"/>
+        </apex:pageBlockButtons> 
+
+
+         <apex:pageBlockSection title="Opportunity Information" columns="3">
+                    <apex:outputField value="{!wrapper.rfqItem.Opportunity__c}"/>
+                    <apex:inputField value="{!wrapper.rfqItem.Next_Step__c}"/>
+            </apex:pageBlockSection>  
+
+        <apex:outputPanel id="output" >
+
+            
+            
+
+
+            <!-- Quote Information Section -->
+            <apex:pageBlockSection title="Item Information" columns="3">
+            <apex:outputField value="{!wrapper.packageFamily.Name}"/>
+            <apex:outputField value="{!wrapper.specificRfqItem['Test_Type__c']}" rendered="{!wrapper.packageFamily.Name == 'Test'}"/>
+                <apex:repeat value="{!attributes}" var="attribute">
+                    <apex:pageBlockSectionItem rendered="{!attribute.isEditable && attribute.objectAPIName != 'RFQ_Item__c'}" helpText="{!$ObjectType[attribute.objectAPIName].fields[attribute.fieldAPIName].inlineHelpText}">
+                        <apex:outputLabel for="pfInput" value="{!$ObjectType[attribute.objectAPIName].fields[attribute.fieldAPIName].Label}" />
+                        <apex:inputField id="pfInput" label="" onChange="fieldChangeEventHook({!attribute.doCallBack},'{!attribute.fieldAPIName}','{!wrapper.specificRfqItem['Id']}');" value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!attribute.isEditable && attribute.objectAPIName == 'RFQ_Item__c'}" helpText="{!$ObjectType[attribute.objectAPIName].fields[attribute.fieldAPIName].inlineHelpText}">
+                        <apex:outputLabel for="pfInput" value="{!$ObjectType[attribute.objectAPIName].fields[attribute.fieldAPIName].Label}" />
+                        <apex:inputField id="pfInput" label="" onChange="fieldChangeEventHook({!attribute.doCallBack},'{!attribute.fieldAPIName}','{!wrapper.rfqItem['Id']}');" value="{!wrapper.rfqItem[attribute.fieldAPIName]}" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}"/>
+                    </apex:pageBlockSectionItem>
+                </apex:repeat>
+                <apex:inputField value="{!wrapper.specificRfqItem['Wafer_Size_PK__c']}" rendered="{!wrapper.packageFamily.Name == 'Test' && wrapper.specificRfqItem['Test_Type__c'] == 'Wafer Probe'}"/>
+                <apex:inputField value="{!wrapper.specificRfqItem['GDPW_PK__c']}" rendered="{!wrapper.packageFamily.Name == 'Test' && wrapper.specificRfqItem['Test_Type__c'] == 'Wafer Probe'}"/>
+            </apex:pageBlockSection>  
+    
+           
+
+           <apex:actionFunction name="onDefaultDriverChange" action="{!onDefaultDriverChange}" reRender="output" oncomplete="hideProgress();">
+                <apex:param name="fieldName" value="" />
+                <apex:param name="objectId" value="" />
+           </apex:actionFunction>
+           
+     
+       </apex:outputPanel>
+             
+    </apex:pageblock>
+
+</apex:form>
+</apex:page>

@@ -1,0 +1,22 @@
+<apex:component >
+	<apex:attribute name="wrapper" type="RFQItemWrapper" description="A RFQItemWrapper"/>
+	<apex:attribute name="mode" type="String"  description="display mode" default="view"/>
+    <apex:attribute name="pbsTitle" type="String"  description="Title of page block section" default="Package Description"/>
+	<apex:attribute name="locked" type="Boolean"  description="is locked by state" default="false"/>
+    <apex:attribute name="columns" type="Integer"  description="Number of columns wide" default="3"/>
+    <apex:attribute name="renderFactorySection" type="Boolean"  description="Should the factory field be rendered" default="false"/>
+    <apex:attribute name="layout" type="RFQILayout" description="Layout for component"/>
+    <apex:attribute name="layoutDeprecated" type="Boolean" description="True if layout is deprecated" default="false" />
+
+	<!-- Package Description Section -->
+    <apex:pageBlockSection title="{!pbsTitle}" columns="{!columns}" rendered="{!layout.enabledSections['Package Description']}">
+        <apex:repeat value="{!layout.sectionMap['Package Description'].attributes}" var="attribute">
+            <apex:outputField rendered="{!(mode=='view' || !locked) && (!layoutDeprecated || wrapper.specificRfqItem[attribute.fieldAPIName] != null)}" value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" />
+            <apex:inputField rendered="{!mode=='edit' && !!locked}" style="{!IF(attribute.isDefaultDriver,'background-color: #CCFFFF','')}" value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" required="{!attribute.isRequired}"/>
+        </apex:repeat> 
+
+        <apex:outputField value="{!wrapper.specificRfqItem['Factory__c']}" rendered="{!renderFactorySection}" />
+        <!-- Ashish 02-June-2017 : Salesforce 116 -Add Amkor Preferred picklist value under Factory for RFQI. -->
+        <apex:outputField value="{!wrapper.rfqItem['Final_Factory__c']}" rendered="{!IF(renderFactorySection,true,false)}" />
+    </apex:pageBlockSection>
+</apex:component>

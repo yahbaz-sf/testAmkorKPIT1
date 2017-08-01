@@ -1,0 +1,66 @@
+<apex:page Controller="InSituDtm.InSitu_Msg_SettingsController" showHeader="true" tabStyle="InSituGen__InSitu_AppSetting__c" action="{!checkMode}">
+    <apex:sectionHeader title="{!PageTitle}" subtitle="{!PageSubTitle}"></apex:sectionHeader>
+    <apex:pageMessages />
+    
+    <style>
+       .activeTab {background-color: #236FBD; color:white; background-image:none}
+       .inactiveTab {background-color: white; color:black; background-image:none}
+    </style>
+
+    <apex:stylesheet value="/sCSS/21.0/sprites/1297816277000/Theme3/default/gc/versioning.css" />  
+
+    <apex:form >
+        <apex:pageBlock mode="detail" id="FeatureSettings" title="Settings">  
+         
+            <apex:pageBlockButtons location="Bottom">
+                <apex:commandButton action="{!save}" value="Save" />
+                <apex:commandButton action="{!returnToSettingView}" value="Cancel" />   
+           </apex:pageBlockButtons>
+           
+            <apex:pageBlockSection columns="1" >
+            
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Subject"/>
+                    <apex:inputText value="{!Subject}" required="true" style="width: 600px" />
+                </apex:pageBlockSectionItem>
+                
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Message Body"/> 
+                    <apex:tabPanel id="theTabPanel" selectedTab="HTMLTab" switchType="client" styleClass="theTabPanel" tabClass="activeTab" contentClass="tabContent" activeTabClass="activeTab" inactiveTabClass="inactiveTab">
+                        <apex:tab label="HTML" name="HTMLTab" id="tabOne">
+                            <apex:inputTextarea value="{!HTMLBody}" required="false" cols="110" rows="20" />
+                        </apex:tab>
+                        <apex:tab label="Text" name="TextTab" id="tabTwo">
+                            <apex:inputTextarea value="{!TextBody}" cols="110" rows="20" />
+                        </apex:tab>
+                    </apex:tabPanel>
+                </apex:pageBlockSectionItem>
+                
+                <apex:pageBlockSectionItem rendered="{!ShowUserName}">
+                    <apex:outputLabel value="User"/>
+                    <apex:outputText value="{!UserName}" />
+                </apex:pageBlockSectionItem>
+                
+                <apex:pageBlockSectionItem rendered="{!ShowUserField}">
+                    <apex:outputLabel value="User"/>
+                    <apex:inputField value="{!AppSetting.InSituGen__Scope_User__c}" style="width: 100px;" rendered="{!ShowUserField}"/>
+                </apex:pageBlockSectionItem>
+                
+                <apex:pageBlockSectionItem rendered="{!ShowProfileName}">
+                    <apex:outputLabel value="Profile"/>
+                    <apex:outputText value="{!ProfileName}" />
+                </apex:pageBlockSectionItem>
+                
+                <apex:pageBlockSectionItem rendered="{!ShowProfileField}">
+                    <apex:outputLabel value="Profile"/>
+                    <apex:selectList value="{!AppSetting.InSituGen__Scope_ProfileID__c}" size="1" >
+						<apex:selectOptions value="{!ProfileOptions}"/>
+					</apex:selectList> 
+                </apex:pageBlockSectionItem>
+                
+            </apex:pageBlockSection>
+                        
+        </apex:pageBlock>
+    </apex:form>
+
+</apex:page>

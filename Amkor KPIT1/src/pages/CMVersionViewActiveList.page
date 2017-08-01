@@ -1,0 +1,3 @@
+<apex:page standardController="CM_Version__c" recordSetVar="versions" extensions="CMVersionController" action="{!viewActiveListAction}">
+CM Version View Active List 
+</apex:page>

@@ -1,0 +1,151 @@
+<apex:page tabStyle="RFQ_Item__c" controller="RFQProcessInstanceController">
+
+<script type="text/javascript">
+
+    var inProgress = false;
+    function resetProgress() {
+        inProgress = false;
+    }
+</script>
+
+<apex:form id="form">
+
+    <apex:sectionHeader title="Approval Request" subtitle="{!workItem.ProcessInstance.TargetObject.Name}" description="On this page, you can add comments and approve/reject the record."/>
+    <apex:pageMessages escape="false" id="messages"/>
+    
+    <apex:pageblock id="mainBody"> 
+    
+        <apex:pageBlockButtons location="bottom">
+            <!-- Bhanu , 02/Mar/2016 Issue 14. BU Price
+                --Removing Boolean (IsSalesView) from rendered attribute of Approve Button 
+            <apex:commandButton value="Approve" action="{!approveItem}" rendered="{!isUnderApproval && manualEntryVerified && !hasAmkorSelected && !invalidBUPrice || (IsSalesView)}" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();" rerender="messages, execConcur"/>
+            <apex:commandButton value="Approve" action="{!approveItem}" rendered="{!isUnderApproval && manualEntryVerified && !hasAmkorSelected && !invalidBUPrice || (IsSalesView && !restrictBU)}" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();" rerender="messages, execConcur"/>
+            -->
+            <apex:commandButton value="Approve" action="{!approveItem}" rendered="{!showApprovalButton}" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();" rerender="messages, execConcur"/>
+            <!-- //Lalit - 03-Mar-2017 : Salesforce-114 :Reject change to 'Return to Sales' during BU process for RFQI ! -->
+            <!-- <apex:commandButton value="Reject"  action="{!rejectItem}" rendered="{!isUnderApproval && (IsSalesView || isBUView)}" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();" rerender="messages, execConcur"/>! -->
+            <apex:commandButton value="Return to Sales"  action="{!rejectItem}" rendered="{!isUnderApproval && (IsSalesView || isBUView)}" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();" rerender="messages, execConcur"/>
+            <apex:commandButton value="No Bid"  action="{!noBid}" rendered="{!IsNoBidPossible && isBUView}" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();" rerender="messages, execConcur"/>
+            <apex:commandButton immediate="true" value="Cancel"  action="{!cancelApproval}" />
+    </apex:pageBlockButtons>
+        
+        
+    <apex:pageBlockSection columns="1" title="Approve/Reject" collapsible="false">
+             <apex:outputField label="Related To" value="{!workItem.ProcessInstance.TargetObjectId}" />
+             <apex:outputField label="Assigned To" value="{!workItem.ActorId}" />
+
+             <apex:outputField value="{!wrapper.rfqItem.Status__c}" rendered="{!isRFQItem}"/>
+             <apex:outputField value="{!wrapper.rfqItem.Sales_Target_Price__c}" rendered="{!isRFQItem}"/>
+             <apex:outputField value="{!wrapper.rfqItem.Forecast__c}" rendered="{!isRFQItem}"/>
+
+             <apex:pageBlockSectionItem rendered="{!wrapper.packageFamily.Name != 'Test' && IsBUView}">
+                <apex:outputLabel value="BU Price" />
+                <apex:outputText value="{0, number, ###,##0.000000} {1}">
+                    <apex:param value="{!wrapper.rfqItem.BU_Price__c}" />
+                    <!--Adds a label like ' / Minute' to the Price to customer - AMK-1825-->
+                    <apex:param value="{!wrapper.rfqItem.BU_Price_Label__c}" />
+                </apex:outputText>
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSectionItem rendered="{!wrapper.packageFamily.Name == 'Test' && !isPostTestServicesOnly && IsBUView}">
+                <apex:outputLabel value="BU Price Per Hour" />
+                <apex:outputText value="{0, number, ###,##0.000000}">
+                    <apex:param value="{!wrapper.specificRfqItem['BU_Price_Per_Hour__c']}" />
+                </apex:outputText>
+            </apex:pageBlockSectionItem>
+            <!-- <apex:pageBlockSectionItem rendered="{!wrapper.packageFamily.Name == 'Test' && !isPostTestServicesOnly && IsBUView}">
+                <apex:outputLabel value="BU Price Per Second" />
+                <apex:outputText value="{0, number, ###,##0.000000}">
+                    <apex:param value="{!wrapper.specificRfqItem['BU_Price_Per_Second__c']}" />
+                </apex:outputText>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem rendered="{!wrapper.packageFamily.Name == 'Test' && !isPostTestServicesOnly && IsBUView}">
+                <apex:outputLabel value="BU Price Per Minute" />
+                <apex:outputText value="{0, number, ###,##0.000000}">
+                    <apex:param value="{!wrapper.specificRfqItem['BU_Price_Per_Minute__c']}" />
+                </apex:outputText>
+            </apex:pageBlockSectionItem> -->
+            <apex:pageBlockSectionItem rendered="{!wrapper.packageFamily.Name == 'Test' && !isPostTestServicesOnly && IsBUView}">
+                <apex:outputLabel value="BU Price per Unit - Final Test" />
+                <apex:outputText value="{0, number, ###,##0.000000}">
+                    <apex:param value="{!wrapper.specificRfqItem['BU_Final_Test_Price_Unit__c']}" />
+                </apex:outputText>
+            </apex:pageBlockSectionItem>
+            <!--Lalit - 12-Dec-2016 : Salesforce-42 :Turnkey ATP with ultraFlex (TI) . Adding new field to display BU Price per Second -Final Test BU_Final_Price_per_Second_Test__c use the existing field to show the bu per second time from the BU_Price_Per_Second__c field.  -->
+            <apex:pageBlockSectionItem rendered="{!wrapper.packageFamily.Name == 'Test' && !isPostTestServicesOnly && IsBUView}">
+                <apex:outputLabel value="BU Price per Second - Final Test" />
+                <apex:outputText value="{0, number, ###,##0.000000}">
+                    <apex:param value="{!wrapper.specificRfqItem['BU_Price_Per_Second__c']}" />
+                </apex:outputText>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem rendered="{!wrapper.packageFamily.Name == 'Test' && IsBUView}">
+                <apex:outputLabel value="BU Post Test Price /Unit" />
+                <apex:outputText value="{0, number, ###,##0.000000}">
+                    <apex:param value="{!wrapper.specificRfqItem['BU_Post_Test_Price_Unit__c']}" />
+                </apex:outputText>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem rendered="{!wrapper.packageFamily.Name == 'Test' && !isPostTestServicesOnly && IsBUView}">
+                <apex:outputLabel value="BU Price - Monthly Charge" />
+                <apex:outputText value="{0, number, ###,##0.000000}">
+                    <apex:param value="{!wrapper.specificRfqItem['BU_Price_Monthly_Charge__c']}" />
+                </apex:outputText>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem helpText="{!execConcurrenceHelp}" rendered="{!isEscalation}">
+                <apex:outputLabel value="{!execConcurrenceLabel}" for="execConcur"/>
+                <!-- extra panels to add required style to inputText -->
+                <apex:outputPanel styleClass="requiredInput" layout="block">
+                    <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                    <apex:inputText value="{!execConcurrence}" id="execConcur" label="{!execConcurrenceLabel}"/>
+                </apex:outputPanel>
+
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSection title="Additional Volume Configurations" columns="1" rendered="{!wrapper.volumeList != null && wrapper.volumeList.size > 0 && !isEscalation}">
+                <apex:pageBlockTable value="{!wrapper.volumeList}" var="volume" rendered="{!IsBUView}">
+                    <apex:column width="10%">
+                        <apex:facet name="header">Request #</apex:facet>
+                        {!volume.index}
+                    </apex:column>
+                    <apex:column width="10%">
+                        <apex:facet name="header">Forecast</apex:facet>
+                        <apex:outputText value="{!volume.volume}"/>
+                    </apex:column>
+                    <apex:column width="10%" rendered="{!wrapper.packageFamily.Name == 'Test'}">
+                        <apex:facet name="header">BU Price /Hr</apex:facet>
+                        <apex:outputText value="{!volume.testInsertionsTotals.buPriceHour}" />
+                    </apex:column>
+
+                    
+                    
+                    <apex:column width="80%">
+                        <apex:facet name="header">{!IF(wrapper.packageFamily.Name == 'Test', 'BU Price /Unit', 'BU Price')}</apex:facet>
+                        <!-- For non test items, show multi volume's price -->
+                        <apex:outputText value="{0, number, ###,##0.000000}" rendered="{!wrapper.packageFamily.Name != 'Test'}">
+                            <apex:param value="{!volume.price}" />
+                        </apex:outputText>
+                        <!-- Post test service only, show the item's post test service price -->
+                        <apex:outputText value="{0, number, ###,##0.000000}" rendered="{!isPostTestServicesOnly}">
+                            <apex:param value="{!wrapper.specificRfqItem['BU_Post_Test_Price_Unit__c']}" />
+                        </apex:outputText>
+                        <!-- For per time items, the price is directly copied from the parent item's -->
+                        <apex:outputText value="{0, number, ###,##0.000000}" rendered="{!wrapper.packageFamily.Name == 'Test' && IsPerTime && !isPostTestServicesOnly}">
+                            <apex:param value="{!wrapper.specificRfqItem['BU_Final_Test_Price_Unit__c']}" />
+                        </apex:outputText>
+                        <!-- Otherwise, show bu price /unit -->
+                        <apex:outputText value="{0, number, ###,##0.000000}" rendered="{!wrapper.packageFamily.Name == 'Test' && !IsPerTime && !isPostTestServicesOnly}">
+                            <apex:param value="{!volume.testInsertionsTotals.buPriceUnit}" />
+                        </apex:outputText>
+                    </apex:column>
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+
+            <apex:outputPanel layout="block">
+                <apex:outputPanel layout="block"/>
+                <apex:inputTextarea label="Comments" cols="140" rows="10" value="{!approvalComments}"/>     
+            </apex:outputPanel>
+    </apex:pageBlockSection>
+        
+    </apex:pageblock>
+</apex:form>
+
+</apex:page>

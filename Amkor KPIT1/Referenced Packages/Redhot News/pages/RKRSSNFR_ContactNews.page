@@ -1,0 +1,285 @@
+<apex:page id="pg" standardController="Contact" extensions="Rknews.RKRSSNFR_ContactNewsController" tabStyle="Contact" action="{!init}"> 
+
+	<apex:stylesheet value="{!URLFOR($Resource.Rknews__jQueryUI ,'css/cupertino/jquery-ui-1.8.12.custom.css')}" />
+	<apex:stylesheet value="{!URLFOR($Resource.Rknews__RKNews ,'css/NewsFeedStyle.css')}" />
+	<apex:stylesheet value="{!URLFOR($Resource.Rknews__RKNews ,'css/Config.css')}" />
+	<apex:includeScript value="{!URLFOR($Resource.Rknews__RKNews ,'js/NewsFeedScript.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.Rknews__RKNews ,'js/NewsFeedChatter.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.Rknews__jQueryUI ,'js/jquery-1.5.1.min.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.Rknews__jQueryUI ,'js/jquery-ui-1.8.12.custom.min.js')}" />
+	<apex:includeScript value="{!$Resource.Rknews__json2}" />
+	<apex:includeScript value="https://www.google.com/jsapi" />
+	
+	<script type="text/javascript">
+		// 8-30-2012 WN - new client-side request uses google feed api
+		google.load("feeds", "1");
+		google.setOnLoadCallback(initialize);
+			
+		j$=jQuery.noConflict();
+		jQuery(document).ready(function(){ 
+			
+			//Displays REDKITE banner
+			j$("#redkiteSliderTab").show("slide", { direction: "right" }, "slow");
+			//Displays the jQuery dialog for posting the selected article on Chatter
+			//when 'Post to Chatter' is clicked for a particular news article
+			j$("#chatterDialog").dialog({ autoOpen: false, height: 193, modal: true, width: 400, resizable: false, title: 'Post To Chatter'});
+		});
+		
+		function reportChatterStatus(){
+			j$("#pg\\:frm\\:chatterSuccess").each( function(){
+				if (this.value != "true")
+					alert("{!$Label.RKRSSNFR_ChatterPostFailiure}");
+			});
+		}
+		
+		//Displays the jQuery accordion menu once the page is ready and the initialisation is complete
+		function showAccordion(){
+			// actual accordion working
+ 			j$( "#newsAccordion" ).accordion({ icons: false, header: 'div.accordion-header', collapsible: true, autoHeight:false, animated: 'easeInOutQuint'});
+
+			// show out vert tab afterwards
+			j$( ".vert-tab" ).show("slide", {direction: "right"}, "slow");
+			j$("#ConfigSetting").show("slide", {direction: "right"}, "slow");
+		}
+		
+		//to show the default favicon on error
+		function showDefaultIconOnError(source){			
+       		source.src = "{!URLFOR($Resource.RKNews, 'img/defaultFavicon/news2.png')}";
+       		source.onerror = "";
+       		return true;
+   		}
+   		
+   		
+		// google feed api
+	    function initialize() {
+			var isenabled = '{!isCacheEnabled}';
+			var isstale   = '{!isCacheStale}';
+			var num       = '{!JSENCODE(googleNewsRss.SearcResultCount)}';
+			var id        = '{!recordId}';
+			var url       = '{!JSENCODE(GoogleQueryURL)}';
+			//console.log('isenabled['+isenabled+']  isstale['+isstale+']  num['+num+']  id['+id+']  url['+url+']');
+			// check to see if cache stale
+	    	if(isstale == 'true') {
+	    		//console.log('google feeds api callout...')
+				var feed = new google.feeds.Feed(url);
+				feed.setNumEntries(num);
+				feed.load(function(result) {
+					if (!result.error) {
+						//console.log('good result response:');
+						//console.log(result.feed);
+						// remove categories attribute
+						for(var i=0; i<result.feed.entries.length; i++)
+							delete result.feed.entries[i].categories;
+						// convert to json string
+						var jsonstring = JSON.stringify(result.feed.entries);
+						//console.log(jsonstring);
+						// check to see if cache enabled
+						if(isenabled == 'true') {
+							// call VF remoteaction to upsert data
+							//console.log('calling remoteaction');
+							remoteProcessNewsFeed(id, url, jsonstring);
+						}
+						else {
+							// call initParams with json string parameter
+							//console.log('cache disabled');
+							initParams(jsonstring);
+						}
+					}
+					else {
+						// Error
+						//console.log('error result:');
+						//console.log(result);
+						initParams();
+					}
+				});
+			}
+			else {
+				// cache data is not stale
+				//console.log('cache not stale')
+				initParams();
+			}
+	    }
+	
+	    // VF remote scripting
+		function remoteProcessNewsFeed(myid, myurl, mystr) {
+			// invoke javascript remote action
+			  Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.RKRSSNFR_ContactNewsController.processNewsFeedJSON}', myid, myurl, mystr,
+				function(result, event) {
+					if (event.status) {
+						//console.log('RKRSSNFR_ContactNewsController.processNewsFeedJSON() SUCCESSFUL');
+						//console.log('response is ' + result);
+						initParams();
+					} else {
+						//console.log('RKRSSNFR_ContactNewsController.processNewsFeedJSON() ERROR: ' + event.message);
+						// Error - call initParams with json string
+			  			initParams(jsonstring);
+					}
+				},
+				{escape: true}
+			);
+			
+		}
+	</script>
+	<apex:pageMessages />
+	<apex:outputPanel id="showError">
+		<apex:pageMessages />
+	</apex:outputPanel>
+	<apex:form id="frm">	
+		<apex:actionFunction name="postChatter" action="{!postOnChatter}" rerender="hiddenArea" onComplete="reportChatterStatus();">
+			<apex:param name="chatterBody" value="" assignTo="{!ArticleBody}"/>
+			<apex:param name="chatterArticleIndex" value="" assignTo="{!ArticleIndex}"/>
+		</apex:actionFunction>
+		
+		<apex:actionFunction name="initParams" action="{!domReady}" rerender="showError,pnlNews" oncomplete="showAccordion()" status="loading"/>
+		<apex:actionStatus id="loading" onstart="document.body.style.cursor='wait';return true;" onStop="document.body.style.cursor='default';return true;" styleclass="loading-status">
+			<apex:facet name="start" >                
+				<center><div class="loading-message-area" >
+					<img src="{!URLFOR($Resource.RKNews ,'img/loading.gif')}"/>&nbsp;&nbsp;<span class="loading-status">{!$Label.RKRSSNFR_Loading}</span>
+				</div></center>                
+			</apex:facet> 
+		<apex:facet name="stop"/>
+	    </apex:actionStatus>
+	    
+		<div id="newsAccordion">
+		<apex:outputPanel id="pnlNews">
+			<apex:variable value="{!-1}" var="rowNum"/>
+			<apex:repeat value="{!articleList}" var="article" >
+				<apex:variable var="rowNum" value="{!rowNum + 1}"/>
+				
+				<div class="accordion-header" >
+					<div class="news-header">
+						<img class="sourceFavicon" src="http://{!HTMLENCODE(article.Domain)}/favicon.ico" onerror="showDefaultIconOnError(this)" width="32px" height="32px"/>
+						<div class="header-text">
+							<div class="article-title">{!article.Title}</div>
+							<span class="article-source">{!article.SourceName}</span>
+							<span class="publish-time">{!HTMLENCODE(article.PublishedDateTime)}</span>					
+						</div>
+					</div>
+				</div>
+				<div class="accordion-content" >
+					<div class="news-content">
+						<apex:image styleClass="news-image" url="{!HTMLENCODE(article.ImageUrl)}" rendered="{!AND(NOT(ISNULL(article.ImageUrl)), LEN(article.ImageUrl) > 0)}" />
+						<div class="content-area">
+							<div class="content-text-block">
+								<span class="content-text"><apex:outputText value="{!article.Summary}"/></span>
+								<apex:outputLink styleClass="content-readmore" value="{!HTMLENCODE(article.Link)}" target="_blank">Read more &raquo; </apex:outputLink>
+							</div> 
+							<apex:outputPanel > <!--  Share on Social sites -->
+								<!--  Post On Chatter -->
+								<apex:outputLink styleClass="share-buttons" rendered="{!blnShareOnChatter}" value="#"
+									onmouseover="tooltip.show('Post To Chatter');" onmouseout="tooltip.hide();" 
+									onclick="return showChatterDialog('{!JSENCODE(article.Title)}', '{!JSENCODE(article.Link)}', '{!JSENCODE(article.Summary)}', '{!rowNum}')">
+									<apex:image url="{!URLFOR($Resource.Rknews__RKNews, 'img/chatter.png')}" width="16px" height="16px" />
+								</apex:outputLink>
+								
+								<!--  Post as saleforce activity -->
+								<apex:outputLink styleClass="share-buttons" value="#"
+									onmouseover="tooltip.show('Save as Activity');" onmouseout="tooltip.hide();" 
+									onclick="return redirectParentWindow('{!JSINHTMLENCODE(objNewsConf.Rknews__RedirectionActivityUrl__c)}', '{!JSENCODE(article.Title)}', '{!JSENCODE(article.Summary)}', '{!JSENCODE(article.Link)}', 'activity', '{!contactID}', 'cont')" >
+									<apex:image url="{!URLFOR($Resource.Rknews__RKNews, 'img/salesforce.png')}" width="16px" height="16px"/>
+								</apex:outputLink>
+							
+								<!--  Post as saleforce Email activity -->
+								<apex:outputLink styleClass="share-buttons" rendered="{!blnShareUsingSalesForceEmail}" value="#"
+									onmouseover="tooltip.show('Send an Email');" onmouseout="tooltip.hide();" 
+									onclick="return redirectParentWindow('{!JSINHTMLENCODE(objNewsConf.Rknews__RedirectionEmailUrl__c)}', '{!JSENCODE(article.Title)}', '{!JSENCODE(article.Summary)}', '{!JSENCODE(article.Link)}', 'email', '{!contactID}', 'cont')">
+									<apex:image url="{!URLFOR($Resource.Rknews__RKNews, 'img/email.png')}" width="16px" height="16px"/>
+								</apex:outputLink>
+								
+								<!--  Post as Desktop Email activity -->
+								<apex:outputLink styleClass="share-buttons" rendered="{!NOT(blnShareUsingSalesForceEmail)}" value="mailto:?subject={!URLENCODE(article.Title)}&body={!URLENCODE(article.Link)}"
+									onmouseover="tooltip.show('Send An Email');" onmouseout="tooltip.hide();" target="_blank" >
+									<apex:image url="{!URLFOR($Resource.Rknews__RKNews, 'img/email.png')}" width="16px" height="16px"/>
+								</apex:outputLink> 			<!-- '{!$Label.RKRSSNFR_FacebookUrl}' -->
+								
+								<!-- Post on Facebook  -->
+								<apex:outputLink styleClass="share-buttons" rendered="{!blnShareOnFacebook}" value="#"
+									onmouseover="tooltip.show('Share on Facebook');" onmouseout="tooltip.hide();" 
+									onclick="return shareOnFacebook('{!JSINHTMLENCODE(objNewsConf.Rknews__FacebookUrl__c)}', '{!JSENCODE(article.Title)}','{!JSENCODE(article.Link)}','{!JSINHTMLENCODE(objNewsConf.Rknews__PopupTarget__c)}','{!JSINHTMLENCODE(objNewsConf.Rknews__FacebookPopupParameter__c)}');return false;" >
+									<apex:image url="{!URLFOR($Resource.Rknews__RKNews, 'img/facebook.png')}" width="16px" height="16px" />
+								</apex:outputLink>
+								
+								<!-- Post on Twitter -->
+								<apex:outputLink styleClass="share-buttons" rendered="{!blnShareOnTwitter}" value="#"
+									onmouseover="tooltip.show('Share on Twitter');" onmouseout="tooltip.hide();"
+									onclick="return shareOnTwitter('{!JSINHTMLENCODE(objNewsConf.Rknews__TwitterUrl__c)}', '{!JSENCODE(article.Title)}', '{!JSENCODE(article.Link)}','{!JSINHTMLENCODE(objNewsConf.Rknews__TwitterSharingUrl__c)}','{!JSINHTMLENCODE(objNewsConf.Rknews__PopupTarget__c)}','{!JSINHTMLENCODE(objNewsConf.Rknews__TwitterPopupParameter__c)}');return false;">
+									<apex:image url="{!URLFOR($Resource.Rknews__RKNews, 'img/twitter.png')}" width="16px" height="16px" />
+								</apex:outputLink>
+								
+								<!-- Post on LinkedIn -->
+								<apex:outputLink styleClass="share-buttons" rendered="{!blnShareOnLinkedIn}" value="#"
+									onmouseover="tooltip.show('Share on LinkedIn');" onmouseout="tooltip.hide();" 
+									onclick="return shareOnLinkedIn('{!JSINHTMLENCODE(objNewsConf.Rknews__LinkedInUrl__c)}', '{!JSENCODE(article.Link)}','{!JSINHTMLENCODE(objNewsConf.Rknews__LinkedInSharingUrl__c)}','{!JSINHTMLENCODE(objNewsConf.Rknews__PopupTarget__c)}','{!JSINHTMLENCODE(objNewsConf.Rknews__LinkedPopupParameter__c)}');return false;"  >
+									<apex:image url="{!URLFOR($Resource.Rknews__RKNews, 'img/linkedin.png')}" width="16px" height="16px" />
+								</apex:outputLink>
+								<!-- Share Article on Social Site Section Ends -->					
+							</apex:outputPanel>
+						</div>
+					</div> 
+				</div>
+			</apex:repeat>
+			<apex:outputPanel rendered="{!blnResultsExist}" >
+			<div class="news-footer">
+				<div class="news-disclaimer">
+					{!SearchNote}
+				</div>
+				<div class="news-disclaimer">
+					{!$Label.RKRSSNFR_News_Source}
+				</div>
+			</div>
+			</apex:outputPanel>
+		</apex:outputPanel>
+		</div>
+		
+		<img class="top-drop-shadow" src="{!URLFOR($Resource.RKNews, 'img/top-shadow.png')}" />
+		<img class="bot-drop-shadow" src="{!URLFOR($Resource.RKNews, 'img/bottom-shadow.png')}" />
+		
+		<div id="chatterDialog" class="chatter-dialog" style="display:none">
+			<input id="chatterArticleIndex" type="hidden" value="" />
+			<div id="news" class="chatter-input">
+				<textarea id="chatterArticle" class="chatter-textarea"></textarea>
+			</div>
+			<div class="chatter-link-area">
+				<img class="chatter-link-image" src="{!URLFOR($Resource.RKNews, 'img/link.png')}"/>
+				<span id="linkText" class="chatter-link-text">
+					<apex:outputText value=""/>
+				</span>
+			</div>
+			<div>
+				<apex:commandButton id="btnPostChatter" value="{!$Label.rknews__RKRSSNFR_Post}" onclick="postArticleOnChatter()" styleClass="chatter-button-left"/>
+				<apex:commandButton id="btnCancel" value="{!$Label.rknews__RKRSSNFR_Cancel}" onclick="closeChatterDialog()" styleClass="chatter-button-right"/>
+			</div>
+		</div>
+		
+		<apex:outputPanel id="hiddenArea">
+			<apex:inputHidden id="chatterSuccess" value="{!IsChatterPostSuccess}" />
+		</apex:outputPanel>
+		
+		<!-- REDKITE Right Slider Tab -->
+	<table cellpadding="0" cellspacing="0" id="redkiteSliderTab" style="display: none;">
+		<tr class="slider-tab">
+			<td class="slider-tab-left">
+			<apex:outputPanel layout="block" style="height: 200px">
+				<apex:outputLink onclick="sliderTab.showMenu(); return false;" >
+					<apex:outputPanel styleClass="tab-arrow" layout="block" rendered="true">
+						<img class="tab-icon left-arrow" src="{!URLFOR($Resource.Rknews__RKNews,'img/s.gif')}"/>
+					</apex:outputPanel>
+					<img width="43px" height="95px" src="{!URLFOR($Resource.RKNews,'img/s.gif')}"/>
+				</apex:outputLink>
+			</apex:outputPanel>	
+			</td>
+			<td class="slider-tab-right">
+				<!-- main content of the Tab Menu -->
+				<!-- 5-29-2012 WN - NO Advanced Search page for Contact.
+				<apex:outputLink rendered="false" styleClass="tab-menu-item tab-menu-icon-lookup" value="{!$Page.RKRSSNFR_AdvancedSearch}?id={!contactID}" 
+							title="{!$Label.RKRSSNFR_AdvancedSearch_HelpText}" target="_top">{!$Label.RKRSSNFR_AdvancedSearch}</apex:outputLink>-->
+				<apex:outputLink rendered="{!if($Profile.Name !='System Administrator',FALSE,TRUE)}" styleClass="tab-menu-item tab-menu-icon-gear" value="{!$Page.Rknews__RKRSSNFR_NewsConfiguration}?retUrl=%2F{!contactID}" 
+							title="{!$Label.rknews__RKRSSNFR_Edit_Configuration_Tooltip}" target="_top">{!$Label.rknews__RKRSSNFR_RedHotConfiguration_Title}</apex:outputLink>
+				<apex:outputLink rendered="true" styleClass="tab-menu-item tab-menu-icon-rk" value="http://www.redkitetechnologies.com" 
+							title="{!$Label.rknews__RKRSSNFR_About_Redkite_Tooltip}" target="_blank">{!$Label.rknews__RKRSSNFR_About_Redkite}</apex:outputLink>
+			</td>		
+		</tr>
+	</table>
+	
+	</apex:form>
+</apex:page>

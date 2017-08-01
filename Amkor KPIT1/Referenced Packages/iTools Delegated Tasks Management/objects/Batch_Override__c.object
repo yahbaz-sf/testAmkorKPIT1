@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customSettingsType>List</customSettingsType>
+    <description>InSitu Software Technical Support Use Only - DO NOT EDIT</description>
+    <enableFeeds>false</enableFeeds>
+    <fields>
+        <fullName>Additional_Criteria__c</fullName>
+        <deprecated>false</deprecated>
+        <description>InSitu Software Technical Support Use Only - DO NOT EDIT</description>
+        <externalId>false</externalId>
+        <inlineHelpText>InSitu Software Technical Support Use Only - DO NOT EDIT</inlineHelpText>
+        <label>Additional Criteria</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Batch_Size__c</fullName>
+        <deprecated>false</deprecated>
+        <description>InSitu Software Technical Support Use Only - DO NOT EDIT</description>
+        <externalId>false</externalId>
+        <inlineHelpText>InSitu Software Technical Support Use Only - DO NOT EDIT</inlineHelpText>
+        <label>Batch Size</label>
+        <precision>3</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Include_Order_By__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <description>InSitu Software Technical Support Use Only - DO NOT EDIT</description>
+        <externalId>false</externalId>
+        <inlineHelpText>InSitu Software Technical Support Use Only - DO NOT EDIT</inlineHelpText>
+        <label>Include Order By</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>No_WHERE_Clause__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <description>InSitu Software Technical Support Use Only - DO NOT EDIT</description>
+        <externalId>false</externalId>
+        <inlineHelpText>InSitu Software Technical Support Use Only - DO NOT EDIT</inlineHelpText>
+        <label>No WHERE Clause</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Oldest_Task_in_Days__c</fullName>
+        <deprecated>false</deprecated>
+        <description>InSitu Software Technical Support Use Only - DO NOT EDIT</description>
+        <externalId>false</externalId>
+        <inlineHelpText>InSitu Software Technical Support Use Only - DO NOT EDIT</inlineHelpText>
+        <label>Oldest Task in Days</label>
+        <precision>5</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Query_Limit__c</fullName>
+        <deprecated>false</deprecated>
+        <description>InSitu Software Technical Support Use Only - DO NOT EDIT</description>
+        <externalId>false</externalId>
+        <inlineHelpText>InSitu Software Technical Support Use Only - DO NOT EDIT</inlineHelpText>
+        <label>Query Limit</label>
+        <precision>8</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <label>InSitu DTM Batch Override</label>
+    <visibility>Public</visibility>
+</CustomObject>

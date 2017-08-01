@@ -1,0 +1,20 @@
+<apex:page controller="RFQICreateVolumeCloneController" sidebar="false" showHeader="false">
+
+<apex:form >
+	<apex:pageBlock >
+		<apex:pageBlockSection >
+			<apex:outputText value="{0} record(s) remaining">
+				<apex:param value="{!numberRemaining}" />
+				<img src="{!$Resource.Spinner}"/>
+			</apex:outputText>
+		</apex:pageBlockSection>
+	</apex:pageBlock>
+
+
+	<apex:actionFunction action="{!createClones}" name="createClonesOnLoad" />
+</apex:form>
+<script type="text/javascript">
+	createClonesOnLoad();
+</script>
+
+</apex:page>

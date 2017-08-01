@@ -1,0 +1,18 @@
+<apex:component controller="CMPBGADisplayController"> 
+<apex:attribute name="pbgaB" type="CMBuilder" assignTo="{!builder}" description="PBGA Run Object"/>
+
+<apex:outputPanel id="disp">
+<apex:pageBlock >
+	<apex:pageBlockButtons location="top">
+	    <apex:commandButton value="Show PBGA Calculation Details" action="{!showAction}" rendered="{!!showDetails}" rerender="disp"/> 
+	     <apex:commandButton value="Hide PBGA Calculation Details" action="{!hideAction}" rendered="{!showDetails}" rerender="disp"/> 
+	</apex:pageBlockButtons>
+	<apex:pageBlockTable value="{!pbgaB.debugList}" var="row" rendered="{!showDetails}"> 
+		<apex:column >	 
+   			<apex:facet name="header">Message</apex:facet> 
+   			{!row.message}
+   		</apex:column>	 
+   	</apex:pageBlockTable>
+</apex:pageBlock>
+</apex:outputPanel>
+</apex:component>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customSettingsType>Hierarchy</customSettingsType>
+    <description>Stores and maintains the User Specified configurations for the RK News App</description>
+    <enableEnhancedLookup>false</enableEnhancedLookup>
+    <enableFeeds>false</enableFeeds>
+    <fields>
+        <fullName>Homepage_Selected_Items__c</fullName>
+        <deprecated>false</deprecated>
+        <description>The Selected Account list stored as a comma separated string of IDs this comma separated string should be ordered according to priority.</description>
+        <externalId>false</externalId>
+        <label>Homepage Selected Items</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>TextArea</type>
+    </fields>
+    <label>News Feed User Configuration</label>
+    <visibility>Public</visibility>
+</CustomObject>

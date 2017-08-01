@@ -1,0 +1,50 @@
+<apex:page controller="SAPPackageAttributeCreateController" tabStyle="Package_Family__c">
+<apex:pageMessages />
+<apex:form >
+    <apex:sectionHeader title="" subtitle="Enable Attribute Value [{!attribute.Attribute_Name__c}: {!attribute.Attribute_Value__c}]" description="Enable an Attribute Value for a Package Family"/>
+	<apex:pageblock id="pb">
+	    <apex:pageBlockButtons >
+	        <apex:commandButton value="Create Item" action="{!createPackageAttribute}"/>
+	        <apex:commandButton value="Cancel" action="{!cancel}"/>
+	    </apex:pageBlockButtons> 
+	    
+	    <apex:pageBlockSection id="pbs" showHeader="false" columns="1">
+	        <apex:pageBlockSectionItem >
+	           <apex:outputLabel for="ProductGroup" value="What Product Group?"/> 
+	            <!-- to show required fields on non sobject bound control -->
+	            <apex:outputPanel layout="block" styleClass="requiredInput">
+                <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+		            <apex:selectList id="ProductGroup" size="1" value="{!itemProductGroup}">
+	                    <apex:selectOptions value="{!productGroups}"/>
+	                    <apex:actionSupport event="onchange" reRender="pbs"/>
+	                </apex:selectList>
+                </apex:outputPanel> 
+            </apex:pageBlockSectionItem> 
+            
+            <apex:pageBlockSectionItem >     
+	            <apex:outputLabel for="PackageFamily" value="What Package Family?"/>
+	            <apex:outputPanel layout="block" styleClass="requiredInput">
+                <apex:outputPanel layout="block" styleClass="requiredBlock"/> 
+	                <apex:selectList id="PackageFamily" size="1" value="{!itemPackageFamily}">
+                        <apex:selectOptions value="{!packageFamilies}"/>
+                        <apex:actionSupport event="onchange" reRender="pbs"/>
+                    </apex:selectList>
+               </apex:outputPanel>
+	        </apex:pageBlockSectionItem> 
+	        
+	         <apex:pageBlockSectionItem >     
+	            <apex:outputLabel for="PackageFamily" value="What Field?"/>
+	            <apex:outputPanel layout="block" styleClass="requiredInput">
+                <apex:outputPanel layout="block" styleClass="requiredBlock"/> 
+	                <apex:selectList id="PackageFamily" size="1" value="{!itemField}">
+                        <apex:selectOptions value="{!fields}"/>
+                    </apex:selectList>
+               </apex:outputPanel>
+	        </apex:pageBlockSectionItem>   
+	        
+	     
+	        
+    	</apex:pageBlockSection>
+    </apex:pageblock>
+</apex:form>
+</apex:page>

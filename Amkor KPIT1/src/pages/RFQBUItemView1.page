@@ -1,0 +1,442 @@
+<apex:page docType="html-5.0" standardController="RFQ_Item__c" extensions="RFQBUItemViewController1" action="{!setupCostModel}">
+
+<!-- css hackishly overriding sf css to get pretty columns --> 
+<c:RFQStyleComponent rendered="{!layout.buColumns > 3}"/>
+
+<!--Javascript to hijack the 'Assigned to' column of the approval history if it is a queue -->
+<c:ApprovalQueueLink />
+
+<style>
+    div.noAction a.actionLink { display: none; }
+</style>
+
+<script type="text/javascript">
+    var inProgress = false;
+    function resetProgress() {
+        inProgress = false;
+    }
+    
+</script>
+
+<chatter:feedWithFollowers entityId="{!wrapper.rfqItem.Id}"/>
+<apex:form id="form" >
+    <apex:sectionHeader title="View/Edit Attributes for this line item" subtitle="{!wrapper.rfqItem.Name}" description="On this page you can view cost/price model output and additonal data about the line item"/>
+    
+    <apex:pageBlock id="head">
+        <apex:pageBlockSection showHeader="false" columns="4" rendered="{!layout.enabledSections['BU Header']}">
+            <apex:repeat value="{!layout.sectionMap['BU Header'].attributes}" var="attribute">
+                <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" rendered="{!attribute.objectAPIName != 'RFQ_Item__c'}"/>
+                <apex:outputField value="{!wrapper.rfqItem[attribute.fieldAPIName]}" rendered="{!attribute.objectAPIName == 'RFQ_Item__c'}"/>
+            </apex:repeat>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+    
+    <apex:pageMessages escape="false"/> 
+    <apex:pageblock id="mainBody">
+    
+        <apex:pageBlockButtons >
+            <apex:commandButton value="Clone" action="{!cloneItem}" rendered="{!ShowCloneButton}" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();"/>
+            <apex:commandButton value="Edit" action="{!editPrice}" rendered="{!IsBUEditable}"/> 
+            <apex:commandButton value="Simulator" action="{!launchSimulator}"/>
+            <apex:commandButton value="Export" onclick="window.open('/apex/RFQBuExport?id={!wrapper.rfqItem.Id}', '_blank');" />
+            <apex:commandButton value="Import" action="{!importItem}"/>
+            <apex:commandButton value="Default Compare" action="{!defaultCompare}" />
+        </apex:pageBlockButtons> 
+          
+        <!-- Cost and Price Section -->
+        <apex:pageBlockSection title="Cost and Price" columns="1" rendered="{!layout.enabledSections['Cost and Price'] && !isLayoutDeprecated && !PostTestServiceOnlyTestType}">
+            <apex:pageBlockSection columns="4" title="{!buPriceSummary}"> 
+                <apex:repeat value="{!layout.sectionMap['Cost and Price'].attributes}" var="attribute">
+                    <apex:outputText value="" rendered="{!attribute.isBlank}" />
+                    <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" rendered="{!!attribute.isBlank}"/>
+                </apex:repeat> 
+            </apex:pageBlockSection>
+        </apex:pageBlockSection>
+
+        <!-- AMK-2351, test multivolume moved to below insertion description, so do not render this section -->
+        <!-- Make sure that if you make any changes to this section, you also change the multiVolume2 section below-->
+        <apex:pageBlockSection id="multiVolume1" title="Additional Volume Configurations" columns="1" rendered="{!!wrapper.packageFamily.Show_Multi_Volume_Below_Description__c && wrapper.packageFamily.Show_Multi_Volume__c && !IsTestAddedServicePostTestOnly}">
+            <script> if ({!wrapper.volumeList.size == 0}) twistSection(document.getElementById("{!$Component.multiVolume1}").childNodes[0].childNodes[0]); </script>
+            <c:RFQMultiVolumeSection wrapper="{!wrapper}" edit="false" layout="{!layout}" builder="{!builder}" isBUPage="true" isEngineeringService="{!IsEngineeringService}" PostTestServiceOnly="{!PostTestServiceOnlyTestType}" isLayoutDeprecated="{!isLayoutDeprecated}" buPriceSummary="{!buPriceSummary}"/>
+        </apex:pageBlockSection>
+
+        <!-- BU Attributes Section -->
+        <apex:outputPanel id="buAttrib" >
+            <apex:pageBlockSection id="pbsBUAttrib" title="BU Attributes" columns="4" rendered="{!layout.enabledSections['BU Attributes']}">               
+                <apex:repeat value="{!layout.sectionMap['BU Attributes'].attributes}" var="attribute">
+                    <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+                </apex:repeat> 
+            </apex:pageBlockSection>
+        </apex:outputPanel>
+        
+        <!-- Package Description Section -->
+        <apex:pageBlockSection title="{!projectDesc}"  columns="4" rendered="{!layout.enabledSections['Package Description'] && !isLayoutDeprecated}">
+            <apex:repeat value="{!layout.sectionMap['Package Description'].attributes}" var="attribute">
+                <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+            </apex:repeat>  
+
+            <apex:outputField value="{!wrapper.specificRfqItem['Factory__c']}" rendered="{!renderFactorySection}" />
+        </apex:pageBlockSection>
+
+        <!-- CPN Driver Section -->
+        <apex:pageBlockSection title="CPN Drivers" columns="4" rendered="{!layout.enabledSections['CPN Drivers']}">
+            <apex:repeat value="{!layout.sectionMap['CPN Drivers'].attributes}" var="attribute">
+                <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+            </apex:repeat>  
+        </apex:pageBlockSection>
+ 
+        <!-- Substrate Description Section -->
+        <apex:outputPanel layout="block" styleClass="oneColumnHack">
+                <apex:pageBlockSection title="Substrate Description" id="substrateSection" columns="{!layout.buColumns}" rendered="{!layout.enabledSections['Substrate Description'] && !isLayoutDeprecated}" > 
+                <apex:outputField value="{!wrapper.rfqItem.Consigned__c}" />
+                        <apex:repeat value="{!layout.sectionMap['Substrate Description'].attributes}" var="attribute">
+                <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+                </apex:repeat>
+            </apex:pageBlockSection>
+        </apex:outputPanel>
+        <!-- <apex:pageBlockSection title="Substrate Description" columns="{!layout.BUColumns}" rendered="{!layout.enabledSections['Substrate Description']}">
+            <apex:repeat value="{!layout.sectionMap['Substrate Description'].attributes}" var="attribute">
+                <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+            </apex:repeat>  
+        </apex:pageBlockSection>  -->
+
+        <!-- Wire Description Section -->
+        <apex:pageBlockSection title="Wire Description" id="wireSection" columns="1" rendered="{!layout.enabledSections['Wire Description'] && !isLayoutDeprecated}">
+            <apex:repeat value="{!wrapper.wireConfigurations}"  var="wireConfiguration">    
+                <apex:pageBlockSection columns="4">
+                    <apex:repeat value="{!wrapper.childObjectSections[wireConfiguration.Id].attributes}" var="attribute">
+                    <!-- <apex:repeat value="{!layout.sectionMap['Wire Description'].attributes}" var="attribute"> -->
+                        <apex:outputField value="{!wireConfiguration[attribute.fieldAPIName]}"/>
+                    </apex:repeat>
+                </apex:pageBlockSection>  
+            </apex:repeat>
+        </apex:pageBlockSection>
+        
+        
+        <!-- Die Description -->
+        <apex:pageBlockSection title="Die Description" id="dieSection" columns="1" rendered="{!layout.enabledSections['Die Description'] && !isLayoutDeprecated}" >  
+            <apex:repeat value="{!wrapper.dieConfigurations}"  var="dieConfiguration">    
+                 <apex:pageBlockSection columns="{!layout.buColumns}">
+                     <!-- <apex:repeat value="{!layout.sectionMap['Die Description'].attributes}" var="attribute"> -->
+                     <apex:repeat value="{!wrapper.childObjectSections[dieConfiguration.Id].attributes}" var="attribute">
+                         <apex:outputField value="{!dieConfiguration[attribute.fieldAPIName]}" />
+                     </apex:repeat>
+                 </apex:pageBlockSection>  
+            </apex:repeat>
+        </apex:pageBlockSection>
+       
+
+        <!-- Passive Description -->
+        <apex:pageBlockSection title="Passive Description" id="passiveSection" columns="1" rendered="{!layout.enabledSections['Passive Description'] && !isLayoutDeprecated}" >
+            <apex:repeat value="{!wrapper.passiveConfigurations}"  var="passiveConfiguration">
+                 <apex:pageBlockSection columns="{!layout.buColumns}">
+                     <!-- <apex:repeat value="{!layout.sectionMap['Passive Description'].attributes}" var="attribute"> -->
+                     <apex:repeat value="{!wrapper.childObjectSections[passiveConfiguration.Id].attributes}" var="attribute">
+                         <apex:outputField value="{!passiveConfiguration[attribute.fieldAPIName]}" />
+                     </apex:repeat>
+                 </apex:pageBlockSection>
+            </apex:repeat>
+        </apex:pageBlockSection>
+
+        <!-- Insertion Description -->
+        <apex:pageBlockSection title="Test Configuration Summary" id="insertionSection" columns="1" rendered="{!layout.enabledSections['Insertion Description'] && !isLayoutDeprecated && !PostTestServiceOnlyTestType}" >
+            <apex:repeat value="{!wrapper.wpInsertConfs}"  var="insertionConfiguration">
+            <apex:pageBlockSection columns="1" title="Test Configuration Detail #{!insertionConfiguration.index}">
+                 <apex:pageBlockSection columns="{!layout.buColumns}">
+                     <!-- <apex:repeat value="{!layout.sectionMap['Insertion Description'].attributes}" var="attribute"> -->
+                     <apex:repeat value="{!wrapper.childObjectSections[insertionConfiguration.conf.Id].attributes}" var="attribute">
+                         <apex:outputField value="{!insertionConfiguration.conf[attribute.fieldAPIName]}" rendered="{!attribute.belongsToSubSection == 'Plant Information'}"/>
+                     </apex:repeat>
+                     <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="" />
+                        <apex:outputText value=""/>
+                    </apex:pageBlockSectionItem>
+                 </apex:pageBlockSection>
+                 <hr/>
+                 <apex:pageBlockSection columns="{!layout.buColumns}">
+                     <!-- <apex:repeat value="{!layout.sectionMap['Insertion Description'].attributes}" var="attribute"> -->
+                     <apex:repeat value="{!wrapper.childObjectSections[insertionConfiguration.conf.Id].attributes}" var="attribute">
+                         <apex:outputField value="{!insertionConfiguration.conf[attribute.fieldAPIName]}" rendered="{!attribute.belongsToSubSection == 'Tester Information'}"/>
+                     </apex:repeat>
+                 </apex:pageBlockSection>
+                 <hr/>
+                 <apex:pageBlockSection columns="{!layout.buColumns}">
+                     <!-- <apex:repeat value="{!layout.sectionMap['Insertion Description'].attributes}" var="attribute"> -->
+                     <apex:repeat value="{!wrapper.childObjectSections[insertionConfiguration.conf.Id].attributes}" var="attribute">
+                         <apex:outputField value="{!insertionConfiguration.conf[attribute.fieldAPIName]}" rendered="{!attribute.belongsToSubSection == 'Handler Information'}"/>
+                     </apex:repeat>
+                 </apex:pageBlockSection>
+                 <hr/>
+                 <apex:pageBlockSection id="testConfigSection" columns="{!layout.buColumns}" rendered="{!layout.enabledSections['Minimum Tester Configuration']}" >
+                    <apex:repeat value="{!layout.sectionMap['Minimum Tester Configuration'].attributes}" var="testerAttribute">
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel for="pfOutput" value="{!$ObjectType[testerAttribute.objectAPIName].fields[testerAttribute.fieldAPIName].Label}" />
+                            <apex:outputField id="pfOutput"  value="{!insertionConfiguration.conf[testerAttribute.fieldAPIName]}"/>
+                        </apex:pageBlockSectionItem>
+                    </apex:repeat>
+                </apex:pageBlockSection>
+                <hr/>
+                <apex:pageBlockSection id="insertionCostPrice" columns="{!layout.buColumns}" rendered="{!layout.enabledSections['Insertion Cost and Price']}" >
+                    <apex:repeat value="{!layout.sectionMap['Insertion Cost and Price'].attributes}" var="testerAttribute">
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel for="pfOutput" value="{!$ObjectType[testerAttribute.objectAPIName].fields[testerAttribute.fieldAPIName].Label}" />
+                            <apex:outputField id="pfOutput"  value="{!insertionConfiguration.conf[testerAttribute.fieldAPIName]}"/>
+                        </apex:pageBlockSectionItem>
+                    </apex:repeat>
+                </apex:pageBlockSection> 
+                </apex:pageBlockSection>   
+            </apex:repeat>
+        </apex:pageBlockSection>
+
+        <!-- Service Description -->
+        <apex:pageBlockSection title="Service Description" id="serviceSection" columns="1" rendered="{!layout.enabledSections['Service Description'] && !isLayoutDeprecated}" >
+            <apex:repeat value="{!wrapper.serviceConfigurations}"  var="serviceConfiguration">
+                 <apex:pageBlockSection columns="{!layout.buColumns}">
+                     <!-- <apex:repeat value="{!layout.sectionMap['Insertion Description'].attributes}" var="attribute"> -->
+                     <apex:repeat value="{!wrapper.childObjectSections[serviceConfiguration.Id].attributes}" var="attribute">
+                         <apex:outputField value="{!serviceConfiguration[attribute.fieldAPIName]}" />
+                     </apex:repeat>
+                     <apex:outputField value="{!serviceConfiguration['Sub_Total__c']}"/>
+                 </apex:pageBlockSection>
+            </apex:repeat>
+        </apex:pageBlockSection>
+
+        <!-- Make sure that if you make any changes to this section, you also change the multiVolume1 section above-->
+        <apex:pageBlockSection id="multiVolume2" title="Additional Volume Configurations" columns="1" rendered="{!wrapper.packageFamily.Show_Multi_Volume_Below_Description__c && wrapper.packageFamily.Show_Multi_Volume__c && !IsTestAddedServicePostTestOnly}">
+            <script> if ({!wrapper.volumeList.size == 0}) twistSection(document.getElementById("{!$Component.multiVolume2}").childNodes[0].childNodes[0]); </script>
+            <c:RFQMultiVolumeSection wrapper="{!wrapper}" edit="false" layout="{!layout}" builder="{!builder}" isBUPage="true" isEngineeringService="{!IsEngineeringService}"
+            PostTestServiceOnly="{!PostTestServiceOnlyTestType}" isLayoutDeprecated="{!isLayoutDeprecated}" buPriceSummary="{!buPriceSummary}"/>
+        </apex:pageBlockSection>
+
+        <!-- Post Test Services Cost and Price -->
+        <apex:pageBlockSection title="Post Test Services BU Price to Sales" columns="1" rendered="{!layout.enabledSections['Post Test Services Cost and Price'] && !isLayoutDeprecated}">
+            <apex:pageBlockSection columns="{!layout.buColumns}"> 
+                <apex:repeat value="{!layout.sectionMap['Post Test Services Cost and Price'].attributes}" var="attribute">
+                    <apex:outputText value="" rendered="{!attribute.isBlank}" />
+                    <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" rendered="{!!attribute.isBlank}"/>
+                </apex:repeat>
+            </apex:pageBlockSection>
+            
+            <apex:pageBlockSection rendered="{!PostTestServiceOnlyTestType}" columns="{!layout.salesColumns}"> 
+                <apex:outputText value="{!wrapper.specificRfqItem['BU_Post_Test_Price_Unit__c']}"/>
+                <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="" />
+                            <apex:outputText value=""/>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="" />
+                            <apex:outputText value=""/>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="" />
+                            <apex:outputText value=""/>
+                        </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:pageBlockSection>
+
+        <!-- Adders Section -->
+        <apex:pageBlockSection title="Adders" columns="{!layout.BUColumns}" rendered="{!layout.enabledSections['Adders'] && !isLayoutDeprecated}">
+            <apex:repeat value="{!layout.sectionMap['Adders'].attributes}" var="attribute">
+                <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+            </apex:repeat>  
+        </apex:pageBlockSection>
+
+        <!-- Post Test Services Section -->
+        <apex:pageBlockSection title="Post Test Services" columns="1" rendered="{!layout.enabledSections['Post Test Services'] && !isLayoutDeprecated && !IsWaferTestType}">
+
+            <apex:pageBlockSection rendered="{!PostTestServiceOnlyTestType}" columns="{!layout.salesColumns}"> 
+                <apex:outputText value="{!wrapper.specificRfqItem['Post_Test_Factory__c']}"/>
+                <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="" />
+                            <apex:outputText value=""/>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="" />
+                            <apex:outputText value=""/>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="" />
+                            <apex:outputText value=""/>
+                        </apex:pageBlockSectionItem>
+            </apex:pageBlockSection> 
+
+
+            <apex:pageBlockSection columns="{!layout.BUColumns}">
+            <apex:repeat value="{!layout.sectionMap['Post Test Services'].attributes}" var="attribute">
+                <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+            </apex:repeat>
+            </apex:pageBlockSection>
+            <!-- Post Test Services Burn In Subsection -->
+            <apex:pageBlockSection columns="{!layout.BUColumns}" rendered="{!layout.enabledSections['Post Test Services Burn In'] && !isLayoutDeprecated}">
+                <apex:repeat value="{!layout.sectionMap['Post Test Services Burn In'].attributes}" var="attribute">
+                    <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+                </apex:repeat> 
+            </apex:pageBlockSection>
+            <!-- Post Test Services Prices Subsection -->
+            <apex:pageBlockSection columns="{!layout.BUColumns}" rendered="{!layout.enabledSections['Post Test Services Prices'] && !isLayoutDeprecated}">
+                <apex:repeat value="{!layout.sectionMap['Post Test Services Prices'].attributes}" var="attribute">
+                    <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+                </apex:repeat> 
+            </apex:pageBlockSection>  
+        </apex:pageBlockSection>
+
+        <!-- Post Test Services Section for Wafer Probe -->
+         <apex:pageBlockSection title="Post Test Services" columns="{!layout.BUColumns}" rendered="{!layout.enabledSections['Post Test Services - Wafer Probe'] && !isLayoutDeprecated && IsWaferTestType}">
+            <apex:repeat value="{!layout.sectionMap['Post Test Services - Wafer Probe'].attributes}" var="attribute">
+                <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+            </apex:repeat>  
+            </apex:pageBlockSection>
+       
+       <!-- NRE Section-->
+        <apex:outputPanel layout="block" styleClass="oneColumnHack" rendered="{!!isLayoutDeprecated}">
+            <apex:pageBlockSection title="NRE" columns="2" >
+                <apex:outputField value="{!wrapper.rfqItem.NRE_Inclusion__c}" />
+            </apex:pageBlockSection>
+
+            <apex:pageBlockSection rendered="{!showNREAttributes}" columns="1">
+
+            <apex:pageBlockSection columns="2">
+                <apex:outputText value="NRE Description:" style="float:right; font-weight: bold;"/>
+                <apex:outputText value="$NRE Value:" style="float:left; font-weight: bold;"/>
+            </apex:pageBlockSection>
+
+            <apex:pageBlockSection columns="1" rendered="{!layout.enabledSections['NRE']}">            
+                <apex:repeat value="{!layout.sectionMap['NRE'].attributes}" var="attribute">
+                   <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+                </apex:repeat>
+            </apex:pageBlockSection>
+
+            <apex:pageBlockSection columns="2">
+                <apex:repeat value="{!wrapper.nreConfigurations}"  var="nreConfiguration">
+                    <apex:outputText value="{!nreConfiguration['Description__c']}" style="float:right;"  label=""/>
+                    <apex:outputText value="{!nreConfiguration['Price_New__c']}" style="float:left;"  label=""/>   
+                </apex:repeat>
+            </apex:pageBlockSection>
+
+            </apex:pageBlockSection>
+        </apex:outputPanel>
+
+        <apex:pageBlockSection title="Additional Information" rendered="{!layout.enabledSections['Additional Information'] && !isLayoutDeprecated}" columns="1">
+            <apex:repeat value="{!layout.sectionMap['Additional Information'].attributes}" var="attribute">
+                <apex:outputText value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" label=""/>
+            </apex:repeat>
+        </apex:pageBlockSection>
+        
+        <apex:pageBlockSection title="Cost Model Reference" columns="4" rendered="true">
+            <c:CMFCMDisplay fcmB="{!builder}" isEditMode="true" noCM="{!noCostModel}" rendered="{! !noCostModel && (cmType == 'CMMLFBuilder' || cmType == 'CMDualBuilder' || cmType == 'CMQuadBuilder' || cmType == 'CMFCBuilder')}"/>
+            <c:CMPBGADisplay pbgaB="{!builder}" rendered="{!(cmType == 'CMPBGABuilder')}"/>
+            <!--<c:CMFCDisplay fcB="{!builder}" rendered="{!(cmType == 'CMFCBuilder')}"/>-->                                                
+            <c:CMOthersDisplay othersB="{!builder}" rendered="{!(cmType == 'CMOthersBuilder')}"/>
+            <c:CMDefaultDisplay defaultB="{!builder}" rendered="{!(cmType == 'CMDefaultBuilder')}"/>
+        </apex:pageBlockSection>
+
+        <c:RFQIDeprecatedSection wrapper="{!wrapper}" theLayout="{!layout}" renderFactorySection="{!renderFactorySection}" columns="1" buPage="true" rendered="{!isLayoutDeprecated}"/>
+
+    </apex:pageblock>
+    
+    <apex:pageblock id="buNotesAttachments" title="BU Notes And Attachments">
+        <apex:pageBlockButtons location="top">
+            <apex:outputLink value="/002/e?parent_id={!buNAId15D}&retURL=/apex/RFQBUItemView1?id={!wrapper.rfqItem.Id}" styleClass="btn">New BU Note</apex:outputLink>
+            <apex:outputLink value="/p/attach/NoteAttach?pid={!buNAId15D}&parentName={!buNAName}&retURL=/apex/RFQBUItemView1?id={!wrapper.rfqItem.Id}" styleClass="btn">New BU Attachment</apex:outputLink>
+        </apex:pageBlockButtons>
+        <b>BU Notes</b>
+        <apex:pageBlockSection columns="1" id="notesSection">
+            <apex:pageblocktable value="{!buNotes}" var="note" id="notesTable">
+                <apex:column headerValue="Action">
+                    <apex:commandLink action="{!editNotes}">
+                        Edit
+                        <apex:param value="{!note.id}" name="noteId" assignTo="{!noteId}"/>
+                     </apex:commandLink>
+                    |<apex:commandLink action="{!deleteNotes}" status="deleteProgress" onclick="if(!confirm('Are you sure?')) return false;" rerender="notesTable" oncomplete="window.location.reload( true );">
+                         Del
+                         <apex:param value="{!note.id}" name="noteId" assignTo="{!noteId}"/>
+                     </apex:commandLink>
+                </apex:column>
+                <apex:column headerValue="Title" >
+                    <apex:commandLink action="{!goToId}">{!note.Title}
+                        <apex:param value="{!note.id}" name="noteId" assignTo="{!Id}"/>
+                    </apex:commandLink>
+                </apex:column>
+                <apex:column value="{!note.ParentId}" headerValue="Related To" />
+                <apex:column value="{!note.CreatedDate}"/>
+                <apex:column value="{!note.CreatedById}" />
+                <apex:column value="{!note.LastModifiedDate}"/>
+                <apex:column value="{!note.LastModifiedById}"/>
+            </apex:pageblocktable>
+        </apex:pageBlockSection>
+        <br/>
+            <apex:actionStatus startText="Please wait...operation in progress" id="deleteProgress" >
+                  <apex:facet name="start">                     
+                    <apex:image value="/img/loading.gif" />              
+                  </apex:facet>
+            </apex:actionStatus>
+        <br/>
+        <b>BU Attachments</b>
+        <apex:pageBlockSection columns="1" id="attSection">
+            <apex:pageblocktable value="{!buAttachments}" var="att" id="attTable">
+                <apex:column headerValue="Action">
+                    <apex:commandLink rerender="attTable" action="{!editAttachments}">
+                        Edit
+                        <apex:param value="{!att.id}" name="attachmentId" assignTo="{!attachmentId}"/>
+                     </apex:commandLink>
+                    |<apex:commandLink rerender="attTable" action="{!viewAttachments}">
+                         View
+                         <apex:param value="{!att.id}" name="attachmentId" assignTo="{!attachmentId}"/>
+                     </apex:commandLink>
+                    |<apex:commandLink action="{!deleteAttachments}" status="deleteProgress" onclick="if(!confirm('Are you sure?')) return false;" rerender="attTable" oncomplete="window.location.reload( true );">
+                         Del
+                         <apex:param value="{!att.id}" name="attachmentId" assignTo="{!attachmentId}"/>
+                     </apex:commandLink>
+                </apex:column>
+                <apex:column headerValue="Title" onClick="window.top.location='/'+{!att.id};">
+                    <!-- <apex:outputLink >{!att.Name}</apex:outputLink> -->
+                    <apex:commandLink action="{!goToId}">{!att.Name}
+                        <apex:param value="{!att.id}" name="attachmentId" assignTo="{!Id}"/>
+                    </apex:commandLink>
+                </apex:column>
+                <apex:column value="{!att.ParentId}" headerValue="Related To" />
+                <apex:column value="{!att.CreatedDate}"/>
+                <apex:column value="{!att.CreatedById}" />
+                <apex:column value="{!att.LastModifiedDate}"/>
+                <apex:column value="{!att.LastModifiedById}"/>
+            </apex:pageblocktable>
+        </apex:pageBlockSection>
+        
+    </apex:pageblock>
+    
+</apex:form>
+
+<!-- Tasks -->
+<apex:relatedList subject="{!wrapper.rfqItem.Id}" list="OpenActivities"/>  
+<apex:relatedList subject="{!wrapper.rfqItem.Id}" list="ActivityHistories"/>   
+    
+<!--Notes & Attachments -->
+<apex:relatedList subject="{!wrapper.rfqItem.Id}" list="CombinedAttachments" />
+<!-- <apex:relatedList title="BU Notes" list="RFQI_BU_Notes__r" >
+</apex:relatedList> -->
+
+<!--Approval History -->
+<div class="noAction">
+<apex:relatedList subject="{!wrapper.rfqItem.Id}" list="ProcessSteps" >
+    <apex:facet name="header"><table><tr><td class="pbTitle"><h3>Approval History</h3></td></tr></table></apex:facet> 
+</apex:relatedList>
+
+<apex:form >
+    <apex:pageBlock title="Similar RFQ Items" >
+        <apex:pageBlockButtons location="top" >
+                <apex:commandButton rendered="{!relatedItemsVisible}" style="height: 20px" styleClass="bRelatedList" value="Advanced Search" action="{!viewRelatedItemsAdvanced}" />
+        </apex:pageBlockButtons>
+
+        <apex:outputPanel rendered="{!relatedItemsVisible}">
+            <c:RFQItemRelatedItemList relatedItems="{!relatedItems}" />
+        </apex:outputPanel>
+        
+        <apex:outputPanel rendered="{!IF(relatedItemsVisible,false,true)}">
+            <i>No other items were found with the same CPN in a 'Production Win' or 'Program Win Closed' status</i>
+        </apex:outputPanel>
+        
+    </apex:pageBlock>
+</apex:form>
+
+</div>
+</apex:page>

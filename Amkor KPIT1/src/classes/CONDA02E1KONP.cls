@@ -1,0 +1,63 @@
+global class CONDA02E1KONP {
+	
+    webservice String KSCHL {get; set;}
+    webservice String KNUMT {get; set;}
+    webservice String STFKZ {get; set;}
+    webservice String KZBZG {get; set;}
+    webservice String KSTBM {get; set;}
+    webservice String KONMS {get; set;}
+    webservice String KSTBW {get; set;} 
+    webservice String KONWS {get; set;}
+    webservice String KRECH {get; set;}
+    webservice String KBETR {get; set;}
+    webservice String KONWA {get; set;}
+    webservice String KPEIN {get; set;}
+    webservice String KMEIN {get; set;}
+    webservice String PRSCH {get; set;}
+    webservice String KUMZA {get; set;}
+    webservice String KUMNE {get; set;}
+    webservice String MEINS {get; set;}
+    webservice String MXWRT {get; set;}
+    webservice String GKWRT {get; set;}
+    webservice String PKWRT {get; set;}
+    webservice String FKWRT {get; set;}
+    webservice String RSWRT {get; set;}
+    webservice String KWAEH {get; set;}
+    webservice String UKBAS {get; set;}
+    webservice String KZNEP {get; set;}
+    webservice String KUNNR {get; set;}
+    webservice String LIFNR {get; set;}
+    webservice String MWSK1 {get; set;}
+    webservice String LOEVM_KO {get; set;}
+    webservice String ZAEHK_IND {get; set;}
+    webservice String BOMAT {get; set;}
+    webservice String KBRUE {get; set;}
+    webservice String KSPAE {get; set;}
+    webservice String BOSTA {get; set;}
+    webservice String KNUMA_PI {get; set;}
+    webservice String KNUMA_AG {get; set;}
+    webservice String KNUMA_SQ {get; set;}
+    webservice String VALTG {get; set;}
+    webservice String VALDT {get; set;}
+    webservice String ZTERM {get; set;}
+    webservice String ANZAUF {get; set;}
+    webservice String MIKBAS {get; set;}
+    webservice String MXKBAS {get; set;}
+    webservice String KOMXWRT {get; set;}
+    webservice String KLF_STG {get; set;}
+    webservice String KLF_KAL {get; set;}
+    webservice String VKKAL {get; set;}
+    webservice String AKTNR {get; set;}
+    webservice String KNUMA_BO {get; set;}
+    webservice String MDFLG {get; set;}
+    webservice String BOMAT_EXTERNAL {get; set;}
+    webservice String BOMAT_VERSION {get; set;}
+    webservice String BOMAT_GUID {get; set;}
+    webservice List<CONDA02E1KONM> E1KONM {get; set;}
+    webservice List<CONDA02E1KONW> E1KONW {get; set;}
+    webservice List<CONDA02E1VFKONX> E1VFKONX {get; set;}
+    webservice List<CONDA02E1VFSCAR> E1VFSCAR {get; set;}
+    webservice String SEGMENT {get; set;}
+	
+
+}

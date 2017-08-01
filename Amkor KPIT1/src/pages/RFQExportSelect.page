@@ -1,0 +1,64 @@
+<apex:page sidebar="false" controller="RFQExportSelectController" action="{!buViewRedirect}">
+
+<body>
+<apex:form >
+	<apex:pageMessages />
+
+	<apex:pageBlock title="Export RFQ to CSV" id="mainPageBlock" rendered="{!!wasExported}">
+		<apex:pageBlockButtons location="bottom">
+			<apex:commandButton value="Export" action="{!export}" rendered="{!rfqItems.size > 0}"/>
+			<apex:commandButton value="Return to RFQ" action="{!cancel}" />
+		</apex:pageBlockButtons>
+
+		<apex:pageBlockSection columns="1">
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel for="formatRadio" value="Export Format" />
+
+				<apex:selectRadio id="formatRadio" value="{!selectedFormat}">
+					<apex:selectOptions value="{!formatOptions}" />
+					<apex:actionSupport event="onclick" rerender="selectionPbs" />
+				</apex:selectRadio>
+
+			</apex:pageBlockSectionItem>
+
+			<apex:pageBlockSectionItem > 
+				<apex:outputLabel for="selectRadio" value="Items To Export"/> 
+
+				<apex:selectRadio id="selectRadio" value="{!selectionMode}">
+		            <apex:selectOptions value="{!exportOptions}"/>
+		            <apex:actionSupport event="onclick" rerender="selectionPbs"/> 
+		        </apex:selectRadio>
+	    	</apex:pageBlockSectionItem>
+    	</apex:pageBlockSection>
+
+    	<apex:outputPanel id="selectionPbs">
+	        <apex:pageBlockSection rendered="{!selectionMode == 'ONLY_SELECTED'}" title="Items to Export">
+	        	<apex:pageBlockTable value="{!selectableItems}" var="row">
+	        		<apex:column >
+	        			<apex:inputCheckbox value="{!row.selected}" />
+	        		</apex:column>
+
+	        		<apex:column value="{!row.item.Name}" />
+	        		<apex:column value="{!row.item.Package_Family__c}" />
+	        		<apex:column value="{!row.item.Project_Device__c}" />
+	        		<apex:column value="{!row.item.Dim_XY__c}" />
+	        		<apex:column value="{!row.item.Price_To_Customer__c}" />
+	        		<apex:column value="{!row.item.Status__c}" />
+	        	</apex:pageBlockTable>
+
+	        </apex:pageBlockSection>
+        </apex:outputPanel>
+
+	</apex:pageBlock>
+
+	<apex:pageBlock title="Success" rendered="{!wasExported}">
+		<apex:pageBlockButtons location="bottom">
+			<apex:commandButton onclick="window.open('/servlet/servlet.FileDownload?file={!attachmentId}', '_blank');" value="Download File" />
+			<apex:commandButton value="Return to RFQ" action="{!cancel}" />
+		</apex:pageBlockButtons>
+		<h3>Your CSV file was succesfully generated.</h3>
+	</apex:pageBlock>
+
+</apex:form> 
+</body>
+</apex:page>

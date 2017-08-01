@@ -1,0 +1,28 @@
+<apex:component >
+    <apex:attribute name="wrapper" type="RFQItemWrapper" description="A RFQItemWrapper"/>
+    <apex:attribute name="mode" type="String"  description="display mode" default="view"/>
+    <apex:attribute name="locked" type="Boolean"  description="is locked by state" default="false"/>
+    <apex:attribute name="columns" type="Integer"  description="Number of columns wide" default="3"/>
+    <apex:attribute name="layout" type="RFQILayout" description="Layout for component"/>
+    <apex:attribute name="layoutDeprecated" type="Boolean" description="True if layout is deprecated" default="false" />
+    
+    <!-- Quote Information Section -->
+    <apex:pageBlockSection title="Quote Information" columns="1" rendered="{!layout.enabledSections['Quote Information']}">
+        <apex:pageBlockSection columns="{!columns}">
+        <apex:repeat value="{!layout.sectionMap['Quote Information'].attributes}" var="attribute">
+            <apex:outputField rendered="{!(mode=='view' || (locked && !(attribute.fieldAPIName=='Price_To_Customer__c'))) && (!layoutDeprecated || wrapper.specificRfqItem[attribute.fieldAPIName] != null) && attribute.rendered && attribute.objectAPIName != 'RFQ_Item__c'}" value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" />
+            <apex:inputField rendered="{!mode=='edit' && attribute.objectAPIName != 'RFQ_Item__c' && (!locked || (attribute.fieldAPIName=='Price_To_Customer__c'))}" style="{!IF(attribute.isDefaultDriver,'background-color: #CCFFFF','')}" value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" required="{!attribute.isRequired}"/>
+
+            <apex:outputField rendered="{!(mode=='view' || (locked && !(attribute.fieldAPIName=='Price_To_Customer__c'))) && (!layoutDeprecated || wrapper.specificRfqItem[attribute.fieldAPIName] != null) && attribute.rendered && attribute.objectAPIName == 'RFQ_Item__c'}" value="{!wrapper.rfqitem[attribute.fieldAPIName]}" />
+            <apex:inputField rendered="{!mode=='edit' && attribute.objectAPIName == 'RFQ_Item__c' && (!locked || (attribute.fieldAPIName=='Price_To_Customer__c'))}" style="{!IF(attribute.isDefaultDriver,'background-color: #CCFFFF','')}" value="{!wrapper.rfqitem[attribute.fieldAPIName]}" required="{!attribute.isRequired}"/>
+        </apex:repeat> 
+        </apex:pageBlockSection>
+        <apex:pageBlockSection columns="{!columns}" rendered="{!layout.enabledSections['Quote Information Prices']}">
+            
+            <apex:repeat value="{!layout.sectionMap['Quote Information Prices'].attributes}" var="attribute">
+                <apex:outputField rendered="{!(mode=='view' || (locked && !(attribute.fieldAPIName=='Price_To_Customer__c'))) && (!layoutDeprecated || wrapper.specificRfqItem[attribute.fieldAPIName] != null) && attribute.rendered}" value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" />
+                <apex:inputField rendered="{!mode=='edit' && (!locked || (attribute.fieldAPIName=='Price_To_Customer__c'))}" style="{!IF(attribute.isDefaultDriver,'background-color: #CCFFFF','')}" value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" required="{!attribute.isRequired}"/>
+            </apex:repeat>
+        </apex:pageBlockSection> 
+    </apex:pageBlockSection>
+</apex:component>

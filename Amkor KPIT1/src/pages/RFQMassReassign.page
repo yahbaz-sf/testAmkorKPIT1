@@ -1,0 +1,119 @@
+<apex:page controller="RFQMassReassignController" tabStyle="Account" showHeader="true" >
+	<apex:form >
+
+         <apex:sectionHeader title="Items To Approve" subtitle="Mass Reassign" description="On this page, you can mass re-assign your items to approve"/>
+          <apex:pageMessages escape="false"/>
+
+	    <apex:pageBlock >
+
+	       <apex:pageBlockButtons location="top">
+    
+                  <apex:commandButton value="Back" immediate="true" action="{!goHome}"/>
+                  <apex:commandButton value="Reassign" action="{!reassign}"/>
+	       </apex:pageBlockButtons>
+	      
+	       <apex:pageBlockTable width="100%" style="font-size: .9em; vertical-align: top" cellpadding="1px" cellspacing="1px" value="{!itemsToApprove}" var="item">
+	       
+	            <apex:column headerValue="Re-Assign                        ">
+	                    <apex:inputCheckbox value="{!item.isSelected}"/>
+	            </apex:column>
+	       
+	            <apex:column headerValue="Related To">
+	                    <apex:outputLink rendered="{!item.isRFQItem}" value="#" onclick="window.top.location.href = '/apex/RFQBUItemView?id={!item.pInst.targetObjectId}'">{!item.pInst.targetobject.name}</apex:outputLink>
+	                    <apex:outputLink rendered="{!!item.isRFQItem}" value="#" onclick="window.top.location.href = '/{!item.pInst.targetObjectId}'">{!item.pInst.targetobject.name}</apex:outputLink>
+	            </apex:column>
+
+	             <apex:column headerValue="Assigned To">
+	                    <apex:outputText value="{!item.workItem.actor.Name}" />
+	            </apex:column>
+
+	            <apex:column headerValue="RFQ">
+	                    <apex:outputLink rendered="{!item.isRFQItem}" value="#" onclick="window.top.location.href = '/apex/RFQView?id={!item.rfqItem.RFQ__c}'">{!item.rfqItem.RFQ__r.Name}</apex:outputLink>
+	            </apex:column>
+
+	            <apex:column headerValue="Submitted">
+	                    <apex:outputField value="{!item.workItem.createdDate}" />
+	            </apex:column>
+
+	            <apex:column headerValue="Status">
+	                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.Status__c}" />
+	            </apex:column>
+
+	            <apex:column headerValue="SBU Name">
+	                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.RFQ__r.SBU_Name__r.Name}" />
+	            </apex:column>
+
+	            <apex:column headerValue="Device">
+	                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.Project_Device__c}" />
+	            </apex:column>
+	         
+	            <apex:column headerValue="Family">
+	                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.Package_Family__r.Name}" />
+	            </apex:column>
+
+	            <apex:column headerValue="Volume">
+	                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.Forecast__c}" />
+	            </apex:column>
+
+	            <apex:column headerValue="BU Price">
+	                <apex:outputText rendered="{!item.isRFQItem}" value="{0,number,#,##0.00000}">
+	                    <apex:param value="{!item.rfqItem.BU_Price__c}" />
+	                </apex:outputText>  
+	            </apex:column>
+
+	            <apex:column headerValue="% GM">
+	                    <apex:outputText rendered="{!item.isRFQItem}" value="{0,number,#,##0.00000}">
+	                        <apex:param value="{!item.rfqItem.Total_Perc_GM__c}" />
+	                    </apex:outputText>  
+	            </apex:column>
+
+	            <apex:column headerValue="Factory">
+	                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.Factory__c}" />
+	            </apex:column>
+
+	            <apex:column headerValue="Dim - Ball/Leads">
+	                    <apex:outputText value="{!item.rfqItem.Dim_XY__c}" />
+	            </apex:column>
+
+	            <apex:column headerValue="Mold Type">
+	                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.Mold_Type__c}" />
+	            </apex:column>
+
+	            <apex:column headerValue="# Die">
+	                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.Number_Of_Die__c}" />
+	            </apex:column>
+	            
+	            <apex:column headerValue="Wire Material / Diameter">
+	                    <apex:outputText value="{!item.rfqItem.Wire_Type_And_Diameter__c}" />
+	            </apex:column>
+
+	            <apex:column headerValue="# Wires">
+	                    <apex:outputText rendered="{!item.isRFQItem}" value="{!item.rfqItem.Number_Of_Wires__c}" />
+	            </apex:column>
+
+	            <apex:column headerValue="Tot 3d Wire Length (mm)">
+	                    <apex:outputText rendered="{!item.isRFQItem}" value="{0,number,#,##0.00000}">
+	                    <apex:param value="{!item.rfqItem.Total_Wire_Length__c}" />
+	                     </apex:outputText>
+	            </apex:column>
+
+	            <apex:column headerValue="AU Base">
+	                <apex:outputText rendered="{!item.isRFQItem}" value="{0,number,#,##0.00000}">
+	                    <apex:param value="{!item.rfqItem.RFQ__r.SBU_Name__r.Customer_AU_Base_fml__c}" />
+	                </apex:outputText>
+	            </apex:column>
+
+	            <apex:column headerValue="Heat Sink">
+	                    <apex:outputText value="{!item.rfqItem.Heatspreader__c}" />
+	            </apex:column>
+	            
+	        </apex:pageBlockTable>
+	        <apex:outputText value="No items to approve" rendered="{!!hasItems}"/> 
+	    </apex:pageBlock>
+
+		<apex:outputPanel id="opPanel" >
+			<apex:inputField label="New Approver" value="{!dummyRFQI.OwnerId}" required="true" />
+		</apex:outputPanel>
+
+	</apex:form>
+</apex:page>

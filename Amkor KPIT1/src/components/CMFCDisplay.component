@@ -1,0 +1,18 @@
+<apex:component controller="CMFCDisplayController"> 
+<apex:attribute name="fcB" type="CMBuilder" assignTo="{!builder}" description="Flip Chip Run Object"/>
+
+<apex:outputPanel id="disp">
+<apex:pageBlock >
+	<apex:pageBlockButtons location="top">
+	    <apex:commandButton value="Show Flip Chip Calculation Details" action="{!showAction}" rendered="{!!showDetails}" rerender="disp"/> 
+	     <apex:commandButton value="Hide Others Calculation Details" action="{!hideAction}" rendered="{!showDetails}" rerender="disp"/> 
+	</apex:pageBlockButtons>
+	<apex:pageBlockTable value="{!fcBuilder.debugList}" var="row" rendered="{!showDetails}"> 
+		<apex:column >	 
+   			<apex:facet name="header">Message</apex:facet> 
+   			{!row.message}
+   		</apex:column>	 
+   	</apex:pageBlockTable>
+</apex:pageBlock>
+</apex:outputPanel>
+</apex:component>

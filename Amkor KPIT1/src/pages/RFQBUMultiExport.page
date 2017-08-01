@@ -1,0 +1,84 @@
+<apex:page showHeader="true" sidebar="true" controller="RFQBUMultiExportController">
+
+<script type = "text/javascript">
+    function checkAll(cb)
+	{
+		var inputElem = document.getElementsByTagName("input");
+		for(var i=0; i<inputElem.length; i++){
+			if(inputElem[i].id.indexOf("checkedone")!=-1)
+				inputElem[i].checked = cb.checked;
+		}
+	}   
+
+</script>
+
+	<apex:form >
+
+	<apex:sectionHeader title="" subtitle="RFQ Export" description=""/>
+
+	<apex:pageMessages />
+
+		<apex:pageBlock id="pb">
+
+			<apex:pageBlockButtons location="bottom">
+				<apex:commandButton value="Export" action="{!export}" />
+				<apex:commandButton value="Cancel" action="{!returnToRfq}" />
+			</apex:pageBlockButtons>
+
+			<apex:pageBlockSection title="Package Family Select">
+
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Package Family" />
+					<apex:selectList value="{!selectedPackageFamily}" multiselect="false" size="1" >
+						<apex:selectOptions value="{!packageFamilyOptions}" />
+						<apex:actionSupport event="onchange" action="{!setItemList}" rerender="pb" />
+					</apex:selectList>
+				</apex:pageBlockSectionItem>
+
+			</apex:pageBlockSection>
+
+			<apex:pageBlockSection title="Test Type Selection" rendered="{!packageFamilyName == 'Test'}">
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Test Type?" />
+					<apex:selectList value="{!testType}" multiselect="false" size="1">
+						<apex:selectOptions value="{!TestTypeOptions}" />
+						<apex:actionSupport event="onchange" action="{!setItemListForTest}" rerender="pb" />
+					</apex:selectList>
+				</apex:pageBlockSectionItem>
+
+			</apex:pageBlockSection>
+
+			<apex:pageBlockSection title="Items to Export" id="itemsPbs">
+				<apex:outputPanel rendered="{!currentItems == null || currentItems.size == 0}">
+					<i>No items</i>
+				</apex:outputPanel>
+				<apex:outputPanel rendered="{!currentItems != null && currentItems.size > 0}">
+
+		        	<apex:pageBlockTable value="{!currentItems}" var="row" style="width: 80%">
+		        		<apex:column >
+
+		        			<apex:facet name="header"> 
+		        			<apex:inputCheckbox >
+								<apex:actionSupport event="onclick" onsubmit="checkAll(this)" rerender="itemsPbs"/>
+							</apex:inputCheckbox>
+							</apex:facet>
+
+		        			<apex:inputCheckbox value="{!row.selected}" id="checkedone"/>
+		        		</apex:column>
+
+		        		<apex:column value="{!row.item.Name}" />
+		        		<apex:column value="{!row.item.Package_Family_Name_fml__c}" />
+		        		<apex:column value="{!row.item.Project_Device__c}" />
+		        		<apex:column value="{!row.item.Dim_XY__c}" />
+		        		<apex:column value="{!row.item.Price_To_Customer__c}" />
+		        		<apex:column value="{!row.item.Status__c}" />
+		        	</apex:pageBlockTable>
+	        	</apex:outputPanel>
+
+	        </apex:pageBlockSection>
+
+		</apex:pageBlock>
+
+	</apex:form>
+	
+</apex:page>

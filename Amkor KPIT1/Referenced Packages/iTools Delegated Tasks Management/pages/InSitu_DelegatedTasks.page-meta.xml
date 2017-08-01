@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>31.0</apiVersion>
+    <availableInTouch>true</availableInTouch>
+    <confirmationTokenRequired>false</confirmationTokenRequired>
+    <description>This page displays a list of tasks the current user has assigned to other users.  It can be used as a standalone tab or a home page component.</description>
+    <label>Delegated Tasks</label>
+    <packageVersions>
+        <majorNumber>4</majorNumber>
+        <minorNumber>0</minorNumber>
+        <namespace>InSituGen</namespace>
+    </packageVersions>
+</ApexPage>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fields>
+        <fullName>InSitu_Assigned_to_Group_Date__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Date the Task was assigned to its current Task Group</description>
+        <externalId>false</externalId>
+        <label>Assigned to Group Date</label>
+        <required>false</required>
+        <type>Date</type>
+    </fields>
+    <fields>
+        <fullName>InSitu_Claimed_Date__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Date the task was claimed by a member of its associated Task Group</description>
+        <externalId>false</externalId>
+        <label>Claimed Date</label>
+        <required>false</required>
+        <type>Date</type>
+    </fields>
+    <fields>
+        <fullName>InSitu_Completed_Date__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Completed Date</label>
+        <required>false</required>
+        <type>Date</type>
+    </fields>
+    <fields>
+        <fullName>InSitu_Contact_Task__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <description>Indicates the Contact identified in the Name field is responsible for completing the task.</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Indicates the Contact identified in the Name field is responsible for completing the task.</inlineHelpText>
+        <label>Contact Task</label>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>InSitu_Days_to_Complete__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Days to Complete</label>
+        <precision>5</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>InSitu_Due_Date__c</fullName>
+        <deprecated>false</deprecated>
+        <description>A mirror of the standard ActivityDate field that was initially added so the due date could be used in validation rules and workflows.  Starting with Summer 14&apos; the standard ActivityDate field is  available for use in validation rules, formulas, and workflows so this field should no longer be used.</description>
+        <externalId>false</externalId>
+        <label>Due Date (obsolete)</label>
+        <required>false</required>
+        <type>Date</type>
+    </fields>
+    <fields>
+        <fullName>InSitu_EN_Hidden_Flag__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <description>This field should NOT be included on the Event page layout(s).</description>
+        <externalId>false</externalId>
+        <label>InSitu EN Flag - Do Not Place on Layout</label>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>InSitu_EN_Visible_Flag__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <description>This is the field that SHOULD be included on the Event page layout(s).</description>
+        <externalId>false</externalId>
+        <label>Send Notification Email</label>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>InSitu_ONTracker__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Special tracking field used by the iTools Delegated Tasks Management Overdue Notification feature.  Do NOT place this field on any Task or Event Page Layout.</description>
+        <externalId>false</externalId>
+        <label>InSituONTracker - Do Not Place on Layout</label>
+        <length>100</length>
+        <required>false</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>InSitu_Owner_Not_Responsible__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>InSitu Owner Not Responsible</label>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>InSitu_RNTracker__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>InSituRNTracker - Do Not Place on Layout</label>
+        <required>false</required>
+        <type>DateTime</type>
+    </fields>
+    <fields>
+        <fullName>InSitu_RelatedToOwnerId__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Salesforce ID of the owner of the Task&apos;s Related To object.  This field should NOT be added to any page layouts.</description>
+        <externalId>true</externalId>
+        <label>Related To Owner ID</label>
+        <length>100</length>
+        <required>false</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>InSitu_Send_Email_Reminder__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <description>Place only on the Task page layouts</description>
+        <externalId>false</externalId>
+        <label>Send Email Reminder</label>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>InSitu_TCN_Flag__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>Check this box if you wish to have the task&apos;s creator notified by e-mail when this task is completed, deleted, re-opened, or its Due Date or Assigned To is changed before it is completed.</inlineHelpText>
+        <label>Notify when Complete</label>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>InSitu_Task_Group__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Task Group the task is currently assigned to.  This field is empty if the task is not assigned to a Task Group</description>
+        <externalId>false</externalId>
+        <label>Task Group</label>
+        <length>255</length>
+        <required>false</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>InSitu_Workdays_to_Complete__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Workdays to Complete</label>
+        <precision>5</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+</CustomObject>

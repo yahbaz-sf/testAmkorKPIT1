@@ -1,0 +1,14 @@
+<apex:page tabStyle="RFQ__c" >
+<apex:form id="form" >
+    <apex:sectionHeader title="Version Information" subtitle="RFQ Application Version" description="This page displays the current version of the RFQ Applicaiton installed in this org."/>
+    
+    <apex:pageBlock id="head">
+	    <apex:pageBlockSection title="Version Information">
+	    
+	        <apex:outputText value="Version: 1.5.6"/>
+	    
+	    </apex:pageBlockSection>
+	</apex:pageBlock>
+
+</apex:form>
+</apex:page>

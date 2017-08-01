@@ -1,0 +1,7 @@
+<apex:page showHeader="false" controller="First_Rain.FRCustomSettingsListController">
+    
+    <head>
+        
+    </head>
+    <apex:iframe height="625" width="100%" id="frCarouselIframe"  src="https://apps.firstrain.com/sfdcnextgen/001/dynamic/homescreen.do?entrprsid={!enterpriseId}&type=homescreen&accesstoken={!accesstoken}&userEmail={!$User.Email}&userFirstName={!URLENCODE($User.FirstName)}&userLastName={!URLENCODE($User.LastName)}&sessionId={!$Api.Session_ID}&userid={!$User.Id}&restUrl={!resturl}"></apex:iframe>
+</apex:page>

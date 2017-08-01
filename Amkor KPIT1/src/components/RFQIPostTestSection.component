@@ -1,0 +1,16 @@
+<apex:component >
+	<apex:attribute name="wrapper" type="RFQItemWrapper" description="A RFQItemWrapper"/>
+	<apex:attribute name="mode" type="String"  description="display mode" default="view"/>
+    <apex:attribute name="locked" type="Boolean"  description="is locked by state" default="false"/>
+    <apex:attribute name="columns" type="Integer"  description="Number of columns wide" default="3"/>
+    <apex:attribute name="layout" type="RFQILayout" description="Layout for component"/>
+    <apex:attribute name="layoutDeprecated" type="Boolean" description="True if layout is deprecated" default="false" />
+
+	<!-- Post-Test Services Section -->
+    <apex:pageBlockSection title="Post-Test Services" columns="{!columns}" rendered="true">
+        <apex:repeat value="{!layout.sectionMap['Post-Test Services'].attributes}" var="attribute">   
+            <apex:outputField rendered="{!(mode=='view' || !locked) && (!layoutDeprecated || wrapper.specificRfqItem[attribute.fieldAPIName] != null)}" value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+            <apex:inputField rendered="{!mode=='edit' && !!locked}" style="{!IF(attribute.isDefaultDriver,'background-color: #CCFFFF','')}" value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+        </apex:repeat>  
+    </apex:pageBlockSection>
+</apex:component>

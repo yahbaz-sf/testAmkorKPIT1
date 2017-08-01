@@ -1,0 +1,17 @@
+<apex:page standardController="Task" extensions="InSituDtm.InSitu_ContactTaskStatusController" showHeader="false" sidebar="false" standardStylesheets="true" > 
+<apex:form id="theStatusForm">
+
+	<apex:outputText value="{!StatusText}" />
+	
+	<apex:panelGrid columns="3" cellspacing="1px" rendered="{!IF(LEN(WarningMsg) == 0, 'true', 'false')}" >
+		<apex:commandLink action="{!sendNewTaskNotice}" value="{!SendText}" rendered="{!ShowSendLink}" target="_top"/>
+		&nbsp;&nbsp;&nbsp;
+		<apex:commandLink action="{!sendTaskCancelationNotice}" value="{!CancelText}" rendered="{!ShowCancelLink}" target="_top"/>	
+	</apex:panelGrid>
+	
+	<apex:panelGrid columns="1" cellspacing="1px" rendered="{!IF(LEN(WarningMsg) > 0, 'true', 'false')}" >
+		<apex:outputText value="{!WarningMsg}" style="color: red;" />
+	</apex:panelGrid>
+	
+</apex:form> 
+</apex:page>

@@ -1,0 +1,101 @@
+<apex:component ><!--controller="RFQIDeprecatedSectionController"-->
+	<apex:attribute name="wrapper" type="RFQItemWrapper" description="A RFQItemWrapper"/>
+    <apex:attribute name="columns" type="Integer"  description="Number of columns wide" default="1"/>
+    <apex:attribute name="renderFactorySection" type="Boolean"  description="Should the factory field be rendered" default="false"/>
+    <apex:attribute name="theLayout" type="RFQILayout"  description="Layout for component"/>
+    <apex:attribute name="salesPage" type="Boolean" default="false" description="True if this component is on a sales page" />
+    <apex:attribute name="buPage" type="Boolean" default="false" description="True if this component is on a bu page" />
+    
+        <!-- BU Header -->
+        <apex:pageBlockSection showHeader="false" columns="{!columns}" rendered="{!buPage && theLayout.enabledSections['BU Header']}">
+            <apex:repeat value="{!theLayout.sectionMap['BU Header'].attributes}" var="attribute">
+                <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" rendered="{!wrapper.specificRfqItem[attribute.fieldAPIName] != null}"/>
+            </apex:repeat>
+        </apex:pageBlockSection>
+        <!-- Cost and Price Section -->
+        <apex:pageBlockSection title="Cost and Price" columns="{!columns}" rendered="{!buPage && theLayout.enabledSections['Cost and Price']}">
+            <apex:repeat value="{!theLayout.sectionMap['Cost and Price'].attributes}" var="attribute">
+                <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" rendered="{!!attribute.isBlank && wrapper.specificRfqItem[attribute.fieldAPIName] != null}"/>
+            </apex:repeat> 
+        </apex:pageBlockSection>
+
+        <!-- Quote Information Section -->
+        <c:RFQIQuoteInformationSection wrapper="{!wrapper}"  columns="{!columns}" layout="{!theLayout}" rendered="{!salesPage}" layoutDeprecated="true"/>
+
+        <!-- Package Description Section -->
+        <c:RFQIPackageDescriptionSection wrapper="{!wrapper}" columns="{!columns}" renderFactorySection="{!renderFactorySection}" layout="{!theLayout}" layoutDeprecated="true"/>
+
+        <!-- CPN Drivers Section -->
+        <apex:pageBlockSection title="CPN Drivers" id="cpnSection" columns="{!columns}" rendered="{!theLayout.enabledSections['CPN Drivers'] }" >  
+             <apex:repeat value="{!theLayout.sectionMap['CPN Drivers'].attributes}" var="attribute">
+                 <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" rendered="{!wrapper.specificRfqItem[attribute.fieldAPIName] != null}"/> 
+             </apex:repeat>
+        </apex:pageBlockSection>
+
+        <!-- Substrate Description -->
+        <apex:pageBlockSection title="Substrate Description" id="substrateSection" columns="{!columns}" rendered="{!theLayout.enabledSections['Substrate Description'] }" >  
+             <apex:repeat value="{!theLayout.sectionMap['Substrate Description'].attributes}" var="attribute">
+                 <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" rendered="{!wrapper.specificRfqItem[attribute.fieldAPIName] != null}"/>
+             </apex:repeat>
+        </apex:pageBlockSection>
+        
+
+        <!-- Wire Description Section -->
+        <c:RFQIWireDescriptionSection id="wireSection" columns="{!columns}" wrapper="{!wrapper}" rendered="{!theLayout.enabledSections['Wire Description'] }" layout="{!theLayout}" layoutDeprecated="true"/>
+
+        <!-- Die Description -->
+        <apex:pageBlockSection title="Die Description" id="dieSection" columns="1" rendered="{!theLayout.enabledSections['Die Description'] }" >  
+            <apex:repeat value="{!wrapper.dieConfigurations}"  var="dieConfiguration">    
+                 <apex:pageBlockSection columns="{!columns}">
+                     <apex:repeat value="{!theLayout.sectionMap['Die Description'].attributes}" var="attribute">
+                         <apex:outputField value="{!dieConfiguration[attribute.fieldAPIName]}" rendered="{!dieConfiguration[attribute.fieldAPIName] != null}"/>
+                     </apex:repeat>
+                 </apex:pageBlockSection>  
+            </apex:repeat>
+        </apex:pageBlockSection> 
+        
+        <!-- Passive Description --> 
+        <apex:pageBlockSection title="Passive Description" id="passiveSection" columns="1" rendered="{!theLayout.enabledSections['Passive Description'] }" >  
+            <apex:repeat value="{!wrapper.passiveConfigurations}"  var="passiveConfiguration">    
+                 <apex:pageBlockSection columns="{!columns}">
+                     <apex:repeat value="{!theLayout.sectionMap['Passive Description'].attributes}" var="attribute">
+                         <apex:outputField value="{!passiveConfiguration[attribute.fieldAPIName]}" rendered="{!passiveConfiguration[attribute.fieldAPIName] != null}"/>
+                     </apex:repeat>
+                 </apex:pageBlockSection>  
+            </apex:repeat>
+        </apex:pageBlockSection> 
+
+        <!-- Insertion Description -->
+        <apex:pageBlockSection title="Insertion Description" id="insertionSection" columns="1" rendered="{!theLayout.enabledSections['Insertion Description'] }" >  
+            <apex:repeat value="{!wrapper.insertionConfigurations}"  var="insertionConfiguration">    
+                 <apex:pageBlockSection columns="{!columns}">
+                     <apex:repeat value="{!theLayout.sectionMap['Insertion Description'].attributes}" var="attribute">
+                         <apex:outputField value="{!insertionConfiguration[attribute.fieldAPIName]}" rendered="{!insertionConfiguration[attribute.fieldAPIName] != null}"/>
+                     </apex:repeat>
+                 </apex:pageBlockSection>  
+            </apex:repeat>
+        </apex:pageBlockSection>  
+
+        <!-- Adders Section -->
+        <c:RFQIAdderSection wrapper="{!wrapper}" columns="{!columns}" rendered="{!theLayout.enabledSections['Adders'] }" layout="{!theLayout}" layoutDeprecated="true"/>
+        
+        <!-- NRE -->
+        <apex:outputPanel layout="block" styleClass="oneColumnHack">
+            <apex:pageBlockSection title="NRE" columns="2" rendered="{!theLayout.enabledSections['NRE']}" >  
+                <apex:outputField value="{!wrapper.rfqItem.NRE_Inclusion__c}"/>
+                <apex:outputField value="{!wrapper.rfqItem.Include_NRE_On_Quote__c}"/>
+
+                 <apex:repeat value="{!theLayout.sectionMap['NRE'].attributes}" var="attribute">
+                     <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" rendered="{!wrapper.rfqItem.Include_NRE_On_Quote__c && attribute.showOnSalesScreen && wrapper.specificRfqItem[attribute.fieldAPIName] != null}" />
+                 </apex:repeat>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection >
+                <apex:repeat value="{!wrapper.nreConfigurations}"  var="nreConfiguration">  
+                        <apex:repeat value="{!wrapper.childObjectSections[nreConfiguration.Id].attributes}" var="attribute">
+                            <apex:outputField value="{!nreConfiguration[attribute.fieldAPIName]}" />
+                        </apex:repeat>
+                    </apex:repeat>
+            </apex:pageBlockSection>
+        </apex:outputPanel>
+        
+</apex:component>

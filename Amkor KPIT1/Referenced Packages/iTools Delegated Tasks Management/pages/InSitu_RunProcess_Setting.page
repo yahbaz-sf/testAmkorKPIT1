@@ -1,0 +1,139 @@
+<apex:page Controller="InSituDtm.InSitu_RunProcess_Controller" showHeader="true" tabStyle="InSituGen__InSitu_AppSetting__c" >
+    <apex:sectionHeader title="Run Batch Process" subtitle="{!ProcessName}"></apex:sectionHeader> 
+    <apex:pageMessages />    
+    <apex:form > 
+ 
+        <apex:pageBlock mode="Edit">
+        
+           	<apex:pageBlockButtons location="Top">
+               <apex:commandButton action="{!runBatchProcess}" value="Start" rendered="{!ShowStart}"/>
+               <apex:commandButton action="{!returnToManage}" value="Cancel" />
+           	</apex:pageBlockButtons>
+    
+    		<apex:outputPanel layout="block" styleclass="message warningM3" id="QueueFullMsg" rendered="{!IsQueueFull}" >   
+				<table cellspacing="0" cellpadding="0" border="0" style="padding:0px;margin:0px;" class="messageTable">
+					<tbody>
+						<tr valign="top">
+							<td><img title="info" class="msgIcon" src="/s.gif" alt="info"/></td>
+							<td class="messageCell">
+								<div id="msgBody" class="messageText">
+									<span id="msgTitle">
+										<h4>Process Queue is Full</h4>
+									</span>
+										{!ProcessName} routine cannot be run at this time because there are too many Apex jobs currently queued or running.<br/>
+										You will have to wait for one of the jobs to complete or possibly cancel a job that may have become stalled.&nbsp;
+										To review the list of Apex Jobs, go to Setup | Monitoring | Apex Jobs.<br/>
+										When the number of Apex Jobs is less than the limit of {!MaxJobs}, you will be able to run the {!ProcessName} routine.
+									<br/>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</apex:outputPanel>
+		
+			<apex:outputPanel layout="block" styleclass="message errorM3" id="RTODisabledMsg" rendered="{!ShowRTODisabled}" >   
+				<table cellspacing="0" cellpadding="0" border="0" style="padding:0px;margin:0px;" class="messageTable">
+					<tbody>
+						<tr valign="top">
+							<td><img title="info" class="msgIcon" src="/s.gif" alt="info"/></td>
+							<td class="messageCell">
+								<div id="msgBody" class="messageText">
+									<span id="msgTitle">
+										<h4>Feature Disabled</h4>
+									</span>
+										The {!ProcessName} routine cannot be run because the Related To Owner feature is currently disabled.<br/>
+										To enable this feature, edit the <b>RTO_Configure</b> iTools Setting.
+									<br/>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</apex:outputPanel>
+         	
+         	<apex:outputPanel layout="block" styleclass="message confirmM3" id="RTOEnabledMsg" rendered="{!ShowRTOEnabled}" >   
+				<table cellspacing="0" cellpadding="0" border="0" style="padding:0px;margin:0px;" class="messageTable">
+					<tbody>
+						<tr valign="top">
+							<td><img title="info" class="msgIcon" src="/s.gif" alt="info"/></td>
+							<td class="messageCell">
+								<div id="msgBody" class="messageText">
+									<span id="msgTitle">
+										<h4>Related To Owner Recalculation</h4>
+									</span>
+										This routine will update the owner tracking field on a task in the event the owner of the related object (Opportunity, Account, Case, etc.) has changed. The owner tracking field value is calculated for your organization’s open tasks when you enabled the Related To Owner feature and is kept up to date as each individual task is edited. If, however, the owner of the related object is changed, the owner tracking field on the associated tasks is not updated. To ensure the owner tracking field always has the proper value, the Related To Owner Recalculation routine should be run.<br/>
+										There are several instances for which an organization will reassign ownership of Salesforce objects en masse - the most common of these is when a user leaves your organization.  It is recommended that this routine be run after such a reassignment of object ownership.  Also, if you frequently change object ownership, you should plan to schedule this routine to automatically run on a regular basis.  For details on how to schedule the Related To Owner Recalculation routine, see the Delegated Tasks Management Configuration Guide.<br/><br/>
+										<b>Recalculation Last Run:</b>&nbsp;&nbsp;{!LastRun}
+									<br/>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</apex:outputPanel>
+         	
+         	<apex:outputPanel layout="block" styleclass="message errorM3" id="TNDisabledMsg" rendered="{!ShowTNDisabled}" >   
+				<table cellspacing="0" cellpadding="0" border="0" style="padding:0px;margin:0px;" class="messageTable">
+					<tbody>
+						<tr valign="top">
+							<td><img title="info" class="msgIcon" src="/s.gif" alt="info"/></td>
+							<td class="messageCell">
+								<div id="msgBody" class="messageText">
+									<span id="msgTitle">
+										<h4>Features Disabled</h4>
+									</span>
+										The {!ProcessName} routine cannot be run because both the Overdue Notifications and the Reminder Notifications features are currently disabled.<br/>
+										To enable these features, edit the <b>ON_Configure</b> and/or <b>RN_Configure</b> iTools Setting.
+									<br/>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</apex:outputPanel>
+			
+			<apex:outputPanel layout="block" styleclass="message confirmM3" id="TNEnabledMsg" rendered="{!ShowTNEnabled}" >   
+				<table cellspacing="0" cellpadding="0" border="0" style="padding:0px;margin:0px;" class="messageTable">
+					<tbody>
+						<tr valign="top">
+							<td><img title="info" class="msgIcon" src="/s.gif" alt="info"/></td>
+							<td class="messageCell">
+								<div id="msgBody" class="messageText">
+									<span id="msgTitle">
+										<h4>Task Notifications</h4>
+									</span>
+										This routine will identify open tasks whose due date is approaching soon or has past and send email notifications to the appropriate people.<br/>
+										You should plan to schedule this routine to automatically run on a regular basis.  For details on how to schedule the Task Notifications routine, see the Delegated Tasks Management Configuration Guide.<br/><br/>
+										<b>Task Notifications Last Run:</b>&nbsp;&nbsp;{!LastRun}
+									<br/>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</apex:outputPanel>
+			
+			<apex:outputPanel layout="block" styleclass="message confirmM3" id="TGMsg" rendered="{!ShowTG}" >   
+				<table cellspacing="0" cellpadding="0" border="0" style="padding:0px;margin:0px;" class="messageTable">
+					<tbody>
+						<tr valign="top">
+							<td><img title="info" class="msgIcon" src="/s.gif" alt="info"/></td>
+							<td class="messageCell">
+								<div id="msgBody" class="messageText">
+									<span id="msgTitle">
+										<h4>Task Group Summary Reports</h4>
+									</span>
+										This routine will generate and email Task Group Summary reports based on settings found on each Task Group record.<br/>
+										You should plan to schedule this routine to automatically run on a regular basis.  For details on how to schedule the Task Group Summary Reports routine, see the Delegated Tasks Management Configuration Guide.<br/><br/>
+										<b>Task Group Summary Reports Last Run:</b>&nbsp;&nbsp;{!LastRun}
+									<br/>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</apex:outputPanel>
+    	</apex:pageBlock>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,64 @@
+<apex:component >
+	<apex:attribute name="quoteSummaryItems" type="RFQQuoteSummaryItem[]" description="The Related Items"/>
+	<apex:attribute name="showAdderDetailColumn" type="Boolean" description="showAdderDetailColumn"/>
+	<apex:attribute name="priceCustBreakdown" type="map" description="Price to Customer Breakdown"/>
+	<apex:attribute name="factories" type="map" description="map of all factories" />
+
+	<apex:dataTable value="{!quoteSummaryItems}" var="item" styleClass="summaryTable" border="1">
+			<apex:column >
+				<apex:facet name="header">Customer Project/Device Name</apex:facet>
+				<apex:outputText value="{!item.projectDeviceName}" rendered="{!!item.isSubtotalItem}"/>
+			</apex:column>
+
+			<apex:column style="{!item.style}">
+				<apex:facet name="header">Service Type</apex:facet>
+				<apex:outputText value="{!item.serviceType}"/>
+			</apex:column>
+
+			<apex:column >
+				<apex:facet name="header">Plant</apex:facet>
+				 <apex:outputText value="{!item.factoryName}"/> 
+			</apex:column>
+
+			<apex:column >
+				<apex:facet name="header">Description</apex:facet>
+				 <apex:outputText value="{!item.description}"/> 
+			</apex:column>
+
+			<apex:column >
+				<apex:facet name="header">Volume K/Wk</apex:facet>
+				<apex:outputText value="{!item.volumePerWk}" />
+			</apex:column>
+
+			<apex:column >
+				<apex:facet name="header">Price ($)</apex:facet>
+				<apex:outputText value="{0, number, ###,##0.00000}" rendered="{!item.price != null}">
+					<apex:param value="{!item.price}" />
+				</apex:outputText>
+				<apex:outputText value="Included" rendered="{!item.price == null && item.serviceType == 'Post Test Services'}"/>
+			</apex:column>
+
+			<apex:column >
+				<apex:facet name="header">UOM</apex:facet>
+				<apex:outputText value="{!item.uom}" />
+			</apex:column>
+
+			<apex:column >
+				<apex:facet name="header">NRE Total</apex:facet>
+				<apex:outputText value="{0, number, ###,##0.00}">
+					<apex:param value="{!item.nreTotal}" />
+				</apex:outputText>
+			</apex:column> 
+
+			<apex:column >
+			<apex:facet name="header">CPN</apex:facet>
+				<apex:outputText value="{!item.cpn}" />
+			</apex:column>
+
+			<apex:column >
+				<apex:facet name="header">RFQI</apex:facet>
+				<apex:outputText value="{!item.rfqiName}" />
+			</apex:column>
+
+		</apex:dataTable>
+</apex:component>

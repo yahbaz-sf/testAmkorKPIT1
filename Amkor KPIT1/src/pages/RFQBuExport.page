@@ -1,0 +1,4 @@
+<apex:page controller="RFQBuExportController" sidebar="false" showheader="false" standardStyleSheets="false" readonly="true" contentType="application/csv;charset=UTF-8#{!fileName}.csv">
+	<apex:outputText value="{!csvOutput}" />
+
+</apex:page>

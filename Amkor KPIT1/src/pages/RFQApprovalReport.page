@@ -1,0 +1,9 @@
+<apex:page controller="RFQApprovalReportController" sidebar="false" showheader="false" standardStyleSheets="false" readonly="true" contentType="application/csv;charset=UTF-8#RFQApprovals.csv">
+
+RFQ Item,Product Group,Package Family,User,Approval Status,Item Status,Comments,Action Date
+<apex:repeat value="{!approvals}" var="a">
+{!a.itemName},{!a.productGroup},{!a.packageFamily},{!a.actorName},{!a.approvalStatus},{!a.itemStatus},{!a.approvalComments},{!a.createdDate}
+</apex:repeat>
+
+	
+</apex:page>

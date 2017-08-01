@@ -1,0 +1,100 @@
+<apex:page standardController="RFQ_Item__c" extensions="BUNotesAndAttachmentsController">
+<apex:form id="form">
+    
+    <apex:pageblock id="pb">
+                <apex:pageBlockButtons dir="top">
+                    <!-- <apex:commandButton value="New BU Notes And Attachments" action="{!URLFOR($Action.RFQI_BU_Notes_Attachments__c.New, null,[saveURL=URLFOR($Action.Account.View,Account.Id)])}"/> -->
+                    <apex:commandButton value="New BU Notes" onclick="javascript:redirectToNewNotes('{!fifteenDigitbuNotesandAttachmentId}');"/>
+                    <apex:commandButton value="New BU Attachment" onclick="javascript:redirectToNewAttachment('{!buNotesandAttachmentId}','{!buNotesandAttachment.Name}');"/>
+                </apex:pageBlockButtons>
+                <apex:outputText ><b>Notes</b></apex:outputText>
+                <!--<apex:actionFunction action="{!editNotes}" name="editNotesApex"/>-->
+                
+                <apex:pageblocktable value="{!buNotes}" var="note" id="Notes" rendered="true">
+                    <apex:column style="width:8%" headerValue="Action">
+                        <!--<apex:commandLink rerender="table" style="color:blue" status="deleteProgress" onclick="editNotesJS('{!note.Id}')">-->
+                        <apex:commandLink rerender="table" status="editProgress" onclick="javascript:editNotesJS('{!note.Id}');">
+                        Edit
+                        <apex:param value="{!note.id}" name="noteId" assignTo="{!noteId}"/>
+                        </apex:commandLink>
+                        
+                        |<apex:commandLink rerender="Notes" action="{!deleteNotes}" status="deleteProgress" onclick="reloadAfterDelete()">
+                        Del
+                        <apex:param value="{!note.id}" name="noteId" assignTo="{!noteId}"/>
+                        </apex:commandLink>
+                </apex:column>
+                   <!-- <apex:column value="{!note.Title}" headerValue="Notes Title"/> -->
+                   <apex:column onclick="goToId('{!note.Id}')">
+                       <apex:outputLink >{!note.Title}</apex:outputLink>
+                       <apex:facet name="header">Notes Title</apex:facet>
+                    </apex:column>
+                    <apex:column value="{!note.ParentId}" headerValue="Related To" onclick="goToParent('{!note.ParentId}')"/>
+                    <apex:column value="{!note.CreatedDate}"/>
+                    <apex:column value="{!note.CreatedById}" onclick="goToParent('{!note.CreatedById}')"/>
+                    <apex:column value="{!note.LastModifiedDate}"/>
+                    <apex:column value="{!note.LastModifiedById}" onclick="goToParent('{!note.LastModifiedById}')"/>
+                </apex:pageBlockTable>
+            
+            <br/>
+                <apex:outputText ><b>Attachments</b></apex:outputText>
+                <apex:pageblockTable value="{!buAttachments}" var="att" id="Attachments" rendered="true">
+                    <apex:column style="width:8%" headerValue="Action">
+                        <apex:commandLink rerender="table" status="editProgress" onclick="javascript:editAttachmentJS('{!att.Id}');">
+                        Edit
+                        <apex:param value="{!att.id}" name="attachmentId" assignTo="{!attachmentId}"/>
+                        </apex:commandLink>
+                        |
+                        <apex:commandLink rerender="Attachments" action="{!deleteAttachments}" status="deleteProgress" onclick="reloadAfterDelete()">
+                        Del
+                        <apex:param value="{!att.id}" name="attachmentId" assignTo="{!attachmentId}"/>
+                        </apex:commandLink>
+                </apex:column>
+                    <!-- <apex:column value="{!att.Name}" headerValue="Attachment Name"/> -->
+                    <apex:column onclick="goToId('{!att.Id}')"  >
+                       <apex:outputLink >{!att.Name}</apex:outputLink>
+                       <apex:facet name="header">Attachment Name</apex:facet>
+                    </apex:column>
+                    <apex:column value="{!att.ParentId}" headerValue="Related To" onclick="goToParent('{!att.ParentId}')"/>
+                    <apex:column value="{!att.CreatedDate}"/>
+                    <apex:column value="{!att.CreatedById}" onclick="goToParent('{!att.CreatedById}')"/>
+                    <apex:column value="{!att.LastModifiedDate}"/>
+                    <apex:column value="{!att.LastModifiedById}" onclick="goToParent('{!att.LastModifiedById}')"/>
+                </apex:pageblockTable>
+            
+    </apex:pageblock>
+</apex:form>
+    <script>
+        function editNotesJS(noteId){
+            if(confirm('Are you sure?')){
+                alert('Note Id'+noteId);
+                /*editNotes(noteId);*/
+                top.location = '/'+noteId+'/e?retURL=%2F'+noteId;
+            }
+        }
+        
+        function reloadAfterDelete(){
+            var id = '{!RFQ_Item__c.id}';
+            top.location = '/'+id;
+        }
+        
+        function editAttachmentJS(attId){
+            if(confirm('Are you sure?')){
+                alert('Note Id'+attId);
+                /*editAttachments(attId);*/
+                top.location = '/'+attId+'/e?retURL=%2F'+attId;
+            }
+        }
+        
+        function goToId(id){
+            top.location = '/'+id;
+        }
+        
+        function redirectToNewNotes(practiceId){
+            top.location = '/002/e?parent_id='+practiceId+'&retURL=%2F'+practiceId;
+        }
+        
+        function redirectToNewAttachment(practiceId,practiceName){
+            top.location = '/p/attach/NoteAttach?pid='+practiceId+'&parentName='+practiceName+'&retURL=%2F'+practiceId;
+        }
+    </script>
+</apex:page>

@@ -1,0 +1,24 @@
+<apex:page standardController="CM_Version__c" extensions="CMVersionController" action="{!setupEditAction}"> 
+<apex:form >
+<apex:sectionHeader title="CM Version" subtitle="Edit CM Version"/>
+<apex:pageBlock >
+	<apex:pageBlockButtons >
+		<apex:commandButton value="Save" action="{!saveAction}"/>
+		<apex:commandButton value="Cancel" action="{!cancelAction}" immediate="true"/>
+	</apex:pageBlockButtons>
+	<apex:pageBlockSection columns="2">
+		<apex:pageBlockSectionItem />
+		<apex:outputField value="{!rec.Status__c}"/>
+		<apex:outputField value="{!rec.Name}"/>	
+		<apex:outputField value="{!rec.Version__c}"/>	
+	</apex:pageBlockSection>
+	<apex:pageBlockSection columns="2" title="Wire Calc Values">
+		<apex:inputField value="{!rec.Wire_Die_Thickness__c}"/>	
+		<apex:inputField value="{!rec.Wire_Loop_Height__c}"/>
+		<apex:inputField value="{!rec.Wire_DA_Thickness__c}"/>
+		<apex:inputField value="{!rec.Wire_Paddle_Down__c}"/>
+		<apex:inputField value="{!rec.Wire_Ball_Ratio__c}"/>
+	</apex:pageBlockSection>
+</apex:pageBlock>
+</apex:form>
+</apex:page>

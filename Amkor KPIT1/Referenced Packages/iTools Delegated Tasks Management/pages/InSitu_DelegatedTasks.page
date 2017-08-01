@@ -1,0 +1,368 @@
+<apex:page Controller="InSituDtm.InSitu_DelegatedTasksController" 
+           showHeader="{!ShowHeader}" 
+           sidebar="{!ShowSidebar}" 
+           standardStylesheets="true" >
+
+<style type="text/css">
+.sortArrow 
+{
+    padding-left: 5px;
+    vertical-align: text-bottom; 
+    height: 11px;
+}
+.popupBackground
+{
+    background-color:black;
+    opacity: 0.60;
+    filter:alpha(opacity=60);
+    position:absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 9998;          
+    border-bottom-color:-moz-use-text-color;
+    border-bottom-style:none;
+    border-bottom-width:medium;
+    border-left-color-ltr-source:physical;
+    border-left-color-rtl-source:physical;
+    border-left-color-value:-moz-use-text-color;
+    border-left-style-ltr-source:physical;
+    border-left-style-rtl-source:physical;
+    border-left-style-value:none;
+    border-left-width-ltr-source:physical;
+    border-left-width-rtl-source:physical;
+    border-left-width-value:medium;
+    border-right-color-ltr-source:physical;
+    border-right-color-rtl-source:physical;
+    border-right-color-value:-moz-use-text-color;
+    border-right-style-ltr-source:physical;
+    border-right-style-rtl-source:physical;
+    border-right-style-value:none;
+    border-right-width-ltr-source:physical;
+    border-right-width-rtl-source:physical;
+    border-right-width-value:medium;
+    border-top-color:-moz-use-text-color;
+    border-top-style:none;
+    border-top-width:medium;
+}
+</style> 
+
+    <apex:sectionHeader title="{!SectionTitle}" rendered="{!ShowHeader}" ></apex:sectionHeader>
+    <apex:pageMessages id="DelegatedTaskPageMessages"/>
+
+<div class="filterOverview" style="border-top-color: #1797C0;" >
+    <apex:form rendered="{!OnTab}" > 
+        <apex:outputPanel styleClass="bFilterView" layout="block" rendered="{!IsLicensed}" id="FilterOptions" > 
+            <span class="bFilter">
+                <span class="fBody">
+                    <b>View:&nbsp;&nbsp;</b>
+                    <apex:selectList value="{!CurrentDelegatorScope}" size="1" title="Delegator List" id="theDelegatorList2" rendered="{!RTOActive}" >
+                        <apex:selectOptions value="{!DelegatorScopeOptions}"/>
+                        <apex:actionSupport event="onchange" action="{!performQuery}" rerender="DelegatedTaskList" status="searchStatus"/>
+                    </apex:selectList>                     
+                    &nbsp;
+                    <apex:selectList value="{!CurrentAssignedUser}" size="1" title="User List" id="theUserList2" >
+                        <apex:selectOptions value="{!AssignedUserOptions}"/>
+                        <apex:actionSupport event="onchange" action="{!performQuery}" rerender="DelegatedTaskList,popupFilterUser" status="searchStatus"/>
+                    </apex:selectList> 
+                    &nbsp;
+                    <apex:selectList value="{!CurrentAssignedScope}" size="1" title="Scope List" id="theScopeList2" >
+                        <apex:selectOptions value="{!AssignedScopeOptions}"/>
+                        <apex:actionSupport event="onchange" action="{!performQuery}" rerender="DelegatedTaskList" status="searchStatus"/>
+                    </apex:selectList>
+                    &nbsp;&nbsp;  
+                    <apex:commandButton action="{!URLFor($Action.Task.NewTask, '', [retURL=RetURL])}" 
+           					   			value="New Task" 
+           					   			rendered="{!$ObjectType.Task.createable}" /> 
+                </span>
+            </span>
+        </apex:outputPanel>
+    </apex:form>
+</div> 
+     
+   <apex:form rendered="{!IsLicensed}"> 
+      <apex:pageBlock tabStyle="Task" id="DelegatedTaskList" >   
+           
+        <apex:facet name="header"> 
+         <apex:outputPanel rendered="{!OnHomePage}" layout="block" style="padding: 5px; white-space: nowrap;">           
+            <b>View:&nbsp;&nbsp;</b>
+            
+            <apex:selectList value="{!CurrentDelegatorScope}" size="1" title="Delegator List" id="theDelegatorList" rendered="{!RTOActive}">
+                <apex:selectOptions value="{!DelegatorScopeOptions}"/>
+                <apex:actionSupport event="onchange" action="{!performQuery}" rerender="DelegatedTaskList" status="searchStatus"/>
+            </apex:selectList>                     
+            
+            <apex:selectList value="{!CurrentAssignedUser}" size="1" title="User List" id="theUserList"  >
+                <apex:selectOptions value="{!AssignedUserOptions}"/>
+                <apex:actionSupport event="onchange" action="{!performQuery}" rerender="DelegatedTaskList,popupFilterUser" status="searchStatus"/>
+            </apex:selectList> 
+             
+            <apex:selectList value="{!CurrentAssignedScope}" size="1" title="Scope List" id="theScopeList"  >
+                <apex:selectOptions value="{!AssignedScopeOptions}"/>
+                <apex:actionSupport event="onchange" action="{!performQuery}" rerender="DelegatedTaskList" status="searchStatus"/> 
+            </apex:selectList>
+            
+            &nbsp;&nbsp;
+            <apex:commandLink action="{!URLFor($Action.Task.NewTask, '', [retURL='/home/home.jsp'])}"  target="_top" rendered="{!$ObjectType.task.createable}" style="-moz-text-decoration-line: none; text-decoration: none;">
+                <apex:commandButton value="New Task" style="font-size: 80%;"/>
+            </apex:commandLink>
+         </apex:outputPanel>  
+        </apex:facet>         
+         
+        <apex:actionStatus id="searchStatus">
+            <apex:facet name="stop"> 
+          
+           <apex:pageBlockTable value="{!Results_Task}" 
+                                var="task" 
+                                id="pbt_Activity" 
+                                rowClasses="odd,even" 
+                                styleClass="tableClass" 
+                                rows="{!RowsPerPage_Task}" 
+                                frame="none" 
+                                border="0" >
+               
+               <apex:column headerValue="" width="13" rendered="{!ShowNotifyColumn}" style="{!WrapStyle}" >
+                   <apex:image url="{!URLFOR($Resource.InSituDtm__InSitu_Notify_Set_Image)}" title="{!NotifyTooltip}"  rendered="{!task.InSituDtm__InSitu_TCN_Flag__c}" />    
+               </apex:column>    
+                                 
+               <apex:column style="{!WrapStyle}">
+                    <apex:facet name="header" > 
+                        <apex:actionStatus id="DUE_DATEColumnClick">
+                            <apex:facet name="start">
+                                <apex:outputText value="Sorting..." style="color: gray;"/>
+                            </apex:facet>
+                            <apex:facet name="stop">
+                                <apex:commandLink value="{!ColumnInfo.Label['DUE_DATE']}" 
+                                                  rendered="{!ColumnInfo.IsSortable['DUE_DATE']}"
+                                                  action="{!performQuery}" 
+                                                  rerender="DelegatedTaskList,DelegatedTaskPageMessages" 
+                                                  status="DUE_DATEColumnClick" >
+                                    <apex:param name="sortKey" value="DUE_DATE" assignTo="{!ColumnInfo.PrimaryKey}" />
+                                    <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, ColumnInfo.SortImage['DUE_DATE'])}" styleClass="sortArrow" />
+                                </apex:commandLink>            
+                            </apex:facet>
+                        </apex:actionStatus>    
+                   </apex:facet>
+                   <span style="{!IF(task.ActivityDate <> null && task.ActivityDate < TODAY(), 'color:#990000', 'color:black')}">
+                       <apex:outputField value="{!task.ActivityDate}" />
+                   </span>
+               </apex:column>
+                                                
+               <apex:column style="{!WrapStyle}"> 
+                    <apex:facet name="header" > 
+                        <apex:actionStatus id="SUBJECTColumnClick">
+                            <apex:facet name="start">
+                                <apex:outputText value="Sorting..." style="color: gray;"/>
+                            </apex:facet>
+                            <apex:facet name="stop">
+                                <apex:commandLink value="{!ColumnInfo.Label['SUBJECT']}" 
+                                                  rendered="{!ColumnInfo.IsSortable['SUBJECT']}"
+                                                  action="{!performQuery}" 
+                                                  rerender="DelegatedTaskList,DelegatedTaskPageMessages"  
+                                                  status="SUBJECTColumnClick" >
+                                    <apex:param name="sortKey" value="SUBJECT" assignTo="{!ColumnInfo.PrimaryKey}" />
+                                    <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, ColumnInfo.SortImage['SUBJECT'])}" styleClass="sortArrow" />
+                                </apex:commandLink>                
+                            </apex:facet>
+                        </apex:actionStatus>    
+                   </apex:facet>
+                   <apex:image url="{!URLFOR($Resource.InSituDtm__InSitu_Recurring_Activity)}" 
+                               title="Recurring Task" 
+                               style="padding-top: 1px; padding-right: 4px;" 
+                               rendered="{!IF(task.RecurrenceActivityId != null, 'true', 'false')}" />  
+                   <apex:outputLink value="{!URLFOR($Action.Task.View, task.Id)}" target="_top" >{!task.Subject}</apex:outputLink>
+                   <apex:image value="/img/high_priority.gif" title="High Priority" height="13" width="16" rendered="{!IF(task.Priority == 'High', 'true', 'false')}" />   
+               </apex:column>                                                    
+            
+               <apex:column style="{!WrapStyle}">
+                    <apex:facet name="header" > 
+                        <apex:actionStatus id="ASSIGNED_TOColumnClick">
+                            <apex:facet name="start">
+                                <apex:outputText value="Sorting..." style="color: gray;"/>
+                            </apex:facet>
+                            <apex:facet name="stop">
+                                <apex:commandLink value="{!ColumnInfo.Label['ASSIGNED_TO']}" 
+                                                  rendered="{!ColumnInfo.IsSortable['ASSIGNED_TO']}"
+                                                  action="{!performQuery}" 
+                                                  rerender="DelegatedTaskList,DelegatedTaskPageMessages" 
+                                                  status="ASSIGNED_TOColumnClick" >
+                                    <apex:param name="sortKey" value="ASSIGNED_TO" assignTo="{!ColumnInfo.PrimaryKey}" />
+                                    <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, ColumnInfo.SortImage['ASSIGNED_TO'])}" styleClass="sortArrow" />
+                                </apex:commandLink>            
+                            </apex:facet>
+                        </apex:actionStatus>    
+                   </apex:facet>
+                   <apex:outputLink value="mailto:{!task.Owner.Email}?SUBJECT={!StatusEmailSubject}{!task.Subject}" target="_blank" >
+                       <apex:image url="{!URLFOR($Resource.InSituDtm__InSitu_Email_Image)}" title="Send email to check status" height="11" rendered="{!IF(LEN(task.Owner.Name) > 0,'true', 'false')}" />
+                   </apex:outputLink>
+                   &nbsp;&nbsp;&nbsp; 
+                   <apex:outputField value="{!task.Owner.Name}" />  
+                   &nbsp;&nbsp;&nbsp; 
+                   <apex:image url="{!URLFOR($Resource.InSituDtm__InSitu_CT)}" title="{!CTTooltip}" height="11" rendered="{!task.InSituDtm__InSitu_Contact_Task__c}" />
+                   <apex:image url="{!URLFOR($Resource.InSituDtm__InSitu_GT)}" title="{!GTTooltip}" height="11" rendered="{!LEN(task.InSituDtm__InSitu_Task_Group__c) > 0}" />    
+               </apex:column>
+           
+               <apex:column rendered="{!ShowStatusColumn}" style="{!WrapStyle}">
+                    <apex:facet name="header" > 
+                        <apex:actionStatus id="STATUSColumnClick">
+                            <apex:facet name="start">
+                                <apex:outputText value="Sorting..." style="color: gray;"/>
+                            </apex:facet>
+                            <apex:facet name="stop">
+                                <apex:commandLink value="{!ColumnInfo.Label['STATUS']}" 
+                                                  rendered="{!ColumnInfo.IsSortable['STATUS']}"
+                                                  action="{!performQuery}" 
+                                                  rerender="DelegatedTaskList,DelegatedTaskPageMessages" 
+                                                  status="STATUSColumnClick" >
+                                    <apex:param name="sortKey" value="STATUS" assignTo="{!ColumnInfo.PrimaryKey}" />
+                                    <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, ColumnInfo.SortImage['STATUS'])}" styleClass="sortArrow" />
+                                </apex:commandLink>            
+                            </apex:facet>
+                        </apex:actionStatus>    
+                   </apex:facet>
+                   <apex:outputField value="{!task.Status}" />     
+               </apex:column>
+               
+               <apex:column rendered="{!ShowNameColumn}" style="{!WrapStyle}">
+                    <apex:facet name="header" > 
+                        <apex:actionStatus id="NAMEColumnClick">
+                            <apex:facet name="start">
+                                <apex:outputText value="Sorting..." style="color: gray;"/>
+                            </apex:facet>
+                            <apex:facet name="stop">
+                                <apex:commandLink value="{!ColumnInfo.Label['NAME']}" 
+                                                  rendered="{!ColumnInfo.IsSortable['NAME']}"
+                                                  action="{!performQuery}" 
+                                                  rerender="DelegatedTaskList,DelegatedTaskPageMessages" 
+                                                  status="NAMEColumnClick" >
+                                    <apex:param name="sortKey" value="NAME" assignTo="{!ColumnInfo.PrimaryKey}" />
+                                    <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, ColumnInfo.SortImage['NAME'])}" styleClass="sortArrow" />
+                                </apex:commandLink>            
+                            </apex:facet>
+                        </apex:actionStatus>    
+                    </apex:facet>
+                    <apex:outputLink value="/{!task.WhoID}" target="_top">
+                        <apex:outputText value="{!task.Who.Name}" />
+                    </apex:outputLink>      
+               </apex:column>
+               
+               <apex:column rendered="{!ShowRelatedToColumn}" style="{!WrapStyle}">
+                    <apex:facet name="header" > 
+                        <apex:actionStatus id="RELATED_TOColumnClick">
+                            <apex:facet name="start">
+                                <apex:outputText value="Sorting..." style="color: gray;"/>
+                            </apex:facet>
+                            <apex:facet name="stop">
+                                <apex:commandLink value="{!ColumnInfo.Label['RELATED_TO']}" 
+                                                  rendered="{!ColumnInfo.IsSortable['RELATED_TO']}"
+                                                  action="{!performQuery}" 
+                                                  rerender="DelegatedTaskList,DelegatedTaskPageMessages" 
+                                                  status="RELATED_TOColumnClick" >
+                                    <apex:param name="sortKey" value="RELATED_TO" assignTo="{!ColumnInfo.PrimaryKey}" />
+                                    <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, ColumnInfo.SortImage['RELATED_TO'])}" styleClass="sortArrow" />
+                                </apex:commandLink>            
+                            </apex:facet>
+                        </apex:actionStatus>    
+                    </apex:facet>
+                    <apex:outputLink value="/{!task.WhatID}" target="_top">
+                        <apex:outputText value="{!task.What.Name}" /> 
+                     </apex:outputLink>    
+               </apex:column>
+                
+           </apex:pageBlockTable>          
+        </apex:facet>
+            <apex:facet name="start">
+                <apex:outputPanel >
+                    <apex:image value="/img/loading32.gif" style="height: 15px;"/>
+                    <apex:outputText value="Searching..." />
+                </apex:outputPanel>
+            </apex:facet>
+        </apex:actionStatus> 
+           
+        <!-- Paging -->
+        <apex:outputPanel layout="block" style="display: block; margin-left: 15px; margin-right: 5px; padding: 0px 0px 0px 0px;" 
+                          id="PagingControls_Task" rendered="{!IsMultiplePages_Task}" >
+            <table width="100%" cellpadding="0">
+                <tablebody>
+                    <tr>
+                        <td width="25%" align="left">
+                            <apex:outputPanel layout="block">
+                                <apex:outputText value="{!RowsDisplayedMsg_Task}" style="white-space: nowrap;"/> 
+                            </apex:outputPanel>
+                        </td>
+                        <td width="25%" align="right" style="white-space: nowrap;">
+                            <apex:commandLink action="{!doFirstPage_Task}" rerender="DelegatedTaskList,DelegatedTaskPageMessages"  >
+                                <apex:variable var="imageFirst" value="{!FirstImage_Task}"/>
+                                <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, imageFirst)}" id="firstPage_Task"/>
+                            </apex:commandLink>
+                            <apex:commandLink action="{!doPrevPage_Task}" rerender="DelegatedTaskList,DelegatedTaskPageMessages"  >
+                                <apex:variable var="imagePrev" value="{!PrevImage_Task}"/>
+                                <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, imagePrev)}" id="prevPage_Task"/>
+                            </apex:commandLink>
+                            &nbsp;
+                        </td>
+                        <td width="25%" align="left" style="white-space: nowrap;">
+                            &nbsp;
+                            <apex:commandLink action="{!doNextPage_Task}" rerender="DelegatedTaskList,DelegatedTaskPageMessages"  > 
+                                <apex:variable var="imageNext" value="{!NextImage_Task}"/>
+                                <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, imageNext)}" id="nextPage_Task"/>
+                            </apex:commandLink> 
+                            <apex:commandLink action="{!doLastPage_Task}" rerender="DelegatedTaskList,DelegatedTaskPageMessages"  >
+                                <apex:variable var="imageLast" value="{!LastImage_Task}"/>
+                                <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, imageLast)}" id="lastPage_Task"/>
+                            </apex:commandLink>
+                        </td>
+                        <td width="25%" align="right">
+                            <apex:outputText value="{!PagesDisplayedMsg_Task}" />
+                        </td>
+                    </tr>
+                </tablebody>
+            </table>
+        </apex:outputPanel>
+    
+      </apex:pageBlock> 
+      
+      <!-- Select User Popup -->
+      <apex:outputPanel id="popupFilterUser" >
+        <apex:outputPanel layout="block" rendered="{!ShowFilterUserPopup}" id="PickUserDialog" styleClass="overlayDialog inlineEditDialog" style="max-width: 400px; display: block; left: 500px; top: 250px; visibility: visible; z-index: 9999;">
+            
+            <apex:outputPanel layout="block" styleClass="topRight">
+                <apex:outputPanel layout="block" styleClass="topLeft">
+                    <apex:commandLink action="{!cancelFilterUser}" rerender="popupFilterUser,DelegatedTaskList,theUserList2" immediate="true">
+                        <img src="/s.gif" class="dialogClose" />
+                    </apex:commandLink>
+                    <h2 id="PickUserDialogTitle">Select User</h2>
+                </apex:outputPanel>
+            </apex:outputPanel>
+            
+            <apex:outputPanel layout="block" styleClass="middle">
+                <apex:outputPanel layout="block" styleClass="innerContent" id="PickUserContent" >
+                    <apex:outputPanel layout="block" styleClass="activeField">
+                        <apex:outputPanel layout="block" styleClass="PickUserDiv">
+                            <apex:panelGrid columns="2">
+                                <apex:outputLabel value="User" styleClass="labelCol"/>
+                                <apex:inputField value="{!FilterUser.OwnerId}" style="vertical-align: bottom; position: relative; bottom: 1px;" />
+                             </apex:panelGrid> 
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+                    
+                    <apex:outputPanel layout="block" styleClass="buttons" id="PickUser_buttons">
+                        <apex:commandButton value="OK" action="{!saveFilterUser}" rerender="popupFilterUser,DelegatedTaskList,theUserList2"/>
+                        <apex:commandButton value="Cancel" action="{!cancelFilterUser}" rerender="popupFilterUser,DelegatedTaskList,theUserList2" immediate="true"/>
+                    </apex:outputPanel>
+                    
+                </apex:outputPanel> 
+            </apex:outputPanel>
+
+            <apex:outputPanel layout="block" styleClass="bottomRight">
+                <apex:outputPanel layout="block" styleClass="bottomLeft"/>
+            </apex:outputPanel>
+        
+        </apex:outputPanel>
+        <apex:outputPanel layout="block" rendered="{!ShowFilterUserPopup}" styleClass="popupBackground"/>   
+    </apex:outputPanel>
+     
+   </apex:form>
+ 
+  </apex:page>

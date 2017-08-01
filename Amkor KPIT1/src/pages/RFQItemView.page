@@ -1,0 +1,540 @@
+<apex:page docType="html-5.0" standardController="RFQ_Item__c" extensions="RFQItemViewController" action="{!buViewRedirect}">
+
+<style>
+body .bPageBlock .pbBody .labelCol, body .bPageBlock .pbBody .dataCol, body .bPageBlock .pbBody .data2Col {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    width: 13%;
+}
+
+
+.dataCol.empty {
+    display: none;
+}
+
+/*--Abhay-A:16-May-2017 :SF SF-195:Win / Loss / Cancel Reason Enhancement*/
+.tempp{
+    display:none;
+}
+</style>
+
+<style>
+div.noAction a.actionLink { display: none; }
+</style>
+<!--Abhay-A:15-May-2017 :SF-195:Win / Loss / Cancel Reason Enhancement-->
+<!-- changes for SF-195 to generate a popup window -->
+  <style type="text/css">
+        .custPopup{
+            background-color: white;
+            border-width: 2px;
+            border-style: solid;
+            z-index: 9999;
+            left: 50%;
+            padding:10px;
+            position: absolute;
+            width: 500px;
+            margin-left: -250px;
+            top:100px;
+            display:block;
+        }
+        .popupBackground{
+            background-color:black;
+            opacity: 0.20;
+            filter: alpha(opacity = 20);
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 9998;
+        }
+        
+         </style>
+          
+<script type="text/javascript">
+        var inProgress = false;
+        function resetProgress() {
+            inProgress = false;
+        }
+        
+        
+
+ </script>
+<!--  Abhay-A:15-May-2017 :SF-195:Win / Loss / Cancel Reason Enhancement  -->               
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>-->
+<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script>
+/*  $(function (){
+            
+             $(".fieldRef").attr('disabled', 'disabled');
+
+            
+            }
+        
+    )*/
+    /*$(function () {
+        document.getElementById('popup').style.display = 'none';
+    });*/ 
+/*     function myFunction() {
+         console.log('function call');
+         showpopup();  
+    var x = document.getElementById('popup');
+    if (x.style.display === 'none') {
+        x.style.display = 'block';
+    } 
+    }
+*/
+
+ /*function showpopup(){
+console.log("in function show popup")
+          showpopupaction();
+           document.getElementById("test").style.display = "block";
+         // document.getElementById("newTimeLogSectionId").style.display = "block";
+      }
+    function closepopup(){
+         
+//showpopupaction();
+           document.getElementById("test").style.display = "none";
+         // document.getElementById("newTimeLogSectionId").style.display = "block";
+      */
+    
+    
+</script>
+<!--Javascript to hijack the 'Assigned to' column of the approval history if it is a queue -->
+<c:ApprovalQueueLink />
+
+<c:RFQItemViewStyle />
+
+
+<c:RFQStyleComponent rendered="{!layout.salesColumns > 3}"/>
+
+
+<!--Show a warning message for users that have been redirected for some reason-->
+<apex:pageMessage severity="warning" strength="1" summary="{!$Label[message]}" rendered="{!message!=null}"/>
+
+<chatter:feedWithFollowers entityId="{!wrapper.rfqItem.Id}"/>
+<apex:form id="form" >
+ <!--   <apex:actionFunction action="{!showPopup}" name="showpopupaction" rerender="false">
+                <apex:param assignTo="{!clickedButton}" value="qualified" name="cb"/>
+         <apex:param assignTo="{!status}" value="Won Qualification Build" name="stat"/>
+    
+    </apex:actionFunction> -->
+    <apex:sectionHeader title="View/Edit Attributes for this line item" subtitle="{!wrapper.rfqItem.Name}" description="On this page you can view or edit the attributes of this line items and request or escalate pricing"/>
+    <apex:pageBlock id="head">
+          <apex:pageBlockSection showHeader="false" columns="2" rendered="{!layout.enabledSections['Sales Header']}">
+            <apex:repeat value="{!layout.sectionMap['Sales Header'].attributes}" var="attribute">
+              
+                <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+                
+            </apex:repeat>
+            
+            <apex:outputField value="{!wrapper.rfqItem.Opportunity__c}"/>
+            
+            <!-- Abhay - 5-Jan-2017 : Salesforce 166 - Add RFQI field to header helping to guide user back to related RFQI -->
+            <!-- Lalit - 3-Mar-17 : Salesforce 193 - Add Cloned Parent field to RFQ Item header -->
+            <apex:outputField value="{!wrapper.rfqItem.Original_RFQ_Item__c}" label="Cloned Parent" rendered="{!wrapper.rfqItem.Original_RFQ_Item__c != null && wrapper.rfqItem.Original_RFQ_Item__c != wrapper.rfqItem.Parent_Volume_Item__c}"/>
+            <apex:outputField value="{!wrapper.rfqItem.Parent_Volume_Item__c}"  rendered="{!wrapper.rfqItem.Parent_Volume_Item__c != null}"/>
+            <!-- Abhay - 11-May-2017 : Salesforce 208 - RFQI Test ONLY flow changes - Probe and Final Test -->
+            <apex:outputField value="{!wrapper.rfqItem.Is_Test_Only_Business__c}"/>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+  
+<apex:pageMessages escape="false" id="messages"/>   
+<apex:pageblock id="mainBody">
+
+    <apex:pageBlockButtons > 
+        <apex:commandButton value="Edit" action="{!editMode}" rendered="{!ShowEditButton}" reRender="messages"/>
+        <apex:commandButton value="Escalate" action="{!requestEscalation}" rendered="{!IsEscalationPossible}" reRender="messages"/>
+        <!--Lalit- 04-Nov-2016 : Salesforce-126:Escalation - Recall of an RFQI that has been escalated is being returned to sales as price complete with a zero price.
+        Rendering the Recall button only if the RfqItem Status is equal to Price Escalation.-->
+        <apex:commandButton value="Recall" action="{!recallApproval}" rendered="{!And(IsUnderApproval,!(wrapper.rfqItem.Status__c == 'Pricing Escalation'))}" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();" reRender="messages"/>
+        <apex:commandButton value="Clone" action="{!cloneItem}" reRender="messages"/>
+        <apex:commandButton value="Compare" action="{!counterCompare}" rendered="{!IsCounterComparePossible}" reRender="messages"/>
+        <!--Lalit - 02-May-2017 : Salesforce-114 : Reject change to 'Return to Sales' during BU process for RFQI Submit button visiblity based upon status.-->
+        <!--<apex:commandButton value="Submit" action="{!submitItem}" rendered="{!IsSubmitableState}" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();" reRender="messages"/>-->
+        <apex:commandButton value="Submit" action="{!submitItem}" rendered="{!IsSubmitableState}" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();" reRender="messages"/>
+        <apex:commandButton value="Approve/Reject" action="{!gotoStandardApprovalWizard}" oncomplete="resetProgress();" rendered="{!IsUnderSalesApproval}" rerender="messages"/>
+        
+        <!-- Bhanu - 29-June-2016 : Salesforce 69 - New Opportunity STAGE changes -->
+        <!-- Adding Set as Qual button and removing obsolete Status -->            
+        <!-- 
+        <apex:commandButton value="Set as Won Prototype Build" action="{!setAsWonPrototype}" rendered="{!IsPriceComplete && !IsQual}" reRender="messages"/>
+        <apex:commandButton value="Set as Won Qualification Build" action="{!setAsWonQual}" rendered="{!IsPriceComplete}" reRender="messages"/>
+        -->
+        
+        <!-- Abhay- 18-Jan-2016 : Salesforce-118 : Sales ability to update RFQI Status from Cancel to Win/Loss. 
+        For Button Visibility based on status-->
+       
+    
+        <!--Abhay-A:16-May-2017 : SF-195:Win / Loss / Cancel Reason Enhancement-->
+        <apex:commandButton value="Set as Qual"   action="{!showPopup}" status="loadingstatus"  rendered="{!IF( OR( wrapper.rfqItem.Status__c = 'Price Complete',wrapper.rfqItem.Status__c = 'Quoted',wrapper.rfqItem.Status__c = 'Program Canceled Closed', wrapper.rfqItem.Status__c = 'Program Loss Closed',wrapper.rfqItem.Status__c = 'Program Win Closed') ,TRUE,FALSE )}" reRender="messages,popup" id="qual">  
+        <apex:param assignTo="{!clickedButton}" value="qualified" name="cb"/>
+         <apex:param assignTo="{!status}" value="Qual" name="stat"/>
+        </apex:commandButton>
+        <!-- Abhay- 04-May-2017 : Salesforce-212 : Added "Set as Program Canceled Closed" Button to the RFQI Status'(Draft,New and Ready To Price) and Added All(Win/Loss/Cancel/Qual) the buttons to RFQI Status Quoted. -->
+        <apex:commandButton value="Set as Program Win Closed" action="{!showPopup}" status="loadingstatus"   rendered="{!IF( OR( wrapper.rfqItem.Status__c = 'Price Complete',wrapper.rfqItem.Status__c = 'Quoted',wrapper.rfqItem.Status__c = 'Program Canceled Closed', wrapper.rfqItem.Status__c = 'Program Loss Closed',wrapper.rfqItem.Status__c = 'Qual') ,TRUE,FALSE )}" reRender="messages,popup"> 
+                <apex:param assignTo="{!clickedButton}" value="won" name="cb"/>
+                 <apex:param assignTo="{!status}" value="Program Win Closed" name="stat"/>
+        </apex:commandButton>
+        <apex:commandButton value="Set as Program Loss Closed" action="{!showPopup}" status="loadingstatus"  rendered="{!IF( OR( wrapper.rfqItem.Status__c = 'Price Complete',wrapper.rfqItem.Status__c = 'Quoted',wrapper.rfqItem.Status__c = 'Program Canceled Closed', wrapper.rfqItem.Status__c = 'Program Win Closed',wrapper.rfqItem.Status__c = 'Qual') ,TRUE,FALSE )}" reRender="messages,popup">
+                <apex:param assignTo="{!clickedButton}" value="lost" name="cb"/>
+                 <apex:param assignTo="{!status}" value="Program Loss Closed" name="stat"/>
+        </apex:commandButton>
+        <apex:commandButton value="Set as Program Canceled Closed" action="{!showPopup}" status="loadingstatus"  rendered="{!IF( OR( wrapper.rfqItem.Status__c = 'Price Complete',wrapper.rfqItem.Status__c = 'Quoted',wrapper.rfqItem.Status__c = 'Draft',wrapper.rfqItem.Status__c = 'Ready To Price',wrapper.rfqItem.Status__c = 'New',wrapper.rfqItem.Status__c = 'Program Win Closed', wrapper.rfqItem.Status__c = 'Program Loss Closed',wrapper.rfqItem.Status__c = 'Qual') ,TRUE,FALSE )}" reRender="messages,popup">   
+               <apex:param assignTo="{!clickedButton}" value="canceled" name="cb"/>
+                <apex:param assignTo="{!status}" value="Program Canceled Closed" name="stat"/>
+        </apex:commandButton> 
+        <!--
+        <apex:commandButton value="Set as Program Win Closed" action="{!setAsProgramWin}" rendered="{!Not(IsPriceComplete)}" reRender="messages"/> 
+        <apex:commandButton value="Set as Program Loss Closed" action="{!setAsProgramLoss}" rendered="{!Not(IsPriceComplete)}" reRender="messages"/>
+        <apex:commandButton value="Set as Program Canceled Closed" action="{!setAsProgramCancelled}" rendered="{!IsProgramCancelledPossible}" reRender="messages"/>
+         -->
+        <apex:commandButton value="Add Service" action="{!addService}" rendered="{!IsAddServicePossible}" reRender="messages"/>
+        <apex:commandButton value="BU Mode" action="{!buViewMode}" rendered="{!IsHybridUser}"/>
+<!--        Abhay-A:16-May-2017 :SF SF-195:Win / Loss / Cancel Reason Enhancement-->
+        <apex:actionStatus id="loadingstatus" >
+                <apex:facet name="start" >
+                    <img src="/img/loading.gif" />                    
+                </apex:facet>
+            </apex:actionStatus>
+    </apex:pageBlockButtons> 
+    
+ 
+<!--Abhay-A:16-May-2017 :SF SF-195:Win / Loss / Cancel Reason Enhancement
+-->   
+<!-- Changes for SF-195.This section is a hide/show popup wherein the reason and comments for the status change are updated in the RFQItem__c object. -->
+    
+<apex:outputPanel id="popup" >
+        <apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!displayPopUp}"/>
+            <apex:outputPanel styleClass="custPopup" layout="block" rendered="{!displayPopUp}">
+                <apex:pageBlockSection >
+               
+               <apex:inputField value="{!wrapper.rfqItem.Quoted_Status__c}" style="display:none;" label="" /><br/>
+               <apex:outputText value="{!wrapper.rfqItem.Quoted_Status__c}"  /><br/> 
+                <apex:inputField value="{!wrapper.rfqItem.StatusReason__c}"  required="true" /> <br/>
+                <apex:inputField value="{!wrapper.rfqItem.Status_Comments__c}" /> <br/>
+<!--                <apex:outputText value="{!errorMessage}" style="color:red;" /><br/>
+-->                <apex:commandButton value="Submit" action="{!submit}" rerender="popup" status="loading" />
+                    <apex:commandButton value="Close" action="{!closePopup}" rerender="popup" immediate="true" /> <br/>
+                    <apex:actionStatus id="loading" >
+                <apex:facet name="start" >
+                    <img src="/img/loading.gif" />                    
+                </apex:facet>
+            </apex:actionStatus>
+                </apex:pageBlockSection>
+        
+            </apex:outputPanel>
+        </apex:outputPanel>
+      
+    <!--  <div id="test" style="display:none;">
+                <div class="custPopup" >
+                <apex:pageBlockSection >
+               <apex:inputField value="{!wrapper.rfqItem.Quoted_Status__c}" /><br/>
+                <apex:outputText value="{!wrapper.rfqItem.Quoted_Status__c}"  /><br/> 
+                <apex:inputField value="{!wrapper.rfqItem.StatusReason__c}"/> <br/>
+                <apex:inputField value="{!wrapper.rfqItem.Status_Comments__c}"/> <br/>
+                <apex:outputText value="{!errorMessage}" style="color:red;" /><br/>
+                <apex:commandButton value="Submit" action="{!submit}" rerender="messages"/>
+                    <apex:commandButton value="Close" onclick="closepopup();" />
+                </apex:pageBlockSection>
+          </div>
+
+      </div> -->
+      
+    <!-- Quote Information Section -->
+    <c:RFQIQuoteInformationSection wrapper="{!wrapper}"  columns="{!layout.salesColumns}" rendered="{!layout.enabledSections['Quote Information' ] && !isLayoutDeprecated }" layout="{!layout}"/>
+    
+    <apex:pageBlockSection title="Additional Volume Configurations" columns="1" rendered="{!wrapper.packageFamily.Show_Multi_Volume__c}">
+        <c:RFQMultiVolumeSection wrapper="{!wrapper}" edit="false" layout="{!layout}" builder="{!builder}" isEngineeringService="{!IsEngineeringService}"/>
+    </apex:pageBlockSection>
+
+    <!-- Package Description Section -->
+    <c:RFQIPackageDescriptionSection wrapper="{!wrapper}" columns="{!layout.salesColumns}" rendered="{!layout.enabledSections['Package Description' ] && !isLayoutDeprecated}" renderFactorySection="{!renderFactorySection}" layout="{!layout}" pbsTitle="{!projectDesc}"/>
+                
+    <!-- CPN Drivers Section -->
+    <apex:pageBlockSection title="CPN Drivers" id="cpnSection" columns="{!layout.salesColumns}" rendered="{!layout.enabledSections['CPN Drivers'] && !isLayoutDeprecated}" >  
+         <apex:repeat value="{!layout.sectionMap['CPN Drivers'].attributes}" var="attribute">
+             <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" /> 
+         </apex:repeat>
+    </apex:pageBlockSection>
+
+    <!-- Substrate Description -->
+    <apex:outputPanel layout="block" styleClass="oneColumnHack">
+    <!-- <apex:outputText value="{!debugString}"/> -->
+    <apex:pageBlockSection title="Substrate Description" id="substrateSection" columns="{!layout.salesColumns}" rendered="{!layout.enabledSections['Substrate Description' ] && !isLayoutDeprecated}" >
+    <!-- Bharat 26-June-2017 : Salesforce 139 -Cavity MEMS Sales RFQ Item Create screens. -->
+    <!-- Consigned field not required in substrate description section for package family MEMS --> 
+    <apex:outputField value="{!wrapper.rfqItem.Consigned__c}" rendered="{! wrapper.packageFamily.Name!='MEMS'}" />
+    <apex:repeat value="{!layout.sectionMap['Substrate Description'].attributes}" var="attribute">
+    <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+    </apex:repeat>
+    </apex:pageBlockSection>
+    </apex:outputPanel>
+
+
+
+
+
+    <!-- <apex:pageBlockSection title="Substrate Description" id="substrateSection" columns="{!layout.salesColumns}" rendered="{!layout.enabledSections['Substrate Description']}" >  
+         <apex:repeat value="{!layout.sectionMap['Substrate Description'].attributes}" var="attribute">
+             <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" />
+         </apex:repeat>
+    </apex:pageBlockSection> -->
+    
+
+    <!-- Wire Description Section -->
+    <!-- <c:RFQIWireDescriptionSection id="wireSection" columns="{!layout.salesColumns}" wrapper="{!wrapper}" rendered="{!layout.enabledSections['Wire Description']}" layout="{!layout}"/> -->
+    <apex:pageBlockSection title="Wire Description" id="wireSection" columns="1" rendered="{!layout.enabledSections['Wire Description'] && !isLayoutDeprecated}" >  
+        <apex:repeat value="{!wrapper.wireConfigurations}"  var="wireConfigurations">    
+             <apex:pageBlockSection columns="{!layout.salesColumns}">
+                 <!-- <apex:repeat value="{!layout.sectionMap['Die Description'].attributes}" var="attribute"> -->
+                 <apex:repeat value="{!wrapper.childObjectSections[wireConfigurations.Id].attributes}" var="attribute"> 
+                     <apex:outputField value="{!wireConfigurations[attribute.fieldAPIName]}" />
+                 </apex:repeat>
+             </apex:pageBlockSection>  
+        </apex:repeat>
+    </apex:pageBlockSection> 
+
+    <!-- Die Description -->
+    <apex:pageBlockSection title="Die Description" id="dieSection" columns="1" rendered="{!layout.enabledSections['Die Description'] && !isLayoutDeprecated}" >  
+        <apex:repeat value="{!wrapper.dieConfigurations}"  var="dieConfiguration">    
+             <apex:pageBlockSection columns="{!layout.salesColumns}">
+                 <!-- <apex:repeat value="{!layout.sectionMap['Die Description'].attributes}" var="attribute"> -->
+                 <apex:repeat value="{!wrapper.childObjectSections[dieConfiguration.Id].attributes}" var="attribute"> 
+                     <apex:outputField value="{!dieConfiguration[attribute.fieldAPIName]}" />
+                 </apex:repeat>
+             </apex:pageBlockSection>  
+        </apex:repeat>
+    </apex:pageBlockSection> 
+    
+    <!-- Passive Description -->
+    <!-- Bharat 24-April-2017 : Salesforce 139 -Cavity MEMS Sales RFQ Item Create screens. -->
+    <!-- PageBlockSection title is made dynamic --> 
+    <apex:pageBlockSection title="{!sectionTitle}" id="passiveSection" columns="1" rendered="{!layout.enabledSections['Passive Description'] && !isLayoutDeprecated}" >  
+        <apex:repeat value="{!wrapper.passiveConfigurations}"  var="passiveConfiguration">    
+             <apex:pageBlockSection columns="{!layout.salesColumns}">
+                 <!-- <apex:repeat value="{!layout.sectionMap['Passive Description'].attributes}" var="attribute"> -->
+                 <apex:repeat value="{!wrapper.childObjectSections[passiveConfiguration.Id].attributes}" var="attribute">
+                     <apex:outputField value="{!passiveConfiguration[attribute.fieldAPIName]}" />
+                 </apex:repeat>
+             </apex:pageBlockSection>  
+        </apex:repeat>
+    </apex:pageBlockSection> 
+
+    <!-- Insertion Description -->
+    <apex:pageBlockSection title="Test Configuration Summary" id="insertionSection" columns="1" rendered="{!layout.enabledSections['Insertion Description'] && !isLayoutDeprecated && !PostTestServiceOnlyTestType}" >  
+        <apex:repeat value="{!wrapper.wpInsertConfs}"  var="insertionConfiguration">
+        <apex:pageBlockSection columns="1" title="Test Configuration Detail #{!insertionConfiguration.index}">    
+
+             <apex:pageBlockSection columns="{!layout.salesColumns}">
+                 <!-- <apex:repeat value="{!layout.sectionMap['Insertion Description'].attributes}" var="attribute"> -->
+                 <apex:repeat value="{!wrapper.childObjectSections[insertionConfiguration.conf.Id].attributes}" var="attribute">
+                     <apex:outputField value="{!insertionConfiguration.conf[attribute.fieldAPIName]}" rendered="{!IF((wrapper.packageFamily.Name!='RFQI_TESTS__c' && attribute.belongsToSubSection == 'Plant Information' && attribute.fieldAPIName=='Factory_Selected__c') ,true,false)}"/>
+                 </apex:repeat>
+              <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="" />
+                    <apex:outputText value=""/>
+                </apex:pageBlockSectionItem>
+             </apex:pageBlockSection>
+             <hr/>
+            <apex:pageBlockSection columns="{!layout.salesColumns}">
+                 <!-- <apex:repeat value="{!layout.sectionMap['Insertion Description'].attributes}" var="attribute"> -->
+                <apex:repeat value="{!wrapper.childObjectSections[insertionConfiguration.conf.Id].attributes}" var="attribute">
+                     <apex:outputField value="{!insertionConfiguration.conf[attribute.fieldAPIName]}" rendered="{!attribute.belongsToSubSection == 'Tester Information'}"/>
+                 </apex:repeat>
+             </apex:pageBlockSection> 
+             <hr/>
+             <apex:pageBlockSection columns="{!layout.salesColumns}">
+                 <!-- <apex:repeat value="{!layout.sectionMap['Insertion Description'].attributes}" var="attribute"> -->
+                 <apex:repeat value="{!wrapper.childObjectSections[insertionConfiguration.conf.Id].attributes}" var="attribute">
+                     <apex:outputField value="{!insertionConfiguration.conf[attribute.fieldAPIName]}" rendered="{!attribute.belongsToSubSection == 'Handler Information'}"/>
+                 </apex:repeat>
+             </apex:pageBlockSection>
+             <hr/>
+             <apex:pageBlockSection id="testConfigSection" columns="{!layout.salesColumns}" rendered="{!layout.enabledSections['Minimum Tester Configuration']}" >
+                <apex:repeat value="{!layout.sectionMap['Minimum Tester Configuration'].attributes}" var="testerAttribute">
+                   <apex:pageBlockSectionItem >
+                      <apex:outputLabel for="pfOutput" value="{!$ObjectType[testerAttribute.objectAPIName].fields[testerAttribute.fieldAPIName].Label}" />
+                      <apex:outputField id="pfOutput"  value="{!insertionConfiguration.conf[testerAttribute.fieldAPIName]}"/>
+                   </apex:pageBlockSectionItem>
+                </apex:repeat>
+                </apex:pageBlockSection>
+          </apex:pageBlockSection>  
+        </apex:repeat>
+    </apex:pageBlockSection>  
+
+    <!-- Service Description -->
+    <apex:pageBlockSection title="Service Description" id="serviceSection" columns="1" rendered="{!layout.enabledSections['Service Description'] && !isLayoutDeprecated}" >  
+        <apex:repeat value="{!wrapper.serviceConfigurations}"  var="serviceConfiguration">    
+             <apex:pageBlockSection columns="{!layout.salesColumns}">
+                 <!-- <apex:repeat value="{!layout.sectionMap['Insertion Description'].attributes}" var="attribute"> -->
+                 <apex:repeat value="{!wrapper.childObjectSections[serviceConfiguration.Id].attributes}" var="attribute">
+                     <apex:outputField value="{!serviceConfiguration[attribute.fieldAPIName]}" />
+                 </apex:repeat>
+                 <apex:outputField value="{!serviceConfiguration['Sub_Total__c']}" rendered="{!ShowPriceToCustomerSave}"/>
+             </apex:pageBlockSection>  
+        </apex:repeat>
+    </apex:pageBlockSection> 
+
+    <!-- Adders Section -->
+    <c:RFQIAdderSection wrapper="{!wrapper}" columns="{!layout.salesColumns}" rendered="{!layout.enabledSections['Adders'] && !isLayoutDeprecated}" layout="{!layout}"/>
+
+    <!-- Post Test Services Section -->
+    <apex:pageBlockSection title="Post Test Services" id="postTestSection" columns="1" rendered="{!layout.enabledSections['Post Test Services'] && !isLayoutDeprecated && !IsWaferTestType}" > 
+
+        <apex:pageBlockSection rendered="{!PostTestServiceOnlyTestType}" columns="{!layout.salesColumns}"> 
+            <apex:outputText value="{!wrapper.specificRfqItem['Post_Test_Factory__c']}"/>
+            <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="" />
+                        <apex:outputText value=""/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="" />
+                        <apex:outputText value=""/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="" />
+                        <apex:outputText value=""/>
+                    </apex:pageBlockSectionItem>
+        </apex:pageBlockSection> 
+
+        <apex:pageBlockSection columns="{!layout.salesColumns}">
+             <apex:repeat value="{!layout.sectionMap['Post Test Services'].attributes}" var="attribute">
+                 <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" /> 
+             </apex:repeat>
+        </apex:pageBlockSection>
+
+            <!-- Post Test Services Burn In Subsection -->
+        <apex:pageBlockSection columns="{!layout.salesColumns}" rendered="{!layout.enabledSections['Post Test Services Burn In'] && !isLayoutDeprecated}">
+            <apex:repeat value="{!layout.sectionMap['Post Test Services Burn In'].attributes}" var="attribute">
+                <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" /> 
+            </apex:repeat>
+        </apex:pageBlockSection>
+
+             <!-- Post-Test Services Pricing Subsection -->
+        <apex:pageBlockSection columns="{!layout.salesColumns}" rendered="{!layout.enabledSections['Post Test Services Prices'] && !isLayoutDeprecated}">
+            <apex:repeat value="{!layout.sectionMap['Post Test Services Prices'].attributes}" var="attribute">
+                <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" /> 
+            </apex:repeat>
+        </apex:pageBlockSection>
+
+    </apex:pageBlockSection>
+
+    <!-- Post Test Services Section for Wafer Probe-->
+    <apex:pageBlockSection title="Post Test Services" id="postTestSectionWafer" columns="{!layout.salesColumns}" rendered="{!layout.enabledSections['Post Test Services - Wafer Probe'] && !isLayoutDeprecated && IsWaferTestType}" >  
+         <apex:repeat value="{!layout.sectionMap['Post Test Services - Wafer Probe'].attributes}" var="attribute">
+             <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" /> 
+         </apex:repeat>
+    </apex:pageBlockSection>
+
+    <!-- Post Test Services BU Price to Sales -->
+    <!-- AMK-2386 -->
+    <apex:pageBlockSection id="ptsCost" title="Post Test Services BU Price to Sales" columns="1" rendered="{!layout.enabledSections['Post Test Services Cost and Price'] && ShowPostTestServiceCostAndPrice}">
+        <apex:pageBlockSection columns="{!layout.buColumns}" >               
+            <apex:repeat value="{!layout.sectionMap['Post Test Services Cost and Price'].attributes}" var="attribute">
+                <apex:outputText value="" rendered="{!attribute.isBlank}" />
+                <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" rendered="{!!attribute.isBlank}"/>
+            </apex:repeat> 
+        </apex:pageBlockSection>
+        <apex:pageBlockSection rendered="{!PostTestServiceOnlyTestType}" columns="{!layout.salesColumns}"> 
+            <apex:outputText value="{!wrapper.specificRfqItem['BU_Post_Test_Price_Unit__c']}"/>
+            <apex:pageBlockSectionItem >
+                <apex:outputLabel value="" />
+                <apex:outputText value=""/>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                <apex:outputLabel value="" />
+                <apex:outputText value=""/>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                <apex:outputLabel value="" />
+                <apex:outputText value=""/>
+            </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+    </apex:pageBlockSection>
+    
+    <!-- NRE -->
+    <apex:outputPanel layout="block" styleClass="oneColumnHack" rendered="{!!isLayoutDeprecated}">
+        <apex:pageBlockSection title="NRE" columns="2" >
+            <apex:outputField value="{!wrapper.rfqItem.NRE_Inclusion__c}" />
+        </apex:pageBlockSection>
+
+        <apex:pageBlockSection rendered="{!showNREAttributes}" columns="1">
+        <apex:pageBlockSection columns="2">
+            <apex:outputText value="NRE Description:" style="float:right; font-weight: bold;"/>
+            <apex:outputText value="$NRE Value:" style="float:left; font-weight: bold;"/>
+        </apex:pageBlockSection>
+
+        <apex:pageBlockSection columns="1" rendered="{!layout.enabledSections['NRE']}">            
+            <apex:repeat value="{!layout.sectionMap['NRE'].attributes}" var="attribute">
+                <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+            </apex:repeat>
+        </apex:pageBlockSection>
+
+        <apex:pageBlockSection columns="2">
+            <apex:repeat value="{!wrapper.nreConfigurations}"  var="nreConfiguration">
+                <apex:outputText value="{!nreConfiguration['Description__c']}" style="float:right;"  label=""/>
+                <apex:outputText value="{!nreConfiguration['Price_New__c']}" style="float:left;"  label=""/>
+            </apex:repeat> 
+        </apex:pageBlockSection>
+
+        </apex:pageBlockSection>
+    </apex:outputPanel>
+
+    <apex:pageBlockSection title="Additional Information" rendered="{!layout.enabledSections['Additional Information'] && !isLayoutDeprecated}" columns="1">
+        <apex:repeat value="{!layout.sectionMap['Additional Information'].attributes}" var="attribute">
+            <apex:outputText value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" label=""/>
+        </apex:repeat>
+    </apex:pageBlockSection>
+   
+    <apex:pageBlockSection title="Additonal Business Considerations" columns="{!layout.salesColumns}" rendered="true">
+       
+    </apex:pageBlockSection>
+
+    <c:RFQIDeprecatedSection wrapper="{!wrapper}" theLayout="{!layout}" renderFactorySection="{!renderFactorySection}" columns="1" salesPage="true" rendered="{!isLayoutDeprecated}"/>
+
+</apex:pageblock>
+</apex:form>
+
+<!-- Tasks -->
+<apex:relatedList subject="{!wrapper.rfqItem.Id}" list="OpenActivities"/>  
+<apex:relatedList subject="{!wrapper.rfqItem.Id}" list="ActivityHistories"/> 
+
+<!--Notes & Attachments -->
+<apex:relatedList subject="{!wrapper.rfqItem.Id}" list="CombinedAttachments" />
+<!--Approval History -->
+<div class="noAction">
+<apex:relatedList subject="{!wrapper.rfqItem.Id}" list="ProcessSteps" >
+<apex:facet name="header"><table><tr><td class="pbTitle"><h3>Approval History</h3></td></tr></table></apex:facet> 
+</apex:relatedList>
+</div>
+
+<apex:relatedList list="RFQI_Escalations__r">
+<apex:facet name="header"><table><tr><td class="pbTitle"><h3>Escalations</h3></td></tr></table></apex:facet> 
+</apex:relatedList>
+
+<apex:form >
+<apex:pageBlock title="Similar RFQ Items" >
+    <apex:pageBlockButtons location="top" >
+            <apex:commandButton rendered="{!relatedItemsVisible}" style="height: 20px" styleClass="bRelatedList" value="Advanced Search" action="{!viewRelatedItemsAdvanced}" />
+    </apex:pageBlockButtons>
+
+    <apex:outputPanel rendered="{!relatedItemsVisible}">
+        <c:RFQItemRelatedItemList relatedItems="{!relatedItems}" />
+    </apex:outputPanel>
+    
+    <apex:outputPanel rendered="{!IF(relatedItemsVisible,false,true)}">
+        <!-- Ashish 19-July-2017 : Salesforce 225 -Similar RFQ Items feature. -->
+        <!-- When the Similar RFQ Items, fetched by 5 statuses : Price Complete, Program Loss Closed, Program Win Closed, Qual, Quoted, does not meet the conditions then the following text is displayed. -->
+        <!-- <i>No other items were found with the same CPN in a 'Program Win Closed' , 'Program Loss Closed' , 'Program Canceled Closed' , 'Qual' , 'Price Complete' or 'Quoted' status</i> -->
+        <apex:pageMessage severity="info" strength="1" summary="{!$Label.No_Similar_RFQ_Items_Message}" />
+    </apex:outputPanel>
+    
+</apex:pageBlock>
+</apex:form>
+
+
+  
+
+</apex:page>

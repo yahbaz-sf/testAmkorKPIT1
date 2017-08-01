@@ -1,0 +1,80 @@
+<apex:page standardController="RFQ_Account_Adder_Cost__c" extensions="AccountAdderChargeController">
+    <apex:pageMessages />
+
+<!--Javascript to hijack the 'Assigned to' column of the approval history if it is a queue -->
+<c:ApprovalQueueLink />
+    
+    <apex:form >
+
+    	<apex:pageBlock title="Account Adder Cost">
+
+    		<apex:pageBlockButtons >
+    			<apex:commandButton value="Edit" action="{!edit}" rendered="{!canEdit}" />
+	        	<apex:commandButton value="Return to Account" action="{!cancel}"/>
+	    	</apex:pageBlockButtons> 
+
+	    	<apex:pageBlockSection id="pbs" columns="1">
+
+	    		<apex:outputField value="{!adderCost.Account__c}" />
+
+	    		<apex:outputField value="{!adderCost.Product_Group__c}" />
+
+	    		<apex:outputField value="{!adderCost.All_Package_Families__c}" />
+
+	    		<apex:outputField value="{!adderCost.Package_Family__c}" rendered="{!!adderCost.All_Package_Families__c}" />
+
+
+
+	    		<apex:pageBlockSectionItem rendered="{!!adderCost.Is_Other_Adder__c}">
+	    			<!-- Field -->
+	    			<apex:outputLabel for="AdderField" value="Adder"/>
+
+    				<apex:outputText id="AdderField" value="{!adderName}" />
+	    		</apex:pageBlockSectionItem>
+
+	    		<apex:outputField rendered="{!adderCost.Is_Other_Adder__c}" value="{!adderCost.Is_Other_Adder__c}" />
+
+	    		<apex:outputField rendered="{!adderId == 'OTHER'}" value="{!adderCost.Other_Name__c}" />
+
+	    		<apex:outputField value="{!adderCost.Charge_Amount__c}" />
+
+	    		<apex:outputField value="{!adderCost.Additional_Match_Criteria__c}" />
+
+	    		<apex:outputPanel id="additionalPanel">
+		    		<apex:pageBlockSection rendered="{!adderCost.Additional_Match_Criteria__c}" title="Additional Match Criteria" columns="1">	
+		    			<apex:pageBlockTable value="{!matchCriteria}" var="row">
+
+		    				<apex:column >
+		    					<apex:facet name="header">Body Size</apex:facet>
+		    					<apex:outputText value="{!row.obj.Body_Size__c}" />
+		    				</apex:column>
+
+		    				<apex:column >
+		    					<apex:facet name="header">Customer Device Name</apex:facet>
+		    					<apex:outputText value="{!row.obj.Customer_Device_Name__c}" />
+		    				</apex:column>
+
+		    				<apex:column >
+		    					<apex:facet name="header">Ball/Lead Count</apex:facet>
+		    					<apex:outputText value="{!row.obj.Lead_Ball_Count__c}" />
+		    				</apex:column>
+
+		    				<apex:column >
+		    					<apex:facet name="header">Charge Amount (per unit)</apex:facet>
+		    					<apex:outputText value="{!row.obj.Charge_Amount__c}" />
+		    				</apex:column>
+
+		    			</apex:pageBlockTable>
+			    	</apex:pageBlockSection>
+		    	</apex:outputPanel>
+
+	    	</apex:pageBlockSection>
+
+    	</apex:pageBlock>
+    </apex:form>
+
+    <apex:relatedList subject="{!adderCost.Id}" list="ProcessSteps" >
+		    <apex:facet name="header"><table><tr><td class="pbTitle"><h3>Approval History</h3></td></tr></table></apex:facet> 
+		</apex:relatedList>
+
+</apex:page>

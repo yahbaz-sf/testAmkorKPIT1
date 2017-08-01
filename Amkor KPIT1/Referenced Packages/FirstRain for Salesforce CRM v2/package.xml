@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FirstRain for Salesforce CRM v2</fullName>
+    <apiAccessLevel>Restricted</apiAccessLevel>
+    <description>FirstRain Customer Insights is a big data analytics solution for enterprise sales and marketing professionals. It delivers relevant, real-time customer and market-focused intelligence that puts their go-to-market strategy into action.</description>
+    <namespacePrefix>First_Rain</namespacePrefix>
+    <objectPermissions>
+        <allowCreate>false</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>Account</object>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <allowCreate>false</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>Opportunity</object>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+    <setupWeblink>Configure</setupWeblink>
+    <types>
+        <members>FRAccountControllerExt</members>
+        <members>FRCustomSettingsListController</members>
+        <members>FROpportunityControllerExt</members>
+        <members>FRSettingsController</members>
+        <members>FRTest</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>FirstRain_Account_Insights</members>
+        <members>FirstRain_Account_Insights_SF1</members>
+        <members>FirstRain_Home_Insights</members>
+        <members>FirstRain_Home_Insights_SF1</members>
+        <members>FirstRain_Opportunity_Insights</members>
+        <members>FirstRain_Settings</members>
+        <name>ApexPage</name>
+    </types>
+    <types>
+        <members>Configure</members>
+        <name>CustomPageWebLink</name>
+    </types>
+    <types>
+        <members>FirstRain_Insights</members>
+        <name>CustomTab</name>
+    </types>
+    <types>
+        <members>FirstRain_logo</members>
+        <name>Document</name>
+    </types>
+    <types>
+        <members>FirstRain Home Insights</members>
+        <name>HomePageComponent</name>
+    </types>
+    <version>36.0</version>
+</Package>

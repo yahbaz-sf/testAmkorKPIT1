@@ -1,0 +1,66 @@
+<apex:page standardController="RFQ_Item__c" extensions="RFQOpItemController">
+
+<c:RFQItemViewStyle />
+
+<style>
+
+    .dataCol.first.last {
+        text-align: left;
+    }
+
+</style>
+
+
+<apex:pageMessages id="messages" escape="false" />
+<apex:form id="form" >
+    <apex:sectionHeader title="View Attributes for this opportunity line item" subtitle="{!wrapper.rfqItem.Name}" description="On this page you can view the attributes of this opportunity item"/>
+
+   
+    
+    <apex:pageblock id="mainBody">  
+
+        <apex:pageBlockButtons >
+            <apex:commandButton value="Edit" action="{!editItem}" />
+            <apex:commandButton value="Add Service" action="{!addOppService}" rendered="{!IsAddServicePossible}"/>
+        </apex:pageBlockButtons> 
+
+
+        <apex:outputPanel id="output" >
+            <!-- Quote Information Section -->
+
+             <apex:pageBlockSection title="Opportunity Information" columns="3">
+                    <apex:outputField value="{!wrapper.rfqItem.Opportunity__c}"/>
+                    <apex:outputField value="{!wrapper.rfqItem.Next_Step__c}"/>
+            </apex:pageBlockSection>  
+
+            <apex:pageBlockSection title="Item Information" columns="3">
+                <apex:outputField value="{!wrapper.packageFamily.Name}"/>
+                <apex:outputField value="{!wrapper.specificRfqItem['Test_Type__c']}" rendered="{!wrapper.packageFamily.Name == 'Test'}"/>
+                <apex:repeat value="{!attributes}" var="attribute">
+                    <apex:pageBlockSectionItem rendered="{!attribute.isEditable && attribute.objectAPIName != 'RFQ_Item__c'}" helpText="{!$ObjectType[attribute.objectAPIName].fields[attribute.fieldAPIName].inlineHelpText}">
+                        <apex:outputLabel for="pfInput" value="{!$ObjectType[attribute.objectAPIName].fields[attribute.fieldAPIName].Label}"/>
+                        <apex:outputField id="pfInput" label="" value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!attribute.isEditable && attribute.objectAPIName == 'RFQ_Item__c'}" helpText="{!$ObjectType[attribute.objectAPIName].fields[attribute.fieldAPIName].inlineHelpText}">
+                        <apex:outputLabel for="pfInput" value="{!$ObjectType[attribute.objectAPIName].fields[attribute.fieldAPIName].Label}"/>
+                        <apex:outputField id="pfInput" label="" value="{!wrapper.rfqItem[attribute.fieldAPIName]}"/>
+                    </apex:pageBlockSectionItem>
+                </apex:repeat>
+                <apex:outputField value="{!wrapper.specificRfqItem['Wafer_Size_PK__c']}" rendered="{!wrapper.packageFamily.Name == 'Test' && wrapper.specificRfqItem['Test_Type__c'] == 'Wafer Probe'}"/>
+                <apex:outputField value="{!wrapper.specificRfqItem['GDPW_PK__c']}" rendered="{!wrapper.packageFamily.Name == 'Test' && wrapper.specificRfqItem['Test_Type__c'] == 'Wafer Probe'}"/>  
+            </apex:pageBlockSection>  
+    
+       </apex:outputPanel>
+             
+    </apex:pageblock>
+
+
+</apex:form>
+
+    
+    <!--Notes & Attachments -->
+<apex:relatedList subject="{!wrapper.rfqItem.Id}" list="OpenActivities"/> 
+<apex:relatedList subject="{!wrapper.rfqItem.Id}" list="ActivityHistories"/>  
+<apex:relatedList subject="{!wrapper.rfqItem.Id}" list="CombinedAttachments" />
+
+</apex:page>

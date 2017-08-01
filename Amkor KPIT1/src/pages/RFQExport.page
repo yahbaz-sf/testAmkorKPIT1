@@ -1,0 +1,3 @@
+<apex:page controller="RFQExportController" contentType="application/csv#RFQOutput.csv" showHeader="false">
+	<apex:outputText value="{!csvOutput}" />
+</apex:page>

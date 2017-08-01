@@ -1,0 +1,66 @@
+<apex:page showHeader="false" sidebar="false" controller="ImportDefaultsController" >
+
+<style type="text/css">
+
+	.narrow {
+		width: 600px;
+	}
+
+	.pbTitle {
+        white-space: nowrap;
+    }
+
+</style>
+
+<apex:form >
+
+	<apex:pageMessages escape="false"/>
+	<apex:outputPanel id="output">
+
+
+		<apex:pageblock id="mainBody" title="Import successful, applying default values..." rendered="{!numberRemaining > 0}"> 
+			<div class="narrow">
+
+				<script type="text/javascript">
+					function resubmit() {
+						submitNextItem();
+					}
+					
+				</script>
+
+				<apex:pageBlockSection >
+						<img src="{!$Resource.Spinner}"/>
+				</apex:pageBlockSection>
+				<apex:pageBlockSection >
+					<apex:outputText value="{0} records remaining">
+						<apex:param value="{!numberRemaining}" />
+					</apex:outputText>
+				</apex:pageBlockSection>
+			</div>
+		</apex:pageblock>
+
+		<apex:pageBlock rendered="{!numberRemaining == 0}" title="All records processed, you may now close this window">
+			<script type="text/javascript">
+				function resubmit() {
+					// All done, no action necessary
+				}
+				
+			</script>
+
+			<button type="button" onclick="window.close()">Close Window</button>
+
+		</apex:pageBlock>
+
+	</apex:outputPanel>
+
+	<apex:actionFunction name="submitNextItem" action="{!submitNextItem}" reRender="output" oncomplete="resubmit();">
+		<apex:param name="rfqId" value="{!rfqId}" />
+	</apex:actionFunction>
+
+	<script type="text/javascript">
+		submitNextItem();
+	</script>
+
+</apex:form>
+	
+</apex:page>

@@ -1,0 +1,156 @@
+<apex:page standardController="Account" showHeader="{!ShowPageHeader}" tabStyle="Account"  id="IAH" cache="true" 
+           extensions="InSituCah.InSitu_AccountHierarchyController" >
+
+           
+   <style>
+      .activeTab {background-color: #236FBD; color:white; background-image:none}
+      .inactiveTab {background-color: white; color:black; background-image:none}
+   </style>
+
+   <apex:form id="formTab">
+		<apex:outputPanel id="ViewBar"  >
+		<table cellspacing="0" cellpadding="0" border="0" width="100%" >
+		<tbody>
+			<tr style="text-align:bottom" >
+				<td style="white-space: nowrap;" >
+					<apex:sectionHeader title="{!PageTitle}" subtitle="{!Account.Name}" rendered="{!ShowPageHeader}" ></apex:sectionHeader>
+				</td>
+				<td align="left" style="text-align:bottom;white-space: nowrap" >
+					<apex:outputText value="&nbsp;&nbsp;" escape="false" rendered="{!ShowPageHeader}" />
+					<apex:outputPanel layout="block" style="padding-left:10px;padding-bottom:10px" rendered="{!ShowAcctTabFilterImage || ShowViewList }">
+						<apex:image url="{!URLFOR($Resource.InSituCah__InSitu_Data_Filter)}" title="{!AcctTabFilterHover}" rendered="{!ShowAcctTabFilterImage}" /> 
+						<apex:outputText value="&nbsp;&nbsp" escape="false" rendered="{!ShowAcctTabFilterImage}" /> 
+						<apex:outputLabel value="Account View:" for="theViewList" style="font-weight:bold;padding-right:10px;" rendered="{!ShowViewList}" /> 
+						<apex:selectList value="{!CurrentView}" size="1" title="Account View" id="theViewList" rendered="{!ShowViewList}">
+			            	<apex:selectOptions value="{!ViewList}"/>
+							<apex:actionSupport event="onchange" action="{!doViewSelect}" rerender="ViewBar,Tabs" />
+						</apex:selectList> 
+						<apex:outputText value="&nbsp;&nbsp;Search:&nbsp;&nbsp;" escape="false" style="font-weight:bold;" rendered="{!HasDynamicField}" /> 
+						<apex:outputText value="{!DSCriterionFieldLabel}" style="valign=middle" rendered="{!HasDynamicField}" /> 
+						<apex:outputText value="&nbsp;&nbsp;" escape="false" rendered="{!HasDynamicField}" />
+						<apex:selectList value="{!DynamicSearchCriterion.CriterionOperator}" size="1" rendered="{!HasDynamicField}">
+	                           <apex:selectOptions value="{!DynamicSearchCriterion.CriterionOperatorOptions}" />
+	                           <apex:actionSupport event="onchange" rerender="ViewBar" />
+						</apex:selectList> 
+						<apex:outputText value="&nbsp;&nbsp;" escape="false" rendered="{!HasDynamicField}" /> 
+						<apex:inputText value="{!DynamicSearchCriterion.CriterionValue}" rendered="{!HasDynamicField && DynamicSearchCriterion.ShowCriterionValueInput}" />
+						<apex:outputText value="&nbsp;&nbsp;" escape="false" rendered="{!HasDynamicField && DynamicSearchCriterion.ShowCriterionValueInput}" />
+						<apex:image url="{!URLFOR($Resource.InSituCah__InSitu_Down_Arrow)}" rendered="{!DynamicSearchCriterion.ShowLookupButton}">
+							<apex:actionSupport event="onclick" action="{!DynamicSearchCriterion.doShowLookupSelectPanel}" rerender="ViewBar" />
+						</apex:image> 
+						<apex:outputText value="&nbsp;&nbsp;" escape="false" rendered="{!DynamicSearchCriterion.ShowLookupButton}" /> 
+						<apex:selectList value="{!DynamicSearchCriterion.CriterionValue}" size="1" multiselect="false" title="Criteria Value" rendered="{!DynamicSearchCriterion.ShowCriterionValueOptions}">
+					        <apex:selectOptions value="{!DynamicSearchCriterion.CriterionValueOptions}"/>
+						</apex:selectList> 
+						<apex:outputText value="&nbsp;&nbsp;" escape="false" rendered="{!DynamicSearchCriterion.ShowCriterionValueOptions}" />
+						<apex:commandButton value="Go!" action="{!doGo}" rerender="ViewBar,Tabs" rendered="{!HasDynamicField && NOT(DynamicSearchCriterion.ShowLookupSelectPanel)}" />
+						<apex:outputPanel id="DynamicSearchStatus" layout="block" style="padding-left:10px;" >
+							<apex:outputText value="{!DSStatus}" style="color: #CC0000" rendered="{!ShowDSStatus}" />
+						</apex:outputPanel>
+					</apex:outputPanel>
+				</td>
+				<td  width="99%" >
+					<apex:outputPanel id="CriterionValuePanel" style="float:left;text-align:left">
+						<apex:selectList value="{!DynamicSearchCriterion.CriterionValues}" size="5" multiselect="true" title="Criteria Value" rendered="{!DynamicSearchCriterion.ShowLookupSelectPanel}">
+					        <apex:selectOptions value="{!DynamicSearchCriterion.CriterionValueOptions}"/>
+					    </apex:selectList>
+						<apex:outputPanel layout="block" id="CriterionValueButtons" style="padding-top:6px;">
+							<apex:commandButton action="{!DynamicSearchCriterion.doInsertSelected}" value="Insert" rerender="ViewBar" rendered="{!DynamicSearchCriterion.ShowLookupSelectPanel}" />
+							<apex:commandButton action="{!DynamicSearchCriterion.doHideLookupSelectPanel}" value="Cancel" rerender="ViewBar" rendered="{!DynamicSearchCriterion.ShowLookupSelectPanel}" />
+						</apex:outputPanel>
+					</apex:outputPanel>
+				</td>
+			</tr>
+		</tbody>
+		</table>   
+ 		</apex:outputPanel>  
+   	<apex:messages />
+
+	<apex:outputPanel id="Tabs" >
+
+		<apex:tabPanel id="AccountTabPanel" value="{!TabInFocus}" tabClass="activeTab" inactiveTabClass="inactiveTab" rendered="{!IsLicensed}">
+	       <apex:tab label="{!labelAccounts}" name="Accounts" id="tabAccount" />
+	       <apex:tab label="{!labelContacts}" name="Contacts"  id="tabContact" rendered="{!IsEnabledContacts}" />
+	       <apex:tab label="{!labelOpps}" name="Opportunities" id="tabOpp" rendered="{!IsEnabledOpps}" />
+	       <apex:tab label="{!labelTasks}" name="Tasks"  id="tabTask" rendered="{!IsEnabledTasks}" />
+	       <apex:tab label="{!labelEvents}" name="Events"  id="tabEvent" rendered="{!IsEnabledEvents}" />
+	       <apex:tab label="{!labelCases}" name="Cases"  id="tabCase" rendered="{!IsEnabledCases}" />
+	       <apex:tab label="{!labelContracts}" name="Contracts"  id="tabContract" rendered="{!IsEnabledContracts}" />
+	       <apex:tab label="{!labelCustom1Tab}" name="Custom1"  id="tabCustom1" rendered="{!IsEnabledCustom1}" />
+	       <apex:tab label="{!labelCustom2Tab}" name="Custom2"  id="tabCustom2" rendered="{!IsEnabledCustom2}" />
+	       <apex:tab label="{!labelCustom3Tab}" name="Custom3"  id="tabCustom3" rendered="{!IsEnabledCustom3}" />
+	       <apex:tab label="{!labelCustom4Tab}" name="Custom4"  id="tabCustom4" rendered="{!IsEnabledCustom4}" />
+	       <apex:tab label="{!labelCustom5Tab}" name="Custom5"  id="tabCustom5" rendered="{!IsEnabledCustom5}" />
+	       <apex:tab label="{!labelCustom6Tab}" name="Custom6"  id="tabCustom6" rendered="{!IsEnabledCustom6}" />
+	       <apex:tab label="{!labelCustom7Tab}" name="Custom7"  id="tabCustom7" rendered="{!IsEnabledCustom7}" />
+	       <apex:tab label="{!labelCustom8Tab}" name="Custom8" id="tabCustom8" rendered="{!IsEnabledCustom8}" />
+	       <apex:tab label="{!labelCustomPage1Tab}" name="CustomPage1"  id="tabCustomPage1" rendered="{!IsEnabledCustomPage1}" />
+	       <apex:tab label="{!labelCustomPage2Tab}" name="CustomPage2"  id="tabCustomPage2" rendered="{!IsEnabledCustomPage2}" />
+	       <apex:tab label="{!labelCustomPage3Tab}" name="CustomPage3"  id="tabCustomPage3" rendered="{!IsEnabledCustomPage3}" />
+	       <apex:tab label="{!labelCustomPage4Tab}" name="CustomPage4"  id="tabCustomPage4" rendered="{!IsEnabledCustomPage4}" />
+	       <apex:tab label="{!labelCustomPage5Tab}" name="CustomPage5"  id="tabCustomPage5" rendered="{!IsEnabledCustomPage5}" />
+	    </apex:tabPanel>
+	
+	    <apex:outputPanel rendered="{!TabInFocus = 'Accounts'}" style="position:relative; top:-25px;"  >
+	        <apex:pageBlock >
+	            <c:InSitu_AH pageID="{!PageName}" pageControllerName="{!this}" keyName="Accounts" />
+	        </apex:pageBlock> 
+	    </apex:outputPanel>         
+	
+	    <apex:outputPanel rendered="{!IsEnabledContacts && TabInFocus = 'Contacts'}" style="position:relative; top:-25px;" >
+	        <apex:pageBlock >
+	            <c:InSitu_AH_Contacts pageID="{!PageName}" pageControllerName="{!this}"  keyName="Contacts" />
+	        </apex:pageBlock> 
+	    </apex:outputPanel>         
+	
+	    <apex:outputPanel rendered="{!IsEnabledOpps && TabInFocus = 'Opportunities'}" style="position:relative; top:-25px;" >
+	        <apex:pageBlock >
+	            <c:InSitu_AH_Opps pageID="{!PageName}" pageControllerName="{!this}" keyName="Opportunities"  />
+	        </apex:pageBlock> 
+	    </apex:outputPanel>         
+	      
+	    <apex:outputPanel rendered="{!IsEnabledTasks && TabInFocus = 'Tasks'}" style="position:relative; top:-25px;" >
+	        <apex:pageBlock >
+	            <c:InSitu_AH_Tasks pageID="{!PageName}" pageControllerName="{!this}"  keyName="Tasks" />
+	        </apex:pageBlock> 
+	    </apex:outputPanel>         
+	      
+	    <apex:outputPanel rendered="{!IsEnabledEvents && TabInFocus = 'Events'}" style="position:relative; top:-25px;" >
+	        <apex:pageBlock >
+	            <c:InSitu_AH_Events pageID="{!PageName}" pageControllerName="{!this}"  keyName="Events" />
+	        </apex:pageBlock> 
+	    </apex:outputPanel>         
+	
+	    <apex:outputPanel rendered="{!IsEnabledCases && TabInFocus = 'Cases'}" style="position:relative; top:-25px;" >
+	        <apex:pageBlock >
+	            <c:InSitu_AH_Cases pageID="{!PageName}" pageControllerName="{!this}"  keyName="Cases" />
+	        </apex:pageBlock> 
+	    </apex:outputPanel>         
+	
+	    <apex:outputPanel rendered="{!IsEnabledContracts && TabInFocus = 'Contracts'}" style="position:relative; top:-25px;" >
+	        <apex:pageBlock >
+	            <c:InSitu_AH_Contracts pageID="{!PageName}" pageControllerName="{!this}"  keyName="Contracts" />
+	        </apex:pageBlock> 
+	    </apex:outputPanel>         
+	
+	    <apex:repeat value="{!CustomTabList}" var="tab"  >
+	        <apex:outputPanel rendered="{!tab.Show && TabInFocus = tab.TabID}" style="position:relative; top:-25px;">
+	        <apex:pageBlock >
+	                <c:InSitu_AH_Custom CustomTabID="{!tab.TabID}" pageID="{!PageName}" pageControllerName="{!this}" keyName="{!tab.TabID}"  />
+	        </apex:pageBlock> 
+	        </apex:outputPanel>         
+	    </apex:repeat>
+	
+	    <apex:repeat value="{!CustomPageTabList}" var="tabCustomPage"  >
+	        <apex:outputPanel rendered="{!tabCustomPage.Show && TabInFocus = tabCustomPage.TabID}" style="position:relative; top:-25px;" >
+	        <apex:pageBlock >
+	                <c:InSitu_AH_CustomPage CustomPageTabID="{!tabCustomPage.TabID}" pageID="{!PageName}" pageControllerName="{!this}" keyName="{!tabCustomPage.TabID}"  />
+	        </apex:pageBlock> 
+	        </apex:outputPanel> 
+	    </apex:repeat>
+	</apex:outputPanel>
+
+    </apex:form> 
+
+            
+</apex:page>

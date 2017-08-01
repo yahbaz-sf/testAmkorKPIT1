@@ -1,0 +1,102 @@
+<apex:page standardController="Account" showHeader="false" tabStyle="Account" id="IAH" readonly="true" cache="true" 
+           renderAs="{!RenderPDF}"  
+           contentType="{!ContentType}"
+           extensions="InSituCah.InSitu_AHOutputController">
+
+    <head>
+        <title>iTools Account Hierarchy</title>
+        <style type="text/css">
+            @page
+            {
+                /* Landscape orientation */
+                size:landscape;
+                
+                /* Put page numbers in the bottom right corner of each page in the pdf document. */
+                @bottom-right 
+                {
+                  content: "Page " counter(page);
+                }
+              }
+        
+            body 
+            {
+                font-family: Arial Unicode MS;
+                font-size:12pt;
+            }
+        
+            td 
+            {
+                font-family: Arial Unicode MS;
+                font-size:10pt;
+            }
+            
+        </style>
+        
+        <style type="text/css" media="print">
+            .printbutton 
+            {
+                visibility: hidden;
+                display: none;
+            }
+        </style>
+        
+    </head>
+
+    <apex:outputPanel layout="block" >
+        <apex:outputText value="{!PageTitle}" style="font-weight:bold;" />
+    </apex:outputPanel>
+        
+    <apex:outputPanel layout="block" rendered="{!IsPrintableView}" >
+        <input type="button" onClick="window.print()" value="Print" class="printbutton" style="float: right;"  />
+    </apex:outputPanel>
+    
+    <apex:outputPanel layout="block" >
+        <apex:outputText value="{!Account.Name}" style="font-weight:bold;" />
+    </apex:outputPanel>
+ 
+    <apex:outputPanel layout="block" >
+        <apex:outputText value="&nbsp;&nbsp;" escape="false" /> 
+    </apex:outputPanel>
+
+    <apex:outputPanel layout="block" rendered="{!TooManyRows}">
+        <apex:outputText value="{!TooManyRowsMsg}" /> 
+    </apex:outputPanel>
+
+    <apex:outputPanel layout="block" rendered="{!TooManyRows}">
+        <apex:outputText value="&nbsp;&nbsp;" escape="false" /> 
+    </apex:outputPanel>
+
+    <apex:messages />
+
+    <apex:outputPanel layout="block" rendered="{!IsLicensed}">
+        <apex:dataTable value="{!AHObjects}" var="pos" id="AHObjectList"
+            styleClass="list tableClass"
+            headerClass="headerRow "
+            rowClasses="dataRow Odd Even"
+            columnClasses="dataCell " 
+            border="1"
+            cellpadding="4"
+            >
+            
+            <apex:column width="25%" headerValue="{!ContactNameFieldLabel}" rendered="{!NumColumns > 0 && IsContactHierarchy}" style="white-space: nowrap; text-align:left;vertical-align:top;" >
+                <apex:outputText value="{!JSENCODE(pos.Indent)}" escape="false" />
+                <apex:outputField value="{!pos.Obj[ContactNameFieldName]}" rendered="{!IF(pos.Obj[ContactNameFieldName] = null, 'False', 'True')}" />
+            </apex:column>
+    
+            <apex:column headerValue="{!AccountNameColHeading}" width="25%" style="white-space: nowrap; text-align: left;vertical-align:top;" >
+                <apex:outputText value="{!JSENCODE(pos.Indent)}" escape="false" rendered="{!NOT(IsContactHierarchy)}"/>
+                <apex:outputText value="{!pos.AccountName}" rendered="{!NOT(ShowInHierarchy) || pos.IsAccount}" />
+            </apex:column>
+            
+            <!-- Dynamic Member Columns -->
+            <apex:repeat value="{!DataTableColumns}" var="col">
+                <apex:column headerValue="{!col.ColumnLabel}" rendered="{!IF(col.Show, true, false)}" style="{!col.ColumnStyle}">
+                    <!-- Kludge rendered clause because of bug in SF with outputField and dynamic visualforce binding -->
+                    <apex:outputField value="{!pos.Obj[col.FieldName]}" rendered="{!NOT(ISBLANK(pos.Obj[col.FieldName])) && (col.DisplayType != 'BOOLEAN' || pos.Obj[col.FieldName] <> false)}" />
+                </apex:column>
+            </apex:repeat>
+            
+        </apex:dataTable>
+    </apex:outputPanel>
+           
+</apex:page>

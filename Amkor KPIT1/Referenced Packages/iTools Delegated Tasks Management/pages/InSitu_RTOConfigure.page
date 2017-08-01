@@ -1,0 +1,91 @@
+<apex:page Controller="InSituDtm.InSitu_RTOConfigureCon" showHeader="true" tabStyle="InSituGen__InSitu_AppSetting__c" >
+    <apex:sectionHeader title="{!PageTitle}" subtitle="{!PageSubtitle}"></apex:sectionHeader>
+    <apex:pageMessages />
+    
+    <apex:form >
+        <apex:pageBlock mode="detail" id="FeatureSettings" title="Settings"> 
+        	<apex:pageBlockButtons location="Bottom">
+           		<apex:commandButton action="{!updateSettings}" value="Save" />
+           		<apex:commandButton action="{!returnToSettingView}" value="Cancel" />	
+           </apex:pageBlockButtons>
+           
+           <apex:outputPanel style="line-height: 3.0;">
+				<apex:inputCheckbox value="{!m_bRTOActive}" id="xbEnable"/>
+	   			<apex:outputLabel value="Enable the Related To Owner feature" for="xbEnable"/>   
+	   		</apex:outputPanel> 	
+        	
+        	<apex:pageBlockSection id="GeneralSettings" Title="General Settings" columns="1" collapsible="false" >
+        		
+        		<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Filter Default"/>
+					<apex:selectList value="{!CurrentDelegatorScope}" size="1" title="Filter Default" id="theFilterDefault" >
+                		<apex:selectOptions value="{!DelegatorScope}" />
+            		</apex:selectList>
+				</apex:pageBlockSectionItem>
+				
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Notify Related To Owner" for="xbNotify"/> 
+					<apex:outputPanel >
+						<apex:inputCheckbox value="{!m_bRTONotify}" id="xbNotify"/>
+						&nbsp;&nbsp;(Send a Task completion notification email to the owner of the Task's Related To object)
+					</apex:outputPanel>	 
+				</apex:pageBlockSectionItem>
+				
+		</apex:pageBlockSection>
+				        	
+           <apex:pageBlockSection columns="1" rendered="{!IF(m_bRTOActive, 'false', 'true')}">
+<p><b>NOTE: </b>The Related To Owner Recalculation routine will be run automatically when the Related To Owner feature is enabled.</p><br/>
+           </apex:pageBlockSection>
+ 
+     </apex:pageBlock>
+    </apex:form>
+    <apex:form rendered="{!CustomRTOAvailable}" id="theRTOForm">
+    <apex:pageMessages />
+    	<apex:pageBlock title="Custom Objects" mode="edit">
+    		<apex:outputText value="Object API Name&nbsp;&nbsp;" escape="false" />
+			<apex:inputText value="{!newRTOObject}" id="Object_Name"/>
+			&nbsp;&nbsp;&nbsp;&nbsp;
+        	<apex:outputText value="Owner Field API Name&nbsp;&nbsp;" escape="false" id="Owner_Field"/>
+			<apex:inputText value="{!newRTOField}" />
+        	&nbsp;&nbsp;&nbsp;&nbsp;
+            <apex:commandButton value="Add" action="{!addCustomRTO}" rerender="theRTOForm" style="position: relative; bottom: 2px;"/>
+     		<br/><br/>
+     		<apex:pageBlockSection columns="1">
+               <apex:pageBlockTable value="{!CustomRTO}" var="Row" id="UsersList" 
+                  rowClasses="odd,even" styleClass="tableClass" rows="50" frame="none" >
+                  
+               	<apex:column width="10px" headerValue="Action">
+                	<apex:commandLink action="{!delCustomRTO}" onClick="return confirmDelete()">
+                        <apex:param name="RowID" value="{!Row.RTO_Id}" />
+                        <b>Del</b>
+                    </apex:commandLink>    
+                </apex:column>
+                  
+                <apex:column headerValue="Object Name" >
+                	<apex:outputText value="{!Row.RTO_ObjectName}"/>
+                </apex:column> 
+                
+                <apex:column headerValue="Owner Field" >
+                	<apex:outputText value="{!Row.RTO_OwnerFieldName}"/>
+                </apex:column>   
+               
+               </apex:pageBlockTable>
+         </apex:pageBlockSection> 
+    	</apex:pageBlock>
+    </apex:form>
+    <apex:form >    
+     	<apex:pageBlock rendered="{!IsQueueFull}">
+     		
+        	 <apex:pageBlockSection columns="1" > 
+         	    <div style="font-weight: bold; color: red;"> 
+				Related To Owner Recalculation routine cannot be run at this time because there are too many Apex jobs currently queued or running.<br/>
+				You will have to wait for one of the jobs to complete or possibly cancel a job that may have become stalled.&nbsp;
+				To review the list of Apex Jobs, go to Setup | Monitoring | Apex Jobs.<br/>
+				When the number of Apex Jobs is less than the limit of {!MaxJobs}, you will be able to run the recalculation routine.
+				</div>
+         	</apex:pageBlockSection>
+         	          
+        </apex:pageBlock>
+    </apex:form>
+
+</apex:page>

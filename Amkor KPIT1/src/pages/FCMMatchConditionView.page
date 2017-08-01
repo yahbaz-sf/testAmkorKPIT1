@@ -1,0 +1,22 @@
+<apex:page standardController="FCM_Match_Condition__c" extensions="FCMMatchConditionController" action="{!setupAction}">
+<apex:form >
+<apex:sectionHeader title="FCM Match Condition" subtitle="View FCM Match Condition"/>
+<apex:pageBlock >
+	<apex:pageBlockButtons rendered="{!ver.Status__c == 'Pending'}">
+		<apex:commandButton value="Edit" action="{!editAction}"/>
+		<apex:commandButton value="Delete" action="{!deleteAction}" onclick="return confirm('Are you sure you wish to delete this Match Condition?')"/>
+	</apex:pageBlockButtons>
+	<apex:pageBlockSection columns="1">
+		<apex:outputField value="{!rec.FCM_BOM__c}" rendered="{!isBom}"/>
+		<apex:outputField value="{!rec.FCM_Process__c}" rendered="{!isProcess}"/>
+		<apex:outputField value="{!rec.Name}"/>
+		<apex:outputField value="{!rec.Match_Type__c}"/>
+		<apex:outputField value="{!rec.RFQI_Field_Def__c}" rendered="{!!isAlways}"/>
+		<apex:outputField value="{!rec.Operand__c}" rendered="{!!isAlways}"/>
+		<apex:outputField value="{!rec.Text_Value__c}" rendered="{!isTextValue}"/>
+		<apex:outputField value="{!rec.Numeric_Value__c}" rendered="{!isNumericValue}"/>
+		<apex:outputField value="{!rec.Boolean_Value__c}" rendered="{!isBooleanValue}"/>
+	</apex:pageBlockSection>
+</apex:pageBlock>
+</apex:form>
+</apex:page>

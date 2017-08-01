@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>FirstRain</label>
+    <mobileReady>false</mobileReady>
+    <motif>Custom283: TV Widescreen</motif>
+    <page>FirstRain_Home_Insights_SF1</page>
+</CustomTab>

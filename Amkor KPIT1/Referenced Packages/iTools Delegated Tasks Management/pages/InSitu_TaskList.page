@@ -1,0 +1,33 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="true" cache="false" >
+
+<style>
+   .activeTab {background-color: #236FBD; color:white; background-image:none}
+   .inactiveTab {background-color: white; color:black; background-image:none}
+</style>
+    
+<apex:stylesheet value="/sCSS/21.0/sprites/1297816277000/Theme3/default/gc/versioning.css" />   
+ 
+<apex:sectionHeader title="My Tasks" />   
+
+<apex:tabPanel id="ContactTaskTabs" 
+               selectedTab="OpenTab" 
+               switchType="client" 
+               styleClass="theTabPanel" 
+               tabClass="activeTab" 
+               contentClass="tabContent" 
+               activeTabClass="activeTab" 
+               inactiveTabClass="inactiveTab">
+    
+    <!--Open Tasks -->                  
+    <apex:tab label="Open" name="OpenTab" id="tabOpen">
+        <c:Insitu_List_Contact_Tasks IsClosed="false" RowsPerPage="10" /> 
+    </apex:tab>
+    
+    <!--Closed Tasks -->                    
+    <apex:tab label="Closed" name="ClosedTab" id="tabClosed">
+        <c:Insitu_List_Contact_Tasks IsClosed="true" RowsPerPage="10" /> 
+    </apex:tab>
+    
+</apex:tabPanel>
+
+</apex:page>

@@ -1,0 +1,129 @@
+<apex:page standardController="RFQ_Ac_Map__c" extensions="RFQAcMapController">
+
+<style type="text/css">
+	.headerCell {
+		padding-right: 20px;
+	}
+</style>
+
+<apex:form id="form">
+
+	<apex:sectionHeader title="View Account File Map" />
+
+	<apex:pageMessages escape="false" />
+
+	<apex:pageblock id="mainBody"> 
+
+		<!-- ************************************* -->
+		<!-- Step One - Enter name and the columns -->
+		<!-- ************************************* -->
+		
+		<apex:pageBlockButtons location="top">
+			<apex:commandButton value="Edit" action="{!editMap}" />
+			<apex:commandButton value="Return To Account" action="{!returnToAccount}" />
+		</apex:pageBlockButtons>
+
+		<apex:pageBlockSection title="Account File Map Info" Columns="2">
+			<!-- Name and account Info -->
+
+			<apex:outputField value="{!accountMap.Account__c}" />
+			<apex:outputField value="{!accountMap.Version__c}" />
+			<apex:outputField value="{!accountMap.Name}" />
+
+		</apex:pageBlockSection>
+
+		<apex:pageBlockSection title="Account File Columns" columns="1">
+		
+			<!-- List of columns -->
+
+			<apex:dataTable value="{!accountMapColumns}" var="mapColumn" id="mapColumnTable">
+		
+				<apex:column > 
+					<apex:outputText value="{!mapColumn.accountMapColumn.name}" />
+				</apex:column>
+			
+			</apex:dataTable>
+
+		</apex:pageBlockSection>
+
+		<!-- ************************************ -->
+		<!-- Step Two - Select device name column -->
+		<!-- ************************************ -->
+
+		<apex:pageBlockSection title="{!$ObjectType['RFQ_Ac_Map__c'].fields['Device_Name_Column__c'].Label}" columns="1">
+
+			<apex:pageBlockSectionItem helpText="{!$ObjectType.RFQ_Ac_Map__c.fields.Device_Name_Column__c.inlineHelpText}">
+				
+				<apex:outputField value="{!accountMap.Device_Name_Column__c}" />
+
+        	</apex:pageBlockSectionItem>
+
+		</apex:pageBlockSection>
+
+		<!-- ************************************** -->
+		<!-- Step Three - Create attribute mappings -->
+		<!-- ************************************** -->
+
+		<apex:pageBlockSection title="Package Family Attribute Mappings" columns="1">
+
+			<apex:repeat value="{!pfMappings}" var="mappingHolder">
+
+				<apex:pageBlockSection columns="1" title="Mapping Item">
+
+					<!-- Product Group Select -->
+					<apex:pageBlockSectionItem >
+						<apex:outputText value="Product Group" />
+						<apex:outputField value="{!mappingHolder.pfMap.Product_Group__c}" />
+						
+                	</apex:pageBlockSectionItem>
+
+                	<!-- Package family select -->
+                	<apex:pageBlockSectionItem >
+                		<apex:outputText value="Package Family" />
+                		<apex:outputField value="{!mappingHolder.pfMap.Package_Family__c}" />
+                	</apex:pageBlockSectionItem>
+
+                	<!-- The account device name -->
+                	<apex:outputField value="{!mappingHolder.pfMap.Account_Device_Name__c}" />
+
+                	<!-- List of Column->API Field mappings -->
+
+                	<apex:outputPanel id="fieldOutputPanel">
+
+                		<apex:outputPanel rendered="{!IF(ISBLANK(mappingHolder.pfMap.Package_Family__c) , false , true)}">
+		                	<apex:dataTable id="fieldsDataTable" value="{!mappingHolder.fieldMaps}" var="fieldMap" headerClass="headerCell">
+
+		                		<apex:column >
+		                			<apex:facet name="header">Cost Attribute</apex:facet>
+		                			<apex:outputLabel value="{!fieldMap.friendlyName}" />
+		                		</apex:column>
+
+		                		<apex:column >
+		                			<apex:facet name="header">File Column</apex:facet>
+		                			<apex:outputField value="{!fieldMap.pfColumn.RFQ_Ac_Map_Column__c}"/>
+		                		</apex:column>
+
+		                		<apex:column >
+		                			<apex:facet name="header">Configuration #</apex:facet>
+		                			<apex:outputLabel value="N/A" rendered="{!fieldMap.pfColumn.Object_Index__c==null || fieldMap.pfColumn.Object_Index__c == 0}"/>
+		                			<apex:outputField value="{!fieldMap.pfColumn.Object_Index__c}" rendered="{!fieldMap.pfColumn.Object_Index__c!=null && fieldMap.pfColumn.Object_Index__c > 0}"/>
+		                		</apex:column>
+		                		
+		                	</apex:dataTable>
+
+	                	</apex:outputPanel>
+
+                	</apex:outputPanel>
+
+            	</apex:pageBlockSection>
+
+			</apex:repeat>
+
+		</apex:pageBlockSection>
+
+	</apex:pageblock>
+
+
+</apex:form>
+
+</apex:page>

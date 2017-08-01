@@ -1,0 +1,150 @@
+<apex:page controller="InSituCah.InSitu_TabViewManageController" standardStylesheets="true" action="{!checkMode}" tabStyle="InSituGen__InSitu_AppSetting__c">
+   	<apex:sectionHeader title="{!HeadingTabView}" subtitle="{!SubHeadingTabView}"></apex:sectionHeader>
+    <apex:messages />
+	<apex:form id="formCanvas">
+
+	<p class="myBreadcrumb">
+	<apex:commandLink action="{!returnToIToolsSetting}" value="<<Back to iTools Setting" />
+	</p>
+
+    <apex:pageBlock rendered="{!errCode = null}" >
+        <apex:pageBlockButtons location="Top" id="DefaultButtons">
+            <apex:commandButton action="{!newView}" value="New" rendered="{!IsViewMode}" />
+            <apex:commandButton action="{!doSetDefaultView}" value="Set Default View" rendered="{!IsViewMode}" />
+            <apex:commandButton action="{!doSave}" value="Save" rendered="{!IsSetDefaultMode}" />
+            <apex:commandButton action="{!doDelete}" value="Delete" rendered="{!ShowDelete}"  />
+            <apex:commandButton action="{!doCancel}" value="Cancel" rendered="{!IsSetDefaultMode}" />
+        </apex:pageBlockButtons>
+		<apex:outputPanel layout="block" id="VisibilityOptionsDetails">
+	        <apex:pageBlockSection columns="1"  rendered="{!IsSetDefaultMode}" >            
+				<apex:pageBlockSectionItem >
+					<apex:outputPanel layout="block">
+						<apex:outputText value="{!VisibilityOptionsHeader}" style="font-style:bold"  />
+						<table >
+		                <tr>
+		                    <td >
+								<apex:outputPanel layout="block" >
+									<apex:selectRadio id="VisibilityOptions" value="{!selectedVisibilityOption}" layout="pageDirection" immediate="true">
+										<apex:selectOptions value="{!VisibilityOptions}"/>
+										<apex:actionSupport event="onchange" action="{!doVisibilityOptionSelected}" rerender="formCanvas"/>
+									</apex:selectRadio>
+								</apex:outputPanel>
+		                    </td>
+		                    <td> 
+								<apex:outputPanel layout="block" id="VisibilityOptionsDetails" styleClass="pbSubbody" style="padding-left:70px;">
+									<apex:outputPanel layout="block" rendered="{!ShowProfileSelect}" >
+										<apex:outputPanel layout="block" >
+											<apex:outputLabel value="<b>Select Profile:</b>&nbsp;&nbsp;" for="VisibilityProfile" escape="false" />
+										</apex:outputPanel>
+										<apex:outputPanel layout="block" >
+											<apex:selectList id="VisibilityProfile" value="{!ProfileID}" size="7" >
+												<apex:selectOptions value="{!ProfileOptions}"/>
+												<apex:actionSupport event="onchange" action="{!doProfileOptionSelected}"  rerender="formCanvas"/>
+											</apex:selectList>
+										</apex:outputPanel>
+									</apex:outputPanel>
+			
+									<apex:outputPanel layout="block" rendered="{!ShowUserSelect}" style="padding-top:20px;" >
+										<apex:outputPanel layout="block" >
+											<apex:outputLabel styleClass="selectTitle" value="<b>Select User:</b>&nbsp;&nbsp;" for="VisibilityUser" escape="false" />
+										</apex:outputPanel>
+										<apex:outputPanel layout="block" >
+							               <apex:inputField id="VisibilityUser" value="{!asDefaultViewSetting.InSituGen__Scope_User__c }" /> 
+										   <apex:actionSupport event="onchange" action="{!doProfileOptionSelected}"  rerender="formCanvas"/>
+										</apex:outputPanel>
+									</apex:outputPanel>
+			
+								</apex:outputPanel>
+		                    </td>
+		                </tr>
+		                </table>
+					</apex:outputPanel>
+				</apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+		</apex:outputPanel>
+		<apex:outputPanel layout="block" id="tableView">
+	       	<apex:pageBlockTable value="{!TabViewData}"  var="tvData" rowClasses="odd,even" styleClass="tableClass" frame="border" rendered="{!ShowViewList}">
+				<apex:column headerValue="{!ActionHeader}" width="50">
+					<apex:outputPanel layout="block" id="actionsView" rendered="{!IsViewMode}">
+						<apex:commandLink action="{!editView}" >
+							<apex:param name="EditViewID" value="{!tvData.ViewObj.Id}"  />
+							<b>Edit</b>
+						</apex:commandLink> 
+						<apex:outputLabel value="|" style="font-style:bold" />
+						<apex:commandLink action="{!deleteView}" onClick="return confirmDelete()"  >
+							<apex:param name="DeleteViewID" value="{!tvData.ViewObj.Id}"  />
+							<b>Del</b>
+						</apex:commandLink>
+					</apex:outputPanel>
+					<apex:outputPanel layout="block" id="actionsSetDefault" rendered="{!IsSetDefaultMode}">
+			            <apex:image id="SelectedImage" url="{!URLFOR($Resource.InSituCah__InSitu_Radio_On)}" rendered="{!IF(tvData.ViewObj.Id = CheckedItemId, 'True', 'False')}" />
+			            <apex:image id="UnSelectedImage" url="{!URLFOR($Resource.InSituCah__InSitu_Radio_Off)}" rendered="{!IF(tvData.ViewObj.Id = CheckedItemId, 'False', 'True')}" >
+			                <apex:actionSupport event="onclick" action="{!doToggleCheckbox}" rerender="tableView">
+			                    <apex:param name="ToggleCheckboxItem" value="{!tvData.ViewObj.Id}" assignTo="{!ToggleCheckboxItem}"/>
+			                </apex:actionSupport>
+			            </apex:image>
+					</apex:outputPanel>
+				</apex:column>
+	            <apex:column >
+					<apex:facet name="header">
+						<apex:commandLink value="View" action="{!doSort}" >
+				            <apex:param name="sortColumn" value="0" assignTo="{!sortColumn}"/>
+		                    <apex:image url="{!URLFOR($Resource.InSituCah__InSitu_Sort_ASC_Arrow)}" title="Sorted Ascending" rendered="{!IF(CurrentSort = '0asc','True', 'False')}" />
+		                    <apex:image url="{!URLFOR($Resource.InSituCah__InSitu_Sort_DESC_Arrow)}" title="Sorted Descending" rendered="{!IF(CurrentSort = '0desc','True', 'False')}" />
+		                </apex:commandLink>
+					</apex:facet>
+	               	<apex:outputField value="{!tvData.ViewObj.InSituGen__Label__c}"/>
+	            </apex:column>
+	            <apex:column >
+					<apex:facet name="header">
+						<apex:commandLink value="Scope Indicator" action="{!doSort}" >
+				            <apex:param name="sortColumn" value="1" assignTo="{!sortColumn}"/>
+		                    <apex:image url="{!URLFOR($Resource.InSituCah__InSitu_Sort_ASC_Arrow)}" title="Sorted Ascending" rendered="{!IF(CurrentSort = '1asc','True', 'False')}" />
+		                    <apex:image url="{!URLFOR($Resource.InSituCah__InSitu_Sort_DESC_Arrow)}" title="Sorted Descending" rendered="{!IF(CurrentSort = '1desc','True', 'False')}" />
+		                </apex:commandLink>
+					</apex:facet>
+	               	<apex:outputText value="{!tvData.ScopeIndicator}"/>
+	            </apex:column>
+	            <apex:column >
+					<apex:facet name="header">
+						<apex:commandLink value="Profile / User" action="{!doSort}" >
+				            <apex:param name="sortColumn" value="2" assignTo="{!sortColumn}"/>
+		                    <apex:image url="{!URLFOR($Resource.InSituCah__InSitu_Sort_ASC_Arrow)}" title="Sorted Ascending" rendered="{!IF(CurrentSort = '2asc','True', 'False')}" />
+		                    <apex:image url="{!URLFOR($Resource.InSituCah__InSitu_Sort_DESC_Arrow)}" title="Sorted Descending" rendered="{!IF(CurrentSort = '2desc','True', 'False')}" />
+		                </apex:commandLink>
+					</apex:facet>
+	               	<apex:outputText value="{!tvData.ScopeValue}"/>
+	            </apex:column>
+	            <apex:column headerValue="Criteria" >
+	               	<apex:outputText value="{!tvData.Criteria}"/>
+	            </apex:column>
+		    </apex:pageBlockTable>
+		</apex:outputPanel>
+
+		<apex:outputPanel layout="block" id="NextPrevLinks" >
+		    <apex:panelGrid columns="2" width="100%" rendered="{!ShowViewList}" >
+		    	<apex:panelGroup >
+			        <apex:outputText value="{!CurrentPageDisplay}" />
+			        <apex:outputText value="&nbsp;&nbsp;&nbsp;&nbsp;" escape="false" />
+			
+			        <apex:commandLink rerender="ObjectList, NextPrevLinks" rendered="{!ShowFirstLast}" action="{!firstPage}">First</apex:commandlink>
+			        <apex:outputText value="&nbsp;&nbsp;|&nbsp;&nbsp;" rendered="{!ShowFirstLast}" escape="false" />
+			        
+			        <apex:commandLink rerender="ObjectList, NextPrevLinks" rendered="{!hasPrevious}" action="{!prevPage}">Previous</apex:commandlink>
+			        <apex:outputText value="&nbsp;&nbsp;|&nbsp;&nbsp;" rendered="{!hasPrevious}" escape="false" />
+			        
+			        <apex:commandLink rerender="ObjectList, NextPrevLinks" rendered="{!hasNext}" action="{!nextPage}">Next</apex:commandlink>
+			        <apex:outputText value="&nbsp;&nbsp;|&nbsp;&nbsp;" rendered="{!hasNext}" escape="false" />
+			        
+			        <apex:commandLink rerender="ObjectList, NextPrevLinks" rendered="{!ShowFirstLast}" action="{!lastPage}">Last</apex:commandlink>
+		        </apex:panelGroup>
+		
+		        <apex:outputText value="{!TotalItemsDisplay}" style="float: right;"/>
+		
+		    </apex:panelGrid>
+		</apex:outputPanel>
+
+    </apex:pageBlock>
+
+	</apex:form>	
+</apex:page>

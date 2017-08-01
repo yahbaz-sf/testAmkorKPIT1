@@ -1,0 +1,4 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="true" cache="false">
+<apex:sectionHeader title="Mark Task Complete" ></apex:sectionHeader> 
+	<c:InSitu_Edit_Contact_Task IsCommentRequired="false"/> 
+</apex:page>

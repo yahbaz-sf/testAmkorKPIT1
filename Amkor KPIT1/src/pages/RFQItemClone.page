@@ -1,0 +1,25 @@
+<apex:page standardController="RFQ_Item__c" extensions="RFQItemCloneController">
+
+<script type="text/javascript">
+    var inProgress = false;
+    function resetProgress() {
+        inProgress = false;
+    }
+
+</script>
+
+
+    <apex:sectionHeader title="Clone this line item" subtitle="RFQ Item Clone" description="Choose to clone {!wrapper.rfqItem.Name} to the current {!wrapper.rfqItem.RFQ__r.Name} or clone to a new RFQ"/>
+
+    <apex:form >
+        <apex:pageBlock > 
+	        <apex:pageBlockButtons location="bottom">
+		        <apex:commandButton value="Clone To New RFQ" action="{!cloneToNew}"/>
+		        <apex:commandButton value="Clone To Current RFQ" action="{!cloneToCurrent}" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();"/>
+		        <apex:commandButton value="Cancel" action="{!cancel}"/>
+		    </apex:pageBlockButtons>
+		    
+		    <c:RFQIPackageDescriptionSection wrapper="{!wrapper}" mode="view" />
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

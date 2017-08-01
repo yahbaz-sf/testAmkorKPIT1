@@ -1,0 +1,456 @@
+<apex:page sidebar="false" showHeader="false" controller="RFQPdfExportController" readonly="true" applyhtmltag="false" renderAs="pdf"> 
+	<head>
+		<style type="text/css">
+			body {
+				font: 0.8em sans-serif;
+			}
+			
+			div.page {
+				page-break-after: always;
+			}
+			
+			.logo {
+				width: 450px;
+				margin-left: auto;
+				margin-right: auto;
+				margin-top: 400px;
+				margin-bottom: 150px;
+				
+			}
+
+			.smallLogo img {
+				width: 100px;
+				position: relative;
+				top: 0px;
+				left: 0px;
+			}
+			
+			.centered {
+				text-align: center;
+			}
+			 
+			.summaryTable {
+				width: 100%;
+				font: 0.7em sans-serif;
+			}
+
+			.summaryTable tr td {
+                padding: 2px;  
+            }
+
+            .summaryTable th {
+                padding: 2px;  
+            }
+
+			.sCol1 {width: 15%;}
+			.sCol2 {width: 15%;}
+			.sCol3 {width: 35%;}
+			.sCol4 {width: 5%;}
+			.sCol5 {width: 5%;}
+			.sCol6 {width: 5%;}
+			.sCol7 {width: 5%;}
+			.sCol8 {width: 10%;}
+			.sCol9 {width: 10%;}
+
+			
+			
+			table.detailList {
+				width: 100%;
+				/* border-collapse: collapse; */
+				border-left: 1px solid black;
+				border-top: 1px solid black;
+				
+				font-size: 0.7em;
+			}
+			
+			table.detailList th.labelCol {
+				font-weight: bold;
+
+				border-right: 1px solid black;
+				
+				border-bottom: 1px solid black;
+				padding: 4px;
+			}
+			
+			table.detailList td.dataCol {
+				border-right: 1px solid black;
+				border-bottom: 1px solid black;
+				
+				padding: 4px;
+			}
+
+			td.empty {
+				display: none;
+			}
+
+			@page:first {
+			    margin-top: 2cm;
+			}
+			@page {
+				margin-top: 0.7cm;
+			}
+
+			@page:first{
+			    @top-right {
+			      
+			      content: counter();
+			          font-weight: lighter;
+			          font-size:8pt;
+			        }
+			    } 
+
+			@page {
+			    @top-right {
+			      
+			      content: "Page " counter(page) " of " counter(pages);
+			          font-weight: lighter;
+			          font-size:8pt;
+			        }
+		        @bottom-right {
+		        	content: element(footer);
+
+		        	}
+			    }
+	        div.footer 
+	        {
+           		position: running(footer);
+          	}
+		</style>
+	</head>
+
+<div class="footer">
+	<div>{!todayStr}</div>
+</div>
+	<!--  Cover Page -->
+	<div class="page">
+		<div class="logo">
+			<img src="{!$Resource.CompanyLogo}"/>
+		</div>
+		
+		<div class="centered">
+
+			<h2><apex:outputText value="{!rfqAccount.Name}" /> - &nbsp; <apex:outputText value="{!accountNumber}" /></h2>
+			<h2><apex:outputText value="{!rfqAccount.Parent.Name}" /> - &nbsp; <apex:outputText value="{!parentAccountNumber}" /></h2>
+			<h2><apex:outputText value="Customer RFQ Number: {!rfq.Customer_RFQ_Number__c}"  rendered="{!IF(ISBLANK(rfq.Customer_RFQ_Number__c), false, true)}" /> </h2>
+			<h2>Request for Quote &nbsp; <apex:outputText value="{!rfq.Name}" /></h2>
+			
+			<h3>Account Representative:</h3>
+			
+			<h3>
+				{!accountRep.Name}<br/>
+				{!accountRep.Phone} &nbsp;<apex:outputText value="ext. " rendered="{!LEN(accountRep.Extension) > 0}" /> <apex:outputText value="{!accountRep.Extension}" /><br/>
+				{!accountRep.Email}
+			</h3>
+			
+			<h3>
+				<apex:outputPanel rendered="{!IF(ISBLANK(rfq.Effective_Through_Date__c),false,true)}">
+					Effective Through: &nbsp;
+					<apex:outputText value="{0,date,MM/dd/yyyy}">
+						<apex:param value="{!rfq.Effective_Through_Date__c}" />
+					</apex:outputText>
+				</apex:outputPanel>
+			</h3>
+		</div>
+		
+	</div>
+	
+	<!-- 1 - Summary Page -->
+	<div class="page">
+		<div class="smallLogo">
+			<img src="{!$Resource.CompanyLogoSmall}" />
+		</div>
+
+		<apex:pageBlock rendered="{!quoteSummaryItems.size > 0}">		
+			<h2 class="centered">Quote Summary</h2>		
+			<c:QuoteSummaryTableTest quoteSummaryItems="{!quoteSummaryItems}" showAdderDetailColumn="{!showAdderDetailColumn}"/>
+		</apex:pageBlock>	
+
+		<apex:pageBlock rendered="{!showAdderDetailColumn && adderItems.size > 0}">		
+			<h3 class="centered">Assembly Adders</h3>		
+				<apex:dataTable value="{!adderItems}" var="item" styleClass="summaryTable" border="1">
+					<apex:column >
+						<apex:facet name="header">Customer Project/Device Name</apex:facet>
+						<apex:outputText value="{!item.projectDeviceName}"/>
+					</apex:column>
+					<apex:column >
+						<apex:facet name="header">Package Family</apex:facet>
+						<apex:outputText value="{!item.packageFamilyName}"/>						
+					</apex:column>
+					<apex:column >
+						<apex:facet name="header">Body Size/Dim</apex:facet>
+						<apex:outputText value="{!item.bodySize}"/>						
+					</apex:column>
+
+					<apex:column >
+						<apex:facet name="header">Ball/Lead Count</apex:facet>
+						<apex:outputText value="{!item.leads}"/>						
+					</apex:column>
+
+					<apex:column >
+						<apex:facet name="header">Adder Detail</apex:facet>
+
+						<apex:dataTable value="{!item.adderItems}" var="adderItem" border=".5" rendered="{!item.adderItems != null}">
+							<apex:column >
+								<apex:outputText value="{!adderItem.name}"/>
+							</apex:column>
+							<apex:column >							
+								<apex:outputText value="{0, number, ###,##0.00000}">
+									<apex:param value="{!adderItem.amount}" />
+								</apex:outputText>
+							</apex:column>
+						</apex:dataTable>
+					</apex:column>
+
+					<apex:column >
+						<apex:facet name="header">Total Adders</apex:facet>
+						<apex:outputText value="{0, number, ###,##0.00000}">
+							<apex:param value="{!item.adderTotal}" />
+						</apex:outputText>
+					</apex:column>
+					<apex:column >
+						<apex:facet name="header">Total Assy Price</apex:facet>
+						<apex:outputText value="{0, number, ###,##0.00000}">
+							<apex:param value="{!item.price}" />
+						</apex:outputText>
+					</apex:column>
+					<apex:column >
+						<apex:facet name="header">CPN</apex:facet>
+						<apex:outputText value="{!item.cpn}"/>						
+					</apex:column>
+					<apex:column >
+						<apex:facet name="header">RFQI</apex:facet>
+						<apex:outputText value="{!item.rfqiName}"/>						
+					</apex:column>
+
+				</apex:dataTable>
+		</apex:pageBlock>	
+
+			<apex:pageBlock rendered="{!engineeringServicesItems != null && engineeringServicesItems.size > 0}">		
+			<h3 class="centered">Engineering Services</h3>
+			<c:QuoteSummaryTableTest quoteSummaryItems="{!engineeringServicesItems}" showAdderDetailColumn="{!showAdderDetailColumn}" productGroupName="Engineering Services"/>		
+			<!-- <apex:dataTable columnClasses="sCol1,sCol2,sCol3,sCol4,sCol5,sCol6,sCol7,sCol8,sCol9" value="{!engineeringServicesItems}" var="item" styleClass="summaryTable" border="1">
+			<apex:column >
+				<apex:facet name="header">Customer Project/Device Name</apex:facet>
+				<apex:outputText value="{!item.projectDeviceName}"/>
+			</apex:column>
+
+			<apex:column>
+				<apex:facet name="header">Service Type</apex:facet>
+				 <apex:outputText value="{!item.serviceType}"/> 
+			</apex:column>
+
+			<apex:column>
+				<apex:facet name="header">Description</apex:facet>
+				 <apex:outputText value="{!item.serviceType} + {!item.description}"/> 
+			</apex:column>
+
+			<apex:column>
+				<apex:facet name="header">QTY</apex:facet>
+				<apex:outputText value="{!item.engSvcsQuantity}" />
+			</apex:column>
+
+			<apex:column>
+				<apex:facet name="header">Price ($)</apex:facet>
+				<apex:outputText value="{0, number, ###,##0.00}">
+					<apex:param value="{!item.price}" />
+				</apex:outputText>
+			</apex:column>
+
+			<apex:column>
+				<apex:facet name="header">UOM</apex:facet>
+				<apex:outputText value="{!item.uom}" />
+			</apex:column>
+
+			<apex:column>
+				<apex:facet name="header">NRE Total</apex:facet>
+				<apex:outputText value="{0, number, ###,##0.00}">
+					<apex:param value="{!item.nreTotal}" />
+				</apex:outputText>
+			</apex:column> 
+
+			<apex:column >
+				<apex:facet name="header">CPN</apex:facet>
+				<apex:outputText value="{!item.cpn}" />
+			</apex:column>
+
+			<apex:column >
+				<apex:facet name="header">RFQI</apex:facet>
+				<apex:outputText value="{!item.rfqiName}" />
+			</apex:column>
+
+		</apex:dataTable> -->
+		</apex:pageBlock>
+
+		
+		<!--  Show comments if entered on the previous page -->
+		<apex:outputPanel rendered="{!IF(LEN(comments) > 0, true, false)}"> 
+			<h3>Additional Comments:</h3>
+			<p><apex:outputText escape="false" value="{!comments}" /></p>
+		</apex:outputPanel>
+	</div>
+
+	<!-- 2 NRE -->
+	<apex:outputPanel layout="block" styleClass="page" rendered="{!renderNrePage}">
+		<div class="smallLogo">
+			<img src="{!$Resource.CompanyLogoSmall}" />
+		</div>
+
+		<h2 class="centered">NRE</h2>
+		<apex:repeat value="{!nrePackageFamilies}" var="packageFamily">
+			<apex:outputPanel rendered="{!pfHasNreItems[packageFamily.Id] || hasLotCharges[packageFamily.Id]}">
+				<h3><apex:outputText value="{!packageFamily.Name}" /></h3>
+			</apex:outputPanel>
+			
+			<apex:pageBlock rendered="{!pfHasNreItems[packageFamily.Id]}">
+				<apex:repeat value="{!pfWrappersNotServiceSorted[packageFamily.Id]}" var="wrapper">
+					<apex:outputPanel rendered="{!(wrapper.rfqItem.Include_NRE_On_Quote__c || wrapper.rfqItem.NRE_Inclusion__c == 'If Applicable' || wrapper.rfqItem.NRE_Inclusion__c == 'Required') && wrapperHasNreItems[wrapper.rfqItem.Id]}">
+
+						 <h5><apex:outputText value="{!wrapper.rfqItem.Project_Device__c}" /> -&nbsp;<apex:outputText value="{!rfqINamesMap[wrapper.parentVolId]}" /></h5>
+						<h6><apex:outputText value="NRE Inclusion: {!wrapper.rfqItem.NRE_Inclusion__c}" /></h6>
+						<apex:pageBlockSection columns="4">
+			                <apex:repeat value="{!wrapperLayouts[wrapper.rfqItem.Id].sectionMap['NRE'].attributes}" var="attribute" >
+				                <apex:outputPanel rendered="{!wrapper.specificRfqItem[attribute.fieldAPIName] != null && attribute.dataType != 'Boolean' && wrapper.specificRfqItem[attribute.fieldAPIName] > 0}" >
+				                	<apex:outputLabel value="Description:" />
+				                	<apex:outputLabel value="{!$ObjectType[attribute.objectAPIName].fields[attribute.fieldAPIName].Label}" />
+				                	<apex:outputLabel value="Price:$" />
+				            		<apex:outputText value="{0, number, ###,##0.00}"   >
+				            			<apex:param value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" />
+				            		</apex:outputText> 
+			            		</apex:outputPanel>
+			            		<apex:outputPanel rendered="{!wrapper.specificRfqItem[attribute.fieldAPIName] != null && attribute.dataType == 'Boolean' && wrapper.specificRfqItem[attribute.fieldAPIName]}" >
+			            			<apex:outputLabel value="Description:" />
+				                	<apex:outputLabel value="{!$ObjectType[attribute.objectAPIName].fields[attribute.fieldAPIName].Label}" />
+				                	<apex:outputLabel value="Include: " />
+				            		<apex:outputText value="Yes" />
+			            		</apex:outputPanel>
+					        </apex:repeat>
+
+
+
+					        <apex:repeat rendered ="{!wrapper.nreConfigurations.size > 0}" value="{!wrapper.nreConfigurations}"  var="nreConfiguration">  
+				                <apex:outputPanel rendered="{!nreConfiguration['Price_New__c'] != null && nreConfiguration['Price_New__c'] > 0}" >
+				                    <apex:outputLabel value="Description:" />
+				                    <apex:outputText value="{!nreConfiguration['Description__c']}" label=""/>
+				                    <apex:outputLabel value="Price:$" />
+				                    <apex:outputText value="{0, number, ###,##0.00}" >
+				            			<apex:param value="{!nreConfiguration['Price_New__c']}" />
+				            		</apex:outputText>
+			            		</apex:outputPanel>
+			                </apex:repeat>
+
+			            </apex:pageBlockSection> 
+					</apex:outputPanel>
+				</apex:repeat>
+			</apex:pageBlock>
+
+			
+			
+			<apex:outputPanel rendered="{!pfLayouts[packageFamily.Id].enabledSections['NRE'] && hasLotCharges[packageFamily.Id]}">
+				<h5>{!packageFamily.Name} Lot Charges</h5>
+				<apex:pageBlock >
+					<apex:pageBlockTable value="{!lotChargeWrappers[packageFamily.Id]}" var="wrapper" border="1" styleClass="summaryTable">
+
+						<apex:column value="{!wrapper.rfqItem.Name}" headerValue="RFQ Item #" />
+							
+						<apex:repeat value="{!pfLayouts[packageFamily.Id].sectionMap['NRE'].attributes}" var="attribute">
+							<apex:column value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" rendered="{!attribute.isLotCharge}" />
+						</apex:repeat>
+
+						<apex:column >
+							<apex:facet name="header">Other Lot Charges</apex:facet>
+
+							<apex:repeat rendered="{!wrapper.lotCharges.size > 0}" value="{!wrapper.lotCharges}" var="lotCharge">
+								<b>{!lotCharge.name}</b>: {!lotCharge.amount}
+								
+								<apex:outputText escape="false" rendered="{!IF(ISNULL(lotCharge.quantity), false, true)}" value="<br/><b>Volume/Quantity (pcs):</b> {0}<br/>">
+									<apex:param value="{!lotCharge.quantity}" />
+								</apex:outputText>
+								<br/>
+								<hr/>
+							</apex:repeat>
+						</apex:column>
+					</apex:pageBlockTable>
+				</apex:pageBlock>
+			</apex:outputPanel>
+			<br/>
+		</apex:repeat>
+	</apex:outputPanel>
+	
+	<!-- 3 Detail Page -->
+	<div class="page">
+		<div class="smallLogo">
+			<img src="{!$Resource.CompanyLogoSmall}" />
+		</div>
+
+		<apex:pageBlock >
+			<h2 class="centered">RFQ Detail</h2>
+		
+			<apex:repeat value="{!packageFamilies}" var="packageFamily">	
+				<h3><apex:outputText value="{!packageFamily.Name}" rendered="{!packageFamily.Product_Group_Name__c != 'Engineering Services'}"/></h3>
+				 
+				<apex:repeat value="{!pfWrappers[packageFamily.Id]}" var="wrapper">
+					<apex:outputPanel rendered="{!wrapper.packageFamily.Product_Group_Name__c != 'Engineering Services'}">
+						<c:RFQPDFQuoteDetailPage showAdderDetailColumn="{!showAdderDetailColumn}" breakoutPostTestPriceMap="{!breakoutPostTestPriceMap}" wrapper="{!wrapper}" pfLayouts="{!pfLayouts}" dummyList="{!dummyList}" specificItemMap="{!specificItemMap}" wrapperLayouts="{!wrapperLayouts}" rfqisWithIncludedPrices="{!rfqisWithIncludedPrices}" testTotalPrices="{!testTotalPrices}" includedPriceKeys="{!IncludedPriceKeys}" RFQItemNameMap="{!rfqINamesMap}"/>
+					</apex:outputPanel>	
+				</apex:repeat>
+			</apex:repeat>
+			
+
+			<apex:outputPanel rendered="{!hasEngineeringServices}">
+				<h3 class="centered"><apex:outputText value="Engineering Services" /></h3>
+			</apex:outputPanel>
+
+			<apex:repeat value="{!packageFamilies}" var="packageFamily">
+			<h3><apex:outputText value="{!packageFamily.Name}" rendered="{!packageFamily.Product_Group_Name__c == 'Engineering Services'}"/></h3>	 
+				<apex:repeat value="{!pfWrappers[packageFamily.Id]}" var="wrapper">
+					<apex:outputPanel rendered="{!wrapper.packageFamily.Product_Group_Name__c == 'Engineering Services' }" >
+						<c:RFQPDFQuoteDetailPage showAdderDetailColumn="{!showAdderDetailColumn}" breakoutPostTestPriceMap="{!breakoutPostTestPriceMap}" wrapper="{!wrapper}" pfLayouts="{!pfLayouts}" dummyList="{!dummyList}" specificItemMap="{!specificItemMap}" wrapperLayouts="{!wrapperLayouts}" rfqisWithIncludedPrices="{!rfqisWithIncludedPrices}" testTotalPrices="{!testTotalPrices}" includedPriceKeys="{!IncludedPriceKeys}" RFQItemNameMap="{!rfqINamesMap}"/>
+					</apex:outputPanel>	
+				</apex:repeat>
+			</apex:repeat>
+			
+		</apex:pageBlock>
+	</div>
+	
+	<!-- Terms and Conditions -->
+	<div>
+		<!--  Don't use class="page" because it will result in a blank page after -->
+		<div class="smallLogo">
+			<img src="{!$Resource.CompanyLogoSmall}" />
+		</div>
+
+		<h2 class="centered">Terms and Conditions</h2>
+		
+		<!-- Ashish N - 21-July-2016 : SALESFORCE-241 : RFQ output file - text update. 
+		     Commented the hard-coded 'Terms and Conditions' and created a custom label for it. -->
+		<apex:outputText value="{!$Label.RFQ_Terms_and_Conditions}" escape="false"/> 
+		
+        <!--<p>
+            This budgetary quote is valid for 90 days.  Pricing is only valid for manufacturing when added to the buyer's master quote. 
+        </p>
+        <p>
+            Quote does not guarantee capacity, material, or process compatibility with customer device. 
+        </p>
+        <p>
+            NRE's may be subject to change pending final design/drawing review.
+        </p>
+        <p>
+            Terms and conditions of sale governing this budgetary quote are as detailed in either the Amkor Master Quote 
+            or in that certain Master Agreement between our companies.
+        </p> -->
+		<!-- Removed in AMK-2353 -->
+		<!-- <apex:outputPanel rendered="{!rfqAccount.Gold_Billing_Flag__c != 'Inclusive'}">
+		<p>
+			PRECIOUS METAL ADDERS: 
+			Prices are quoted at the base price of $1,000 per Troy ounce for gold. 
+			Prices are based on the London Fix PM gold price two days prior to shipment from the factory. 
+			Adders are calculated per 1,000 units by multiplying the quoted factor by the dollar increase above the base price
+			and dividing by 1000. 
+			The calculated price adder per unit is shown as a separate item on the invoice.
+		</p>
+		</apex:outputPanel> -->
+	</div>
+
+
+
+</apex:page>

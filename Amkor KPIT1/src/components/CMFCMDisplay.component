@@ -1,0 +1,247 @@
+<apex:component controller="CMFCMDisplayController" allowDML="true" >
+<apex:attribute name="fcmB" type="CMBuilder" assignTo="{!builder}" description="Driving Builder object"/>
+
+<apex:attribute name="isEditMode" type="Boolean" assignTo="{!isEdit}" description="Allow editing of BOM/Proccess"/>
+<apex:attribute name="noCM" type="Boolean" assignTo="{!noCostModel}" default="true" description="Only display if Cost Model is implemented/accessible"/>
+<apex:outputPanel id="fcm">
+<apex:pageBlock >
+	<apex:pageBlockButtons location="top">
+		<apex:commandButton value="Clear" action="{!clearAction}" rendered="false"/> <!--rendered="{!isEditMode && !noCM}"-->
+	    <apex:commandButton value="Clear & Recalculate" action="{!recalculateAction}" rendered="false"/> <!-- rendered="{!isEditMode && !noCM}" -->
+	</apex:pageBlockButtons>
+	    <!--<apex:outputPanel rendered="{!isEditMode}"> 
+	    Item:&nbsp; 
+	    <apex:selectList value="{!fcmBuilder.processItemSelectedId}" multiselect="false" size="1"> 
+  			<apex:selectOptions value="{!fcmBuilder.processItemSelectList}"/>
+   			<apex:actionSupport event="onchange" rerender="fcm" action="{!processItemChanged}"/> 
+	    </apex:selectList>
+	    <apex:outputPanel rendered="{!fcmBuilder.showProcessVariant}">
+	    	&nbsp;&nbsp;Variant:&nbsp;
+	     	<apex:selectList value="{!fcmBuilder.processVariantSelectedId}" multiselect="false" size="1" >
+  				<apex:selectOptions value="{!fcmBuilder.processItemSelected.variantSelectList}"/> 
+  				<apex:actionSupport event="onchange" rerender="fcm"/> 
+	    	</apex:selectList>
+	    </apex:outputPanel>
+	    <apex:commandButton value="Add" action="{!addProcess}" rerender="fcm" rendered="{!fcmBuilder.showProcessAdd}"/> 
+	    </apex:outputPanel>-->
+	    
+	    <apex:pageBlockTable value="{!fcmBuilder.processItemList}" var="itemProcess"> 
+	    	<apex:column rendered="{!isDeleteAllowed}"> 
+	    		<apex:facet name="header"></apex:facet> 
+	    		<apex:commandLink action="{!deleteProcess}" value="Del" rerender="fcm"> 
+	    			 <apex:param name="itemProcessId" value="{!itemProcess.id}"/> 
+	    		</apex:commandLink>
+	    	</apex:column>
+	    	
+	    	<apex:column ><apex:facet name="header">Operation</apex:facet><apex:outputField value="{!itemProcess.name}" /></apex:column> 
+	    	<apex:column ><apex:facet name="header">Equipment</apex:facet><apex:outputField value="{!itemProcess.Equipment__c}" /></apex:column> 
+	    	<apex:column ><apex:facet name="header">Mach<br/>Per<br/>Person</apex:facet><apex:outputText value="{0, number, ###,###,##0}"><apex:param value="{!itemProcess.Machines_Per_Person__c}" /></apex:outputText></apex:column> 
+	    	<apex:column ><apex:facet name="header">Mach<br/>UPH</apex:facet><apex:outputText value="{0, number, ###,###,##0}"><apex:param value="{!itemProcess.Machine_UPH__c}" /></apex:outputText></apex:column> 
+	    	<apex:column ><apex:facet name="header">Mach<br/>Cost<br/>Unit</apex:facet><apex:outputText value="{0, number, ###,###,##0}"><apex:param value="{!itemProcess.Machine_Cost_Per_Unit__c}" /></apex:outputText></apex:column>
+	    	 
+	    	<apex:column ><apex:facet name="header">Sqft<br/>Per<br/>Mach</apex:facet><apex:outputText value="{0, number, ###,###,##0}"><apex:param value="{!itemProcess.Footprint_Per_Machine__c}" /></apex:outputText></apex:column> 
+	    	<apex:column ><apex:facet name="header">Util<br/>Eff</apex:facet><apex:outputText value="{0, number, ###,###,##0}%"><apex:param value="{!itemProcess.Utilization_Efficiency__c}" /></apex:outputText></apex:column> 
+	    	
+	    	<apex:column ><apex:facet name="header">Net<br/>UPH</apex:facet><apex:outputText value="{0, number, ###,###,##0}"><apex:param value="{!itemProcess.Net_UPH__c}" /></apex:outputText></apex:column> 
+	    	<apex:column ><apex:facet name="header">Std<br/>HPK</apex:facet><apex:outputText value="{0, number, ###,###,##0.0000}"><apex:param value="{!itemProcess.Standard_HPK__c}" /></apex:outputText></apex:column> 
+	    	<apex:column ><apex:facet name="header">KUnits<br/>Per<br/>Week</apex:facet><apex:outputText value="{0, number, ###,###,##0}"><apex:param value="{!itemProcess.K_Units_Per_Week__c}" /></apex:outputText></apex:column> 
+	    	<apex:column >
+	    		<apex:facet name="header">S/D</apex:facet>
+	    		<apex:outputText value="D" rendered="{!itemProcess.Is_Dedicated__c}"/><apex:outputText value="S" rendered="{!!itemProcess.Is_Dedicated__c}"/>
+	    	</apex:column> 
+	    	<apex:column ><apex:facet name="header">Equip<br/>Needed</apex:facet><apex:outputText value="{0, number, ###,###,##0.0}"><apex:param value="{!itemProcess.Equipment_Needed__c}" /></apex:outputText></apex:column> 
+	    	<apex:column ><apex:facet name="header">Tot<br/>Cap</apex:facet><apex:outputText value="{0, number, ###,###,##0.00}"><apex:param value="{!itemProcess.Total_Capital__c}" /></apex:outputText></apex:column> 
+	    	<apex:column ><apex:facet name="header">Tot<br/>Sqft</apex:facet><apex:outputText value="{0, number, ###,###,##0.0}"><apex:param value="{!itemProcess.Total_Sqft__c}" /></apex:outputText></apex:column> 
+	    	<apex:column ><apex:facet name="header">People<br/>Needed</apex:facet><apex:outputText value="{0, number, ###,###,##0.0}"><apex:param value="{!itemProcess.People_Needed__c}" /></apex:outputText></apex:column> 
+	    	<apex:column ><apex:facet name="header">Direct<br/>Labor</apex:facet><apex:outputText value="{0, number, ###,###,##0.0000}"><apex:param value="{!itemProcess.Direct_Labor__c}" /></apex:outputText></apex:column> 
+	    	<apex:column ><apex:facet name="header">Ind<br/>Labor</apex:facet><apex:outputText value="{0, number, ###,###,##0.0000}"><apex:param value="{!itemProcess.Indirect_Labor__c}" /></apex:outputText></apex:column> 
+	    	<apex:column ><apex:facet name="header">Equip<br/>Dep</apex:facet><apex:outputText value="{0, number, ###,###,##0.0000}"><apex:param value="{!itemProcess.Equipment_Depreciation__c}" /></apex:outputText></apex:column> 
+	    	<apex:column ><apex:facet name="header">Fac<br/>Exp</apex:facet><apex:outputText value="{0, number, ###,###,##0.0000}"><apex:param value="{!itemProcess.Facilities_Expense__c}" /></apex:outputText></apex:column> 
+	    	<apex:column ><apex:facet name="header">Tot<br/>Cost<br/>Unit</apex:facet><apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!itemProcess.Total_Cost_Per_Unit__c}" /></apex:outputText></apex:column> 
+	    </apex:pageBlockTable>
+	    
+		<apex:pageBlockSection columns="2" rendered="true">
+			<apex:pageBlockSectionItem />
+	        <apex:pageBlockSectionItem >
+	      		<apex:outputText value="Total Direct Labor"/>
+	      	 	<apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!fcmBuilder.itemFcm.Total_Direct_Labor__c}"/></apex:outputText>
+	        </apex:pageBlockSectionItem>
+
+	        <apex:pageBlockSectionItem />
+	        <apex:pageBlockSectionItem >
+	       		<apex:outputText value="Total Indirect Labor"/>
+	      	 	<apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!fcmBuilder.itemFcm.Total_Indirect_Labor__c}"/></apex:outputText>
+	      	</apex:pageBlockSectionItem>
+
+	        <apex:pageBlockSectionItem />
+	        <apex:pageBlockSectionItem >
+	       		<apex:outputText value="Total Equipment Depreciation"/>
+	      	 	<apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!fcmBuilder.itemFcm.Total_Equipment_Depreciation__c}"/></apex:outputText>
+	      	</apex:pageBlockSectionItem>
+
+	        <apex:pageBlockSectionItem />
+	        <apex:pageBlockSectionItem >
+	       		<apex:outputText value="Total Facilities Expense"/>
+	      	 	<apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!fcmBuilder.itemFcm.Total_Facilities_Expense__c}"/></apex:outputText>
+	      	</apex:pageBlockSectionItem>
+
+	        <apex:pageBlockSectionItem />
+	        <apex:pageBlockSectionItem >
+	       		<apex:outputText value="Total Cost Per Unit"/>
+	      	 	<apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!fcmBuilder.itemFcm.Total_Cost_Per_Unit__c}"/></apex:outputText>
+	      	</apex:pageBlockSectionItem>
+	    </apex:pageBlockSection>
+	    <br/><br/>
+	      
+	    <!--<apex:outputPanel rendered="{!isEditMode}"> 
+	    Item:&nbsp; 
+	    <apex:selectList value="{!fcmBuilder.bomItemSelectedId}" multiselect="false" size="1"> 
+  			<apex:selectOptions value="{!fcmBuilder.bomItemSelectList}"/>
+   			<apex:actionSupport event="onchange" rerender="fcm" action="{!bomItemChanged}"/> 
+	    </apex:selectList>
+	    <apex:outputPanel rendered="{!fcmBuilder.showBomVariant}">
+	    	&nbsp;&nbsp;Variant:&nbsp;
+	     	<apex:selectList value="{!fcmBuilder.bomVariantSelectedId}" multiselect="false" size="1" >
+  				<apex:selectOptions value="{!fcmBuilder.bomItemSelected.variantSelectList}"/> 
+  				<apex:actionSupport event="onchange" rerender="fcm"/> 
+	    	</apex:selectList>
+	    </apex:outputPanel>
+	    <apex:commandButton value="Add" action="{!addBom}" rerender="fcm" rendered="{!fcmBuilder.showBomAdd}"/> 
+	    </apex:outputPanel>-->
+	    
+	    <apex:pageBlockTable value="{!fcmBuilder.bomItemList}" var="itemBom"> 
+	    	<apex:column rendered="{!isDeleteAllowed}">  
+	    		<apex:facet name="header"></apex:facet> 
+	    		<apex:commandLink action="{!deleteBom}" value="Del" rerender="fcm">
+	    			 <apex:param name="itemBomId" value="{!itemBom.id}"/>
+	    		</apex:commandLink>
+	    	</apex:column>
+	    	<apex:column >
+	    		<apex:facet name="header">Valuation Class</apex:facet> 
+	    		<apex:outputField value="{!itemBom.name}" />
+	    	</apex:column> 
+	    	<apex:column >
+	    		<apex:facet name="header">Description</apex:facet> 
+	    		<apex:outputField value="{!itemBom.Description__c}" />
+	    	</apex:column> 
+	    	<apex:column >
+	    		<apex:facet name="header">SID</apex:facet> 
+	    		<apex:outputField value="{!itemBom.SID__c}" />
+	    	</apex:column> 
+	    	<apex:column >
+	    		<apex:facet name="header">UOM</apex:facet> 
+	    		<apex:outputField value="{!itemBom.UOM__c}" />
+	    	</apex:column> 
+	    	<apex:column >
+	    		<apex:facet name="header">Purchase Price</apex:facet> 
+	    		<apex:outputText value="{0, number, ###,###,##0.0000000}"><apex:param value="{!itemBom.Purchase_Price__c}" /></apex:outputText>
+	    	</apex:column> 
+	    	<apex:column >
+	    		<apex:facet name="header">Std Usage</apex:facet> 
+	    		<apex:outputText value="{0, number, ###,###,##0.0}"><apex:param value="{!itemBom.Standard_Usage__c}" /></apex:outputText>
+	    	</apex:column> 
+	    	<apex:column >
+	    		<apex:facet name="header">Usage Rate</apex:facet> 
+	    		<apex:outputText value="{0, number, ###,###,##0.000}"><apex:param value="{!itemBom.Usage_Rate__c}" /></apex:outputText>
+	    	</apex:column> 
+	    	<apex:column >
+	    		<apex:facet name="header">Cum Yield %</apex:facet> 
+	    		<apex:outputText value="{0, number, ##0.0}%"><apex:param value="{!itemBom.Cum_Yield_Percent__c}" /></apex:outputText>
+	    	</apex:column> 
+	    	<apex:column >
+	    		<apex:facet name="header">Mat Cost/Unit</apex:facet> 
+	    		<apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!itemBom.Material_Cost_Per_Unit__c}" /></apex:outputText>
+	    	</apex:column> 
+	    </apex:pageBlockTable>
+	  
+	    <apex:pageBlockSection columns="2">
+	       <apex:pageBlockSectionItem />
+	       <apex:pageBlockSectionItem >
+	      		<apex:outputText value="Sub Total Material Cost"/>
+	      	 	<apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!fcmBuilder.itemFcm.Sub_Total_Material_Cost__c}"/></apex:outputText>
+	       </apex:pageBlockSectionItem>
+	       
+	       <apex:pageBlockSectionItem >
+	      		<apex:outputText value="Freight %"/>
+	       		<apex:outputText value="{0, number, ##0}%"><apex:param value="{!fcmBuilder.itemFcm.Material_Freight_Percent__c}"/></apex:outputText>
+	       </apex:pageBlockSectionItem>
+	       
+	       <apex:pageBlockSectionItem >
+	      		<apex:outputText value="Freight"/>
+	      		 <apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!fcmBuilder.itemFcm.Material_Freight__c}"/></apex:outputText>
+	       </apex:pageBlockSectionItem>
+	       
+	       <apex:pageBlockSectionItem >
+	      		<apex:outputText value="Tooling %"/>
+	       		<apex:outputText value="{0, number, ##0}%"><apex:param value="{!fcmBuilder.itemFcm.Material_Tooling_Percent__c}"/></apex:outputText>
+	       </apex:pageBlockSectionItem>
+	       
+	       <apex:pageBlockSectionItem >
+	      		<apex:outputText value="Tooling"/>
+	       		<apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!fcmBuilder.itemFcm.Material_Tooling__c}"/></apex:outputText>
+	       </apex:pageBlockSectionItem>
+	       
+	       <apex:pageBlockSectionItem >
+	      		<apex:outputText value="Brokerage %"/>
+	       		<apex:outputText value="{0, number, ##0}%"><apex:param value="{!fcmBuilder.itemFcm.Material_Brokerage_Percent__c}"/></apex:outputText>
+	       </apex:pageBlockSectionItem>
+	       
+	       <apex:pageBlockSectionItem >
+	      		<apex:outputText value="Brokerage"/>
+	       		<apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!fcmBuilder.itemFcm.Material_Brokerage__c}"/></apex:outputText>
+	       </apex:pageBlockSectionItem>
+	       
+	        <apex:pageBlockSectionItem />
+	        
+	        <apex:pageBlockSectionItem >
+	      		<apex:outputText value="Total Material Cost"/>
+	       		<apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!fcmBuilder.itemFcm.Total_Material_Cost__c}"/></apex:outputText>
+	    	</apex:pageBlockSectionItem>
+	    	
+	    </apex:pageBlockSection>
+	    <br/><br/>
+	    <apex:pageBlockSection columns="2" rendered="true">  
+	       <apex:pageBlockSectionItem />
+	       <apex:pageBlockSectionItem >
+	      		<apex:outputText value="Manufacturing Overhead"/>
+	       		<apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!fcmBuilder.itemFcm.Manufacturing_Overhead__c}"/></apex:outputText>
+	       </apex:pageBlockSectionItem>
+	       
+	       <apex:pageBlockSectionItem />
+	       
+	       <apex:pageBlockSectionItem >
+	      		<apex:outputText value="QA Cost"/>
+	       		<apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!fcmBuilder.itemFcm.QA_Cost__c}"/></apex:outputText>
+	       </apex:pageBlockSectionItem>
+	       
+	       <apex:pageBlockSectionItem />
+	       
+	       <apex:pageBlockSectionItem >
+	      		<apex:outputText value="Service Group Cost"/>
+	       		<apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!fcmBuilder.itemFcm.Service_Group_Cost__c}"/></apex:outputText>
+	       </apex:pageBlockSectionItem>
+	       
+	       <apex:pageBlockSectionItem />
+	       
+	       <apex:pageBlockSectionItem >
+	      		<apex:outputText value="CLAM"/>
+	       		<apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!fcmBuilder.itemFcm.CLAM__c}"/></apex:outputText>
+	       </apex:pageBlockSectionItem>
+	       
+	       <apex:pageBlockSectionItem />
+	       
+	       <apex:pageBlockSectionItem >
+	      		<apex:outputText value="Total Material Cost"/>
+	       		<apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!fcmBuilder.itemFcm.Total_Material_Cost__c}"/></apex:outputText>
+	       </apex:pageBlockSectionItem>
+	       
+	       <apex:pageBlockSectionItem />
+	       
+	       <apex:pageBlockSectionItem >
+	      		<apex:outputText value="Total Cost of Goods"/>
+	       		<apex:outputText value="{0, number, ###,###,##0.00000}"><apex:param value="{!fcmBuilder.itemFcm.Total_Cost_of_Goods__c}"/></apex:outputText>
+	       </apex:pageBlockSectionItem>
+	    </apex:pageBlockSection>
+</apex:pageBlock>
+</apex:outputPanel>
+</apex:component>

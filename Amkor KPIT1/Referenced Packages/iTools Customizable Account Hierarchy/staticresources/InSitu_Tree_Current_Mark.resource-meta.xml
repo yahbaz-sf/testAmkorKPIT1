@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StaticResource xmlns="http://soap.sforce.com/2006/04/metadata">
+    <cacheControl>Private</cacheControl>
+    <contentType>image/x-png</contentType>
+    <description>Indicator on an item to mark it as the one from which access was initiated.</description>
+</StaticResource>

@@ -1,0 +1,95 @@
+<apex:page controller="InSituCah.InSitu_AHCustomPageSettingsController" standardStylesheets="true" action="{!checkMode}" tabStyle="InSituGen__InSitu_AppSetting__c">
+	<apex:form id="AHCustomPageSettingsForm">
+    	<apex:sectionHeader title="{!HeadingAHCustomPageSettings}" subtitle="{!SubHeadingAHCustomPageSettings}"></apex:sectionHeader>
+   	    <apex:messages />
+
+		<apex:outputPanel layout="block" id="NewUserSpecificOverride" rendered="{!ShowChooseUser}">
+	        <apex:pageBlock title="iTools Setting Edit">
+	           <apex:pageBlockButtons location="Top" id="DefaultButtons">
+	               <apex:commandButton action="{!saveUser}" value="Continue" rerender="AHCustomPageSettingsForm"/>
+	               <apex:commandButton action="{!returnToPreviousPage}" value="Cancel" />
+	           </apex:pageBlockButtons>
+	           <apex:pageBlockSection columns="1">
+	               <apex:inputField value="{!AppSetting.InSituGen__Scope_User__c}" id="ScopeUserInput"/> 
+	               <apex:outputField value="{!AppSetting.InSituGen__Description__c}"/>            
+	           </apex:pageBlockSection>
+	        </apex:pageBlock>
+		</apex:outputPanel>
+		
+		<apex:outputPanel layout="block" id="NewProfileSpecificOverride" rendered="{!ShowChooseProfile}">
+	        <apex:pageBlock title="iTools Setting Edit">
+	           <apex:pageBlockButtons location="Top" id="DefaultButtons">
+	               <apex:commandButton action="{!saveProfile}" value="Continue" rerender="AHCustomPageSettingsForm"/>
+	               <apex:commandButton action="{!returnToPreviousPage}" value="Cancel" />
+	           </apex:pageBlockButtons>
+	           <apex:pageBlockSection columns="1">
+					<apex:pageBlockSectionItem rendered="{!IsProfileSpecific}">
+						<apex:outputLabel value="Profile" />
+						<apex:selectList value="{!ProfileID}" size="7" >
+							<apex:selectOptions value="{!ProfileOptions}"/>
+						</apex:selectList>
+		            </apex:pageBlockSectionItem>
+	                <apex:outputField value="{!AppSetting.InSituGen__Description__c}"/>            
+    	       </apex:pageBlockSection>
+			</apex:pageBlock>
+		</apex:outputPanel>
+
+		<apex:outputPanel layout="block" id="ComponentOptions" rendered="{!ShowEdit}">
+   			<apex:pageBlock mode="edit" id="thePageBlock"> 
+	            <apex:pageBlockSection showHeader="false" columns="1" >
+               
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel value="{!LabelShowTabChk}" for="chkShowObjTab" />
+						<apex:inputCheckbox value="{!IsEnabled}" id="chkShowObjTab" />
+					</apex:pageBlockSectionItem>
+
+		            <apex:pageBlockSectionItem >
+	                   	<apex:outputLabel value="Tab Name" />
+			           	<apex:inputText value="{!TabName}" maxlength="100"/> 
+	    	        </apex:pageBlockSectionItem>
+	                              
+		            <apex:pageBlockSectionItem >
+	                   	<apex:outputLabel value="Source" />
+			           	<apex:inputText value="{!Source}" style="width:400px"/> 
+	    	        </apex:pageBlockSectionItem>
+
+					<apex:pageBlockSectionItem >
+	                   	<apex:outputLabel value="Height" />
+			           	<apex:inputText value="{!Height}" maxlength="100"/> 
+					</apex:pageBlockSectionItem>
+					
+					<apex:pageBlockSectionItem >
+	                   	<apex:outputLabel value="Width" />
+			           	<apex:inputText value="{!Width}" maxlength="100"/> 
+					</apex:pageBlockSectionItem>
+
+		            <apex:pageBlockSectionItem >
+	                   	<apex:outputLabel value="Title" />
+			           	<apex:inputText value="{!Title}" maxlength="100"/> 
+	    	        </apex:pageBlockSectionItem>
+
+					<apex:pageBlockSectionItem >
+	                   	<apex:outputLabel value="Frame Border" />
+			           	<apex:inputCheckbox value="{!FrameBorder}" /> 
+					</apex:pageBlockSectionItem>
+
+					<apex:pageBlockSectionItem >
+	                   	<apex:outputLabel value="Scrolling" />
+			           	<apex:inputCheckbox value="{!Scrolling}" /> 
+					</apex:pageBlockSectionItem>
+				</apex:pageBlockSection>
+					
+           	</apex:pageBlock>
+
+           	<apex:pageBlock >
+	           	<apex:pageBlockButtons location="Bottom" id="DefaultButtons">
+	               <apex:commandButton action="{!save}" value="Save" rerender="popupErrMsg" />
+	               <apex:commandButton action="{!returnToPreviousPage}" value="Cancel" />
+	           	</apex:pageBlockButtons>
+           	</apex:pageBlock>
+           	
+		</apex:outputPanel>
+		
+    </apex:form>
+      
+</apex:page>

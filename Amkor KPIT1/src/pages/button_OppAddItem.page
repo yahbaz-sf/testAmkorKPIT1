@@ -1,0 +1,1 @@
+<apex:page showHeader="false" sidebar="false" standardController="Opportunity" extensions="RFQOpportunityController" action="{!addItem}"/>

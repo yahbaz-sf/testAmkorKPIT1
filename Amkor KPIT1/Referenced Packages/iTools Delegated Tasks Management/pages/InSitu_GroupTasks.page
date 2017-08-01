@@ -1,0 +1,318 @@
+<apex:page standardController="InSituDtm__Task_Group__c" 
+           extensions="InSituDtm.InSitu_GroupTaskController"  
+           showHeader="true" 
+           sidebar="true" 
+           standardStylesheets="true"
+           tabStyle="InSituDtm__Group_Tasks__tab"
+           id="TaskGroupDetailPage" >
+           
+<style type="text/css">
+.sortArrow 
+{
+    padding-left: 5px;
+    vertical-align: text-bottom; 
+    height: 11px;
+}
+</style> 
+
+    <apex:sectionHeader title="{!SectionTitle}" ></apex:sectionHeader>
+    <apex:pageMessages id="TaskGroupPageMessages"/>
+
+<div class="filterOverview" style="border-top-color: #1797C0;" >
+    <apex:form > 
+        <apex:outputPanel styleClass="bFilterView" layout="block" rendered="{!ShowDetail}" id="GroupSpecificActions"> 
+            <span class="bFilter">
+                <span class="fBody">
+                    <!-- Group Selection -->
+                    <b>Group:&nbsp;&nbsp;</b>
+                    <apex:selectList value="{!CurrentGroup}" size="1" title="Group List" id="theGroupList" >
+                        <apex:selectOptions value="{!GroupOptions}"/>
+                        <apex:actionSupport event="onchange" action="{!changeGroup}" rerender="GroupTaskChatterFeed,GroupTaskList,TaskGroupPageMessages,GroupSpecificActions" status="searchStatus"/>
+                    </apex:selectList>  
+                    
+                    <!-- Show Selection -->
+                    &nbsp;&nbsp;&nbsp;&nbsp;<b>View:&nbsp;&nbsp;</b>
+                    <apex:selectList value="{!CurrentScope}" size="1" title="Scope List" id="theScopeList" >
+                        <apex:selectOptions value="{!ScopeOptions}"/>
+                        <apex:actionSupport event="onchange" action="{!changeScope}" rerender="GroupTaskChatterFeed,GroupTaskList,TaskGroupPageMessages" status="searchStatus"/>
+                    </apex:selectList> 
+   
+                    <!-- Group Admin Operations -->
+                    <apex:outputPanel rendered="{!AccessRights.HasEditAccess}">
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <apex:commandButton action="{!URLFor($Action.InSituDtm__Task_Group__c.Edit, CurrentGroup, [retURL=ReturnHere])}" 
+                                            value="Edit" />
+                        <apex:commandButton action="{!URLFor($Action.InSituDtm__Task_Group__c.Delete, CurrentGroup, [retURL=ReturnHere])}" 
+                                            value="Delete" 
+                                            rendered="{!AccessRights.HasDeleteAccess}" 
+                                            onClick="return confirmDelete()" />
+                        <apex:commandButton action="{!URLFOR($Action.InSituDtm__Task_Group__c.Share, CurrentGroup, [retURL=ReturnHere])}"
+                                            value="Sharing" />
+                        <apex:commandButton action="{!URLFOR($Action.InSituDtm__Task_Group__c.New, null)}"
+                                            value="New Group"
+                                            rendered="{!$ObjectType.InSituDtm__Task_Group__c.createable}" />   
+                    </apex:outputPanel>
+                                       
+                    <!-- Group Owner -->
+                    &nbsp;&nbsp;&nbsp;&nbsp;<b>Group Owner:&nbsp;&nbsp;</b>
+                    {!CurrentGroupObject.Owner.FirstName}&nbsp;{!CurrentGroupObject.Owner.LastName}&nbsp;&nbsp;
+                    <apex:outputPanel rendered="{!AccessRights.HasTransferAccess}">
+                        <apex:commandLink action="{!changeOwner}" style="color: black; font-size: 100%; text-decoration: underline;">[Change]</apex:commandLink>
+                    </apex:outputPanel>
+                </span>
+                <span style="float: right;" >
+                    <apex:outputPanel id="FollowGroupButton" >
+                        <chatter:follow entityId="{!CurrentGroup}" />
+                    </apex:outputPanel>
+                </span>
+            </span>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!$ObjectType.InSituDtm__Task_Group__c.createable}" >
+            <apex:pageBlock rendered="{!NOT(ShowDetail)}" >
+                <apex:pageBlockButtons location="top" > 
+                    <apex:commandButton action="{!URLFOR($Action.InSituDtm__Task_Group__c.New, null)}"  value="Create First Group" />
+                </apex:pageBlockButtons> 
+            </apex:pageBlock>
+        </apex:outputPanel> 
+    </apex:form>
+</div>     
+<apex:form rendered="{!ShowDetail}" id="GroupTaskList" > 
+    <apex:pageBlock tabStyle="Task"  rendered="{!ShowTaskList}" >   
+        
+        <apex:actionStatus id="searchStatus">
+            <apex:facet name="stop"> 
+            
+        <apex:pageBlockTable value="{!Results_Task}" 
+                                var="task" 
+                                id="pbt_GroupTasks" 
+                                rowClasses="odd,even" 
+                                styleClass="tableClass" 
+                                rows="{!RowsPerPage}" 
+                                frame="none" 
+                                border="0">>
+               
+            <apex:column headerValue="Action" width="20px" >
+                <apex:commandLink action="{!doClaim}" 
+                                      style="color: #015BA7; -moz-text-decoration-line: none; text-decoration: none;" 
+                                      rendered="{!task.ShowClaim}"
+                                      rerender="GroupTaskList,TaskGroupPageMessages" >
+                    <apex:param name="TaskId" value="{!task.Id}"/>Claim</apex:commandLink>
+                <apex:commandLink action="{!doRelease}" 
+                                      style="color: #015BA7; -moz-text-decoration-line: none; text-decoration: none;" 
+                                      rendered="{!task.ShowRelease}" 
+                              rerender="GroupTaskList,TaskGroupPageMessages" >
+                    <apex:param name="TaskId" value="{!task.Id}"/>Release</apex:commandLink>    
+            </apex:column>
+               
+            <apex:column headerValue="" width="50px" >
+                <apex:outputPanel rendered="{!task.ShowEdit}" style="white-space: nowrap;" >
+                    <b>| </b>
+                        <apex:commandLink action="{!doEditTask}" 
+                                          style="color: #015BA7; -moz-text-decoration-line: none; text-decoration: none;" >          
+                    <apex:param name="TaskId" value="{!task.Id}"/>Edit</apex:commandLink>
+                    <b>| </b>
+                    <apex:commandLink action="{!doCompleteTask}" 
+                                          style="color: #015BA7; -moz-text-decoration-line: none; text-decoration: none;" >
+                        <apex:param name="TaskId" value="{!task.Id}"/>Complete</apex:commandLink> 
+                </apex:outputPanel>   
+           </apex:column>     
+                                 
+           <apex:column >
+                   <apex:facet name="header" > 
+                        <apex:actionStatus id="DUE_DATEColumnClick">
+                        <apex:facet name="start">
+                            <apex:outputText value="Sorting..." style="color: gray;"/>
+                        </apex:facet>
+                        <apex:facet name="stop">
+                            <apex:commandLink value="{!ColumnInfo.Label['DUE_DATE']}" 
+                                              rendered="{!ColumnInfo.IsSortable['DUE_DATE']}"
+                                              action="{!performQuery}" 
+                                              rerender="GroupTaskList,TaskGroupPageMessages" 
+                                              status="DUE_DATEColumnClick" >
+                                <apex:param name="sortKey" value="DUE_DATE" assignTo="{!ColumnInfo.PrimaryKey}" />
+                                <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, ColumnInfo.SortImage['DUE_DATE'])}" styleClass="sortArrow" />
+                            </apex:commandLink>            
+                        </apex:facet>
+                    </apex:actionStatus>    
+               </apex:facet>
+               <span style="{!IF(task.GTask.ActivityDate <> null && task.GTask.ActivityDate < TODAY(), 'color:#990000', 'color:black')}">
+                    <apex:outputField value="{!task.GTask.ActivityDate}" />
+               </span>
+        </apex:column>
+                                                             
+               <apex:column >
+                    <apex:facet name="header" > 
+                        <apex:actionStatus id="SUBJECTColumnClick">
+                            <apex:facet name="start">
+                                <apex:outputText value="Sorting..." style="color: gray;"/>
+                            </apex:facet>
+                            <apex:facet name="stop">
+                                <apex:commandLink value="{!ColumnInfo.Label['SUBJECT']}" 
+                                                  rendered="{!ColumnInfo.IsSortable['SUBJECT']}"
+                                                  action="{!performQuery}" 
+                                                  rerender="GroupTaskList,TaskGroupPageMessages" 
+                                                  status="SUBJECTColumnClick" >
+                                    <apex:param name="sortKey" value="SUBJECT" assignTo="{!ColumnInfo.PrimaryKey}" />
+                                    <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, ColumnInfo.SortImage['SUBJECT'])}" styleClass="sortArrow" />
+                                </apex:commandLink>                
+                            </apex:facet>
+                        </apex:actionStatus>    
+                   </apex:facet>
+                    <apex:image url="{!URLFOR($Resource.InSituDtm__InSitu_Recurring_Activity)}" 
+                               title="Recurring Task" 
+                               style="padding-top: 1px; padding-right: 4px;" 
+                               rendered="{!IF(task.GTask.RecurrenceActivityId != null, 'true', 'false')}" />  
+                   <apex:outputLink value="{!URLFOR($Action.Task.View, task.Id)}" target="_top" >{!task.GTask.Subject}</apex:outputLink>
+                   <apex:image value="/img/high_priority.gif" title="High Priority" height="13" width="16" rendered="{!IF(task.GTask.Priority == 'High', 'true', 'false')}" />   
+               </apex:column>                                                    
+
+               <apex:column >
+                   <apex:facet name="header" > 
+                        <apex:actionStatus id="ASSIGNED_TOColumnClick">
+                            <apex:facet name="start">
+                                <apex:outputText value="Sorting..." style="color: gray;"/>
+                            </apex:facet>
+                            <apex:facet name="stop">
+                                <apex:commandLink value="{!ColumnInfo.Label['ASSIGNED_TO']}" 
+                                                  rendered="{!ColumnInfo.IsSortable['ASSIGNED_TO']}"
+                                                  action="{!performQuery}" 
+                                                  rerender="GroupTaskList,TaskGroupPageMessages" 
+                                                  status="ASSIGNED_TOColumnClick" >
+                                    <apex:param name="sortKey" value="ASSIGNED_TO" assignTo="{!ColumnInfo.PrimaryKey}" />
+                                    <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, ColumnInfo.SortImage['ASSIGNED_TO'])}" styleClass="sortArrow" />
+                                </apex:commandLink>            
+                            </apex:facet>
+                        </apex:actionStatus>    
+                   </apex:facet>
+                   <apex:outputLink value="mailto:{!task.GTask.Owner.Email}?SUBJECT={!StatusEmailSubject}{!task.GTask.Subject}" target="_blank"  >
+                       <apex:image url="{!URLFOR($Resource.InSituDtm__InSitu_Email_Image)}" title="Send email to check status" height="11" rendered="{!task.IsClaimed}" />
+                   </apex:outputLink>
+                   <apex:outputText value="&nbsp;&nbsp;&nbsp;" escape="false" rendered="{!task.IsClaimed}" />
+                   <apex:outputText value="{!task.AssignedTo}" />  
+               </apex:column>
+           
+               <apex:column >
+                   <apex:facet name="header" > 
+                        <apex:actionStatus id="STATUSColumnClick">
+                            <apex:facet name="start">
+                                <apex:outputText value="Sorting..." style="color: gray;"/>
+                            </apex:facet>
+                            <apex:facet name="stop">
+                                <apex:commandLink value="{!ColumnInfo.Label['STATUS']}" 
+                                                  rendered="{!ColumnInfo.IsSortable['STATUS']}"
+                                                  action="{!performQuery}" 
+                                                  rerender="GroupTaskList,TaskGroupPageMessages" 
+                                                  status="STATUSColumnClick" >
+                                    <apex:param name="sortKey" value="STATUS" assignTo="{!ColumnInfo.PrimaryKey}" />
+                                    <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, ColumnInfo.SortImage['STATUS'])}" styleClass="sortArrow" />
+                                </apex:commandLink>            
+                            </apex:facet>
+                        </apex:actionStatus>    
+                   </apex:facet>
+                   <apex:outputField value="{!task.GTask.Status}" />     
+               </apex:column>
+               
+               <apex:column >
+                    <apex:facet name="header" > 
+                        <apex:actionStatus id="NAMEColumnClick">
+                            <apex:facet name="start">
+                                <apex:outputText value="Sorting..." style="color: gray;"/>
+                            </apex:facet>
+                            <apex:facet name="stop">
+                                <apex:commandLink value="{!ColumnInfo.Label['NAME']}" 
+                                                  rendered="{!ColumnInfo.IsSortable['NAME']}"
+                                                  action="{!performQuery}" 
+                                                  rerender="GroupTaskList,TaskGroupPageMessages" 
+                                                  status="NAMEColumnClick" >
+                                    <apex:param name="sortKey" value="NAME" assignTo="{!ColumnInfo.PrimaryKey}" />
+                                    <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, ColumnInfo.SortImage['NAME'])}" styleClass="sortArrow" />
+                                </apex:commandLink>            
+                            </apex:facet>
+                        </apex:actionStatus>    
+                   </apex:facet>
+                    <apex:outputLink value="/{!task.GTask.WhoID}" target="_top">
+                        <apex:outputText value="{!task.GTask.Who.Name}" />
+                    </apex:outputLink>      
+               </apex:column>
+               
+               <apex:column headerValue="Related To" >
+                    <apex:facet name="header" > 
+                        <apex:actionStatus id="RELATED_TOColumnClick">
+                            <apex:facet name="start">
+                                <apex:outputText value="Sorting..." style="color: gray;"/>
+                            </apex:facet>
+                            <apex:facet name="stop">
+                                <apex:commandLink value="{!ColumnInfo.Label['RELATED_TO']}" 
+                                                  rendered="{!ColumnInfo.IsSortable['RELATED_TO']}"
+                                                  action="{!performQuery}" 
+                                                  rerender="GroupTaskList,TaskGroupPageMessages" 
+                                                  status="RELATED_TOColumnClick" >
+                                    <apex:param name="sortKey" value="RELATED_TO" assignTo="{!ColumnInfo.PrimaryKey}" />
+                                    <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, ColumnInfo.SortImage['RELATED_TO'])}" styleClass="sortArrow" />
+                                </apex:commandLink>            
+                            </apex:facet>
+                        </apex:actionStatus>    
+                   </apex:facet>
+                    <apex:outputLink value="/{!task.GTask.WhatID}" target="_top">
+                        <apex:outputText value="{!task.GTask.What.Name}" /> 
+                    </apex:outputLink>    
+               </apex:column>
+                
+            </apex:pageBlockTable>          
+        
+            </apex:facet>
+            <apex:facet name="start">
+                <apex:outputPanel >
+                    <apex:image value="/img/loading32.gif" style="height: 15px;"/>
+                    <apex:outputText value="Searching..." />
+                </apex:outputPanel>
+            </apex:facet>
+        </apex:actionStatus> 
+            
+        <!-- Paging -->
+        <apex:outputPanel layout="block" style="display: block; margin-left: 15px; margin-right: 5px; padding: 0px 0px 0px 0px;" 
+                          id="PagingControls_Task" rendered="{!IsMultiplePages_Task}" >
+            <table width="100%" cellpadding="0">
+                <tablebody>
+                    <tr>
+                        <td width="25%" align="left">
+                            <apex:outputPanel layout="block">
+                                <apex:outputText value="{!RowsDisplayedMsg_Task}" style="white-space: nowrap;"/> 
+                            </apex:outputPanel>
+                        </td>
+                        <td width="25%" align="right" style="white-space: nowrap;">
+                            <apex:commandLink action="{!doFirstPage_Task}" rerender="GroupTaskList,TaskGroupPageMessages" >
+                                <apex:variable var="imageFirst" value="{!FirstImage_Task}"/>
+                                <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, imageFirst)}" id="firstPage_Task"/>
+                            </apex:commandLink>
+                            <apex:commandLink action="{!doPrevPage_Task}" rerender="GroupTaskList,TaskGroupPageMessages" >
+                                <apex:variable var="imagePrev" value="{!PrevImage_Task}"/>
+                                <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, imagePrev)}" id="prevPage_Task"/>
+                            </apex:commandLink>
+                            &nbsp;
+                        </td>
+                        <td width="25%" align="left" style="white-space: nowrap;">
+                            &nbsp;
+                            <apex:commandLink action="{!doNextPage_Task}" rerender="GroupTaskList,TaskGroupPageMessages" >  
+                                <apex:variable var="imageNext" value="{!NextImage_Task}"/>
+                                <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, imageNext)}" id="nextPage_Task"/>
+                            </apex:commandLink> 
+                            <apex:commandLink action="{!doLastPage_Task}" rerender="GroupTaskList,TaskGroupPageMessages" >
+                                <apex:variable var="imageLast" value="{!LastImage_Task}"/>
+                                <apex:image url="{!URLFOR($Resource.InSituDtm__LIST_CONTROLS, imageLast)}" id="lastPage_Task"/>
+                            </apex:commandLink>
+                        </td>
+                        <td width="25%" align="right">
+                            <apex:outputText value="{!PagesDisplayedMsg_Task}" />
+                        </td>
+                    </tr>
+                </tablebody>
+            </table>
+        </apex:outputPanel>
+    </apex:pageBlock>
+
+</apex:form>
+<apex:outputPanel id="GroupTaskChatterFeed" >
+    <chatter:feed entityId="{!CurrentGroup}" showPublisher="false" rendered="{!ShowChatterFeed}" />
+</apex:outputPanel>
+</apex:page>

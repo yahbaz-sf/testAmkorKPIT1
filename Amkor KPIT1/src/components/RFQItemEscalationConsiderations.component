@@ -1,0 +1,14 @@
+<apex:component >
+<apex:pageBlock id="considerations">
+        <apex:pageBlockSection title="Escalation Considerations" columns="2">
+            <apex:outputText escape="false" value="&bull; Did you present Price to Customer?"/>
+            <apex:outputText escape="false" value="&bull; What Price do you think we need to win the business? (Sales Target Price) "/>
+            <apex:outputText escape="false" value="&bull; Could the Customer move to another test platform? "/>
+            <apex:outputText escape="false" value="&bull; Can we get more market share? "/>
+            <apex:outputText escape="false" value="&bull; Are you comparing like parts and configurations when you compare to a Competitor or target price? "/>
+            <apex:outputText escape="false" value="&bull; Can we offset a price break to gain other business? "/>
+           
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+    
+</apex:component>

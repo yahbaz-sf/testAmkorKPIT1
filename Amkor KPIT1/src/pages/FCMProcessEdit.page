@@ -1,0 +1,47 @@
+<apex:page standardController="FCM_Process__c" extensions="FCMProcessController" action="{!setupAction}"> 
+<apex:form >
+<apex:sectionHeader title="FCM Process" subtitle="Edit FCM Process"/>
+<apex:pageBlock >
+	<apex:pageBlockButtons >
+		<apex:commandButton value="Save" action="{!saveAction}"/>
+		<apex:commandButton value="Cancel" action="{!cancelAction}" immediate="true"/>
+	</apex:pageBlockButtons>
+	<apex:outputPanel id="body">
+	<apex:pageBlockSection columns="2">
+		<apex:inputField value="{!rec.name}" required="true"/>
+		<apex:outputField value="{!rec.Type__c}"/>	
+		<apex:inputField value="{!rec.Category__c}" rendered="{!changeCategoryAllowed}" required="true">
+			<apex:actionSupport event="onchange" rerender="body" action="{!updateCategory}"/> 
+		</apex:inputField>	
+		<apex:outputField value="{!rec.Category__c}" rendered="{!!changeCategoryAllowed}"/>
+		<apex:inputField value="{!rec.Has_Variants__c}" rendered="{!isItem}"/>
+		<apex:pageBlockSectionItem rendered="{!!isItem}"/>		
+		<apex:inputField value="{!rec.Sequence__c}"/>
+		<apex:pageBlockSectionItem />
+		<apex:repeat value="{!dataFieldList}" var="lField">
+		<apex:pageBlockSectionItem >
+			<apex:outputText value="{!lField.label}"/>
+			<apex:outputPanel >
+				<apex:inputField value="{!rec[lField.orName]}" rendered="{!!isItem}">
+					<apex:actionSupport event="onchange" rerender="body" action="{!updateValues}"/> 
+				</apex:inputField>
+				<apex:inputField value="{!rec[lField.localName]}" rendered="{!rec[lField.orName]}">
+					<apex:actionSupport event="onchange" rerender="body" action="{!updateValues}"/> 
+				</apex:inputField>
+			</apex:outputPanel>
+		</apex:pageBlockSectionItem>
+		<apex:pageBlockSectionItem >
+			<apex:outputText value="Value" rendered="{!!isItem}"/>
+			<apex:outputField value="{!rec[lField.calcName]}" rendered="{!!isItem}"/>
+		</apex:pageBlockSectionItem>
+		</apex:repeat> 
+	</apex:pageBlockSection>
+	<apex:pageBlockSection columns="1" title="Variant Filters" rendered="{!!isItem}">
+		<apex:inputField value="{!rec.Package_Family__c}"/>
+		<apex:inputField value="{!rec.Filter_Lead_Count__c}"/>
+		<apex:inputField value="{!rec.Filter_Factory__c}"/>
+	</apex:pageBlockSection>
+	</apex:outputPanel>
+</apex:pageBlock>
+</apex:form>
+</apex:page>

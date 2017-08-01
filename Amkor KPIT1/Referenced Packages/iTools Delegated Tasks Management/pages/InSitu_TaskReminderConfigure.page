@@ -1,0 +1,87 @@
+<apex:page Controller="InSituDtm.InSitu_ConfigureTaskReminder_Controller" showHeader="true" tabStyle="InSituGen__InSitu_AppSetting__c" >
+    <apex:sectionHeader title="Reminder Notification" subtitle="Configuration"></apex:sectionHeader>
+    <apex:pageMessages />
+    
+    <apex:form >
+        <apex:pageBlock mode="detail" title="Settings">
+         
+        	<apex:pageBlockButtons location="Both">
+           		<apex:commandButton action="{!save}" value="Save" />
+           		<apex:commandButton action="{!returnToSettingView}" value="Cancel" />	
+            </apex:pageBlockButtons>
+           
+           	<apex:outputPanel style="line-height: 3.0;">
+				<apex:inputCheckbox value="{!FeatureActive}" id="xbEnable"/>
+	   			<apex:outputLabel value="Enable the Reminder Notification feature" for="xbEnable"/>   
+	   		</apex:outputPanel> 	
+        	
+        	<apex:pageBlockSection id="GeneralSettings" Title="General Settings" columns="1" collapsible="false" >
+        		
+        		<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Days In Advance"/>
+					<apex:selectList value="{!DaysInAdvance}" size="1" title="Days in Advance" id="theDaysInAdvance" >
+                		<apex:selectOptions value="{!DaysOptions}" />
+            		</apex:selectList>
+				</apex:pageBlockSectionItem>
+				
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Always Send Reminder" for="xbAlwaysSend"/> 
+					<apex:outputPanel >
+					<apex:inputCheckbox value="{!AlwaysSendReminder}" id="xbAlwaysSend"/>
+						&nbsp;&nbsp;(Do not place the "Send Email Reminder" checkbox on the Task page when this option is selected)
+					</apex:outputPanel>	 
+				</apex:pageBlockSectionItem>
+	
+			</apex:pageBlockSection>
+				
+			<apex:pageBlockSection id="Notifications" Title="Send Reminder Notification To" columns="1" collapsible="false" >
+			
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Task Owner" for="xbOwner"/> 
+					<apex:outputPanel >
+						<apex:inputCheckbox value="{!NotifyOwner}" id="xbOwner"/>
+						&nbsp;&nbsp;(User specified in the Assigned To field)
+					</apex:outputPanel>	 
+				</apex:pageBlockSectionItem>
+				
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Task Delegator" for="xbDelagator"/> 
+					<apex:outputPanel >
+						<apex:inputCheckbox value="{!NotifyCreator}" id="xbDelegatorr"/>
+						&nbsp;&nbsp;(User that created the Task but is not the Owner)
+					</apex:outputPanel>	 
+				</apex:pageBlockSectionItem>
+				
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Related To Owner" for="xbRTO"/> 
+					<apex:outputPanel >
+						<apex:inputCheckbox value="{!NotifyRTO}" id="xbRTO"/>
+						&nbsp;&nbsp;(Owner of the object specified in the Related To field.  Only applies if the Related To Owner feature is enabled.)
+					</apex:outputPanel>	 
+				</apex:pageBlockSectionItem>
+				
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Task Contact" for="xbContact"/> 
+					<apex:outputPanel >
+						<apex:inputCheckbox value="{!NotifyContact}" id="xbContact"/>
+						&nbsp;&nbsp;(Contact specified in the Name field.  Only applies to Contact Tasks and only when the Contact Tasks feature is enabled.)
+					</apex:outputPanel>	 
+				</apex:pageBlockSectionItem>
+				
+        	</apex:pageBlockSection>
+        	
+        	<apex:pageBlockSection id="SenderInfo" Title="Send Reminder Notification From" columns="1" collapsible="false" >
+        		
+        		<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Organization-Wide Email Address"/>
+					<apex:selectList value="{!OrgWideEmail}" size="1" title="Organization-Wide Email Address" id="OrgWideEmail" >
+                		<apex:selectOptions value="{!OWEAOptions}" />
+            		</apex:selectList>
+				</apex:pageBlockSectionItem>
+				
+			</apex:pageBlockSection>
+			
+        </apex:pageBlock>
+    </apex:form>
+
+</apex:page>

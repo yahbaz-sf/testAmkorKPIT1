@@ -1,0 +1,3 @@
+<apex:page standardController="Account" tabStyle="Account" extensions="First_Rain.FRAccountControllerExt"> 
+<apex:iframe src="https://apps.firstrain.com/sfdcnextgen/001/dynamic/accountsnapshot.do?accountname={!URLENCODE(Account.Name)}&accountid={!Account.Id}&entrprsid={!enterpriseId}&type=account&accesstoken={!accesstoken}&userEmail={!$User.Email}&userFirstName={!URLENCODE($User.FirstName)}&userLastName={!URLENCODE($User.LastName)}&sessionId={!$Api.Session_ID}&userid={!$User.Id}&restUrl={!resturl}" height="513px" id="frAccountIframe"/> 
+</apex:page>

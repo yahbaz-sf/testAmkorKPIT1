@@ -1,0 +1,578 @@
+<apex:component id="volComp" controller="RFQMultiVolumeSectionController" allowDML="true">
+<apex:attribute name="wrapper" type="RFQItemWrapper" description="Item Wrapper" assignTo="{!cWrapper}"/>
+<apex:attribute name="edit" type="Boolean" description="Edit Mode" assignTo="{!editMode}"/>
+<apex:attribute name="layout" type="RFQILayout" description="Layout" assignTo="{!cLayout}"/>
+<apex:attribute name="builder" type="CMBuilder" description="CM Builder" assignTo="{!cBuilder}"/>
+<apex:attribute name="isBUPage" type="Boolean" description="Is BU Page" default="false" assignTo="{!buPage}"/>
+<apex:attribute name="isEngineeringService" type="Boolean" description="Is engineering service pg" default="false" assignTo="{!engineeringService}"/>
+<apex:attribute name="PostTestServiceOnly" type="Boolean" description="Is Post Test Service only" default="false"/>
+<apex:attribute name="isLayoutDeprecated" type="Boolean" description="Is Layout Deprecated" default="false"/>
+<apex:attribute name="buPriceSummary" type="String" description="BU Price Summary label" default="false"/>
+
+<style type="text/css">
+        
+hr.insertionSeparator {
+    border: 0;
+    height: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+input[readonly="readonly"]
+{
+
+    background-color: #ECECEC;
+}
+</style>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script type="text/javascript">
+var reloadedIndex;
+var packageFamilyName = '{!wrapper.packageFamily.Name}';
+var doMath = {!wrapper.packageFamily.Has_Cost_And_Price_Math__c};
+function canRepriceVolume(oldValue, ele) {
+        if ({!!wrapper.packageFamily.Copy_Fields_To_Multivolume__c}) return false;
+        if(needsReprice) {
+            if(ele != null) {
+                ele.value = oldValue;
+            }
+            
+            alert('You have modified attributes in the Cost and Price section and must click Reprice Item (or manually enter a BU Price, Substrate Markup, Assembly GM or Price Percent Delta Target) before you can reprice a multi volume item');
+            return false;
+        }
+        return true;
+    }
+
+    function recalculateVolumePrices(field)
+    {
+        //each multi volume has a page block section, so find number of them
+        //increment it to start at 1, not 0 (because function expects that)
+        var size = $("[id$=':volPBS']").length + 1;
+        for (var i = 1; i < size; i++)
+        {
+            onMultiVolumeAttribChange(i, field, {!wrapper.packageFamily.Has_Substrate__c});
+        }
+    }
+
+    function recalcSubTotals(index){
+        if (!doMath) return;
+        console.log('inside');
+        var sub = document.getElementsByClassName(index+'-subTotal');
+        var total = 0;
+        console.log(sub.length);
+        for(var i = 0; i<sub.length; i++) {
+            console.log('inside for');
+            total += Number(sub[i].value);
+        }
+        console.log(total);
+        document.getElementsByClassName(index+'-engBuPrice')[0].value = total;
+    }
+
+    function onMultiVolumeAttribChange(index, fieldName, hasSubstrate)
+    {
+        if (!doMath) return;
+        //decrement index to start counting at 0, not 1
+        index--;
+
+        var subsMarkup;
+        var margNoSubstrate;
+        var margin;
+        var buPrice;
+        var costLessSubs;
+        var subsCost;
+        var othersCost;
+        var auAdder;
+        var baseBUPrice;
+        var goldBillingFlag;
+
+        var elementId;
+
+        $('[class*="multiVolField"]').each(function()
+            {
+                elementId = this.id;
+                if (elementId.indexOf(index + ':volPBS:subsMarkup') != -1)
+                    subsMarkup = this;
+
+                else if (elementId.indexOf(index + ':volPBS:margNoSubstrate') != -1)
+                    margNoSubstrate = this;
+
+                else if (elementId.indexOf(index + ':volPBS:margin') != -1)
+                    margin = this;
+
+                else if (elementId.indexOf(index + ':volPBS:price') != -1)
+                    buPrice = this;
+
+                else if (elementId.indexOf(index + ':volPBS:costLessSubs') != -1)
+                    costLessSubs = this;
+
+                else if (elementId.indexOf(index + ':volPBS:auAdder') != -1)
+                    auAdder = this;
+
+                 else if (elementId.indexOf(index + ':volPBS:baseBUPrice') != -1)
+                    baseBUPrice = this;
+
+                 else if (elementId.indexOf(index + ':volPBS:goldBillingFlag') != -1)
+                    goldBillingFlag = this;
+
+                else if (elementId.indexOf(index + ':volPBS:subsCost') != -1)
+                    subsCost = this;
+
+                else if (elementId.indexOf(index + ':volPBS:othersCost') != -1)
+                    othersCost = this;
+
+            }
+        );
+
+        //extra null checks because some fields will not exist depending on hasSubstrate var
+        var buPriceValue = (buPrice == null || buPrice.value == null) ? 0 : Number(buPrice.value);
+        var costLessSubsValue = (costLessSubs == null || costLessSubs.value == null) ? 0 : Number(costLessSubs.value);
+        var margNoSubstrateValue = (margNoSubstrate == null || margNoSubstrate.value == null) ? 0 : Number(margNoSubstrate.value)/100;
+        var subsCostValue = (subsCost == null || subsCost.value == null) ? 0 : Number(subsCost.value);
+        var othersCostValue = (othersCost == null || othersCost.value == null) ? 0 : Number(othersCost.value);
+        var subsMarkupValue = (subsMarkup == null || subsMarkup.value == null) ? 0 : Number(subsMarkup.value)/100;
+        var marginValue = (margin == null || margin.value == null) ? 0 : Number(margin.value)/100;
+
+        if (packageFamilyName == 'PBGA')
+        {
+            switch(fieldName)
+            {
+                case 'price':
+                case 'costLessSubs':
+                case 'subsCost':
+                case 'othersCost':
+                   marginValue = (buPriceValue == 0) ? 0 : (buPriceValue - (costLessSubsValue + subsCostValue + othersCostValue)) / buPriceValue;
+                   break;
+                default:
+                    console.log('Unknown fieldName: ' + fieldName);
+                    break;
+            }
+        }
+        else
+        {
+            if (hasSubstrate)
+            {
+                var count = 0;
+                var tempArray = new Array(buPriceValue, subsCostValue, subsMarkupValue, margNoSubstrateValue, costLessSubsValue);
+                for (var i = 0; i < tempArray.length; i++) if (tempArray[i] > 0) count++;
+
+                //need at least 4 vars to calculate
+                if (count > 3)
+                {
+                    switch(fieldName)
+                    {
+                        case 'subsCost':
+                            if (!costLessSubsValue) costLessSubsValue = calculateCostLessSubsValue(buPriceValue, margNoSubstrateValue, subsCostValue, subsMarkupValue);
+                        case 'costLessSubs':
+                            if (!margNoSubstrateValue)
+                            {
+                                var denom = buPriceValue - (subsCostValue * (1 + subsMarkupValue));
+                                margNoSubstrateValue = (denom == 0) ? 0 : 1 - (costLessSubsValue / denom);
+                            }
+                            else
+                            {
+                                buPriceValue = calculateBUPriceValue(costLessSubsValue, margNoSubstrateValue, subsCostValue, subsMarkupValue);
+                            }
+                            break;
+                        case 'subsMarkup':
+                        case 'margNoSubstrate':
+                            if (!costLessSubsValue) costLessSubsValue = calculateCostLessSubsValue(buPriceValue, margNoSubstrateValue, subsCostValue, subsMarkupValue);
+                            else buPriceValue = ((1 - margNoSubstrateValue) == 0) ? 0 : costLessSubsValue / (1 - margNoSubstrateValue) + subsCostValue * (1 + subsMarkupValue);
+                            break;
+                        case 'margin':
+                            //do nothing - margin cannot be changed, must change subsMarkup or margNoSubstrate
+                            break;
+                        case 'price':
+                            if (!costLessSubsValue) costLessSubsValue = calculateCostLessSubsValue(buPriceValue, margNoSubstrateValue, subsCostValue, subsMarkupValue);
+                            else 
+                            {
+                                var denom = buPriceValue - (subsCostValue * (1 + subsMarkupValue));
+                                margNoSubstrateValue = (denom == 0) ? 0 : 1 - (costLessSubsValue / denom);
+                            }
+                            break;
+                        default:
+                            console.log('Unknown fieldName: ' + fieldName);
+                            break;
+                    }
+                }
+
+                marginValue = (buPriceValue == 0 || subsCostValue == 0 || costLessSubsValue == 0) ? 0 : (buPriceValue - (costLessSubsValue + subsCostValue)) / buPriceValue;
+            }
+            else
+            {
+                //check to make sure you have at least two variables
+                if ((buPriceValue && costLessSubsValue) || (buPriceValue && marginValue) || (costLessSubsValue && marginValue))
+                {
+                    switch(fieldName)
+                    { 
+                            
+                        case 'costLessSubs':
+                            if (!marginValue) marginValue = calculateMarginValue(buPriceValue, costLessSubsValue, subsCostValue, subsMarkupValue);
+                            else buPriceValue = calculateBUPriceValue(costLessSubsValue, marginValue, subsCostValue, subsMarkupValue);
+                            break;
+                        case 'margin':
+                            if (!costLessSubsValue) costLessSubsValue = calculateCostLessSubsValue(buPriceValue, marginValue, subsCostValue, subsMarkupValue);
+                            else buPriceValue = calculateBUPriceValue(costLessSubsValue, marginValue, subsCostValue, subsMarkupValue);
+                            break;
+                        case 'price':
+                            if (!costLessSubsValue) costLessSubsValue = calculateCostLessSubsValue(buPriceValue, marginValue, subsCostValue, subsMarkupValue);
+                            else marginValue = calculateMarginValue(buPriceValue, costLessSubsValue, subsCostValue, subsMarkupValue);
+                            break;
+                        default:
+                            console.log('Unknown fieldName: ' + fieldName);
+                            break;
+                    }
+                }
+            }
+        }
+        if (goldBillingFlag != null)
+        {
+            if (goldBillingFlag.value == '' || goldBillingFlag.value == 'Transactionally')
+            {
+                baseBUPrice.value = ((buPriceValue == null) ? 0 : buPriceValue.toFixed(6)) - ((auAdder.value == null) ? 0 : Number(auAdder.value).toFixed(6));
+            }
+            else if (goldBillingFlag.value == 'Inclusive')
+            {
+                baseBUPrice.value = (buPriceValue == null) ? 0 : buPriceValue.toFixed(6);
+                auAdder.value = 'Inclusive';
+            }
+        }
+
+        if (buPrice != null) buPrice.value = (buPriceValue).toFixed(6);
+        if (costLessSubs != null) costLessSubs.value = costLessSubsValue;
+        if (margNoSubstrate != null) margNoSubstrate.value = (margNoSubstrateValue * 100).toFixed(6);
+        if (subsCost != null) subsCost.value = subsCostValue;
+        if (subsMarkup != null) subsMarkup.value = (subsMarkupValue * 100).toFixed(6);
+        if (margin != null) margin.value = (marginValue * 100).toFixed(6);
+        console.log("===================");
+
+    }
+
+    function calculateMarginValue(buPriceValue, costLessSubsValue, subsCostValue, subsMarkupValue)
+    {
+        var denom = buPriceValue - (subsCostValue * (1 + subsMarkupValue));
+        var margNoSubstrateValue = (denom == 0) ? 0 : 1 - (costLessSubsValue / denom);
+        var marginValue = (buPriceValue == 0) ? 0 : (buPriceValue - (costLessSubsValue + subsCostValue)) / buPriceValue;
+        return marginValue;
+    }
+
+    function calculateBUPriceValue(costLessSubsValue, margNoSubstrateValue, subsCostValue, subsMarkupValue)
+    {
+        buPriceValue = ((1 - margNoSubstrateValue) == 0) ? 0 : costLessSubsValue / (1 - margNoSubstrateValue) + subsCostValue * (1 + subsMarkupValue);
+        return buPriceValue;
+    }
+
+    function calculateCostLessSubsValue(buPriceValue, marginValue, subsCostValue, subsMarkupValue)
+    {
+        return (buPriceValue - subsCostValue * (1 + subsMarkupValue)) * (1 - marginValue);
+    }
+</script>
+
+<!-- SF hack to load the rendered map before any of the components -->
+<apex:outputPanel rendered="{!loadMap}">
+
+</apex:outputPanel>
+    <!-- Cost and Price Section -->
+    <apex:outputPanel rendered="{!isBUPage && wrapper.packageFamily.Name == 'Test' && layout.enabledSections['Cost and Price'] && !isLayoutDeprecated && !PostTestServiceOnly}">
+        <apex:pageBlockSection columns="4" title="{!buPriceSummary}"> 
+            <apex:repeat value="{!layout.sectionMap['Cost and Price'].attributes}" var="attribute">
+                <apex:outputText value="" rendered="{!attribute.isBlank}" />
+                <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" rendered="{!!attribute.isBlank}"/>
+            </apex:repeat> 
+        </apex:pageBlockSection>
+        <br />
+        <hr />
+        <br />
+    </apex:outputPanel>
+
+    <apex:outputPanel id="volPanel" >
+        <apex:repeat id="volRepeat" value="{!cWrapper.volumeList}" var="vEntry">
+            <apex:pageBlockSection id="volPBS" columns="{!IF(ShowPriceEntry, 4, 3)}">
+
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Volume Request #"/>
+                    <apex:outputText value="{!vEntry.index}"/>
+                </apex:pageBlockSectionItem>
+
+               <!-- Volume picklist -->
+                 <apex:pageBlockSectionItem id="volPBSI" rendered="{!renderedMap[vEntry.index]['volPBSI']}"> 
+                    <apex:outputLabel value="Volume K/Wk"/>
+                    <apex:selectList id="volSel" value="{!vEntry.volume}" size="1" onchange="if(!canRepriceVolume('{!vEntry.volume}', this)) return false; showProgress(); reloadedIndex = {!vEntry.index}; recalculatePriceForVolume({!vEntry.index});" >
+                        <apex:selectOptions value="{!options}"/>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+
+                <!-- Volume number entry -->
+                <apex:pageBlockSectionItem rendered="{!renderedMap[vEntry.index]['volPBSIEntry']}">
+                    <apex:outputLabel value="Volume K/Wk"/>
+                    <apex:input type="number" id="volSelNum" value="{!vEntry.NumericValue}" />
+                </apex:pageBlockSectionItem>
+
+                <!-- Volume output -->
+                <apex:pageBlockSectionItem rendered="{!renderedMap[vEntry.index]['volPBSIOutput']}">
+                    <apex:outputLabel value="Volume K/Wk"/>
+                    <apex:outputText value="{!vEntry.volume}"/>
+                </apex:pageBlockSectionItem>
+
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Requested By"/>
+                    <apex:outputText value="{!vEntry.requestedBy}"/>
+                </apex:pageBlockSectionItem>
+
+                <!-- Substrate Markup -->
+                <apex:pageBlockSectionItem id="subsMarkupPBSI" rendered="{!renderedMap[vEntry.index]['subsMarkupPBSI']}">
+                    <apex:outputLabel value="Substrate Markup"/>
+                    <apex:inputText id="subsMarkup"  value="{!vEntry.subsMarkup}" styleClass="multiVolField" onchange="onMultiVolumeAttribChange({!vEntry.index}, 'subsMarkup', {!wrapper.packageFamily.Has_Substrate__c});"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!renderedMap[vEntry.index]['subsMarkupPBSO']}">
+                    <apex:outputLabel value="Substrate Markup"/>
+                   <apex:outputText id="subsMarkup2" value="{!vEntry.subsMarkup}"/>
+                </apex:pageBlockSectionItem>
+
+                <!-- Margin w/o SUbstrate -->
+                <apex:pageBlockSectionItem id="margNoSubstratePBSI" rendered="{!renderedMap[vEntry.index]['margNoSubstratePBSI']}">
+                    <apex:outputLabel value="Assembly % Margin"/>
+                    <apex:inputText id="margNoSubstrate" value="{!vEntry.marginNoSubstrate}" styleClass="multiVolField" onchange="onMultiVolumeAttribChange({!vEntry.index}, 'margNoSubstrate', {!ShowSubstrateFields});"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!renderedMap[vEntry.index]['margNoSubstratePBSO']}">
+                    <apex:outputLabel value="Assembly % Margin"/>
+                    <apex:outputText value="{!vEntry.marginNoSubstrate}"/>
+                </apex:pageBlockSectionItem>
+
+                <!-- Total Margin -->
+                <apex:pageBlockSectionItem id="marginPBSI" rendered="{!renderedMap[vEntry.index]['marginPBSI']}">
+                    <apex:outputLabel value="{!IF(ShowSubstrateFields, 'Total Margin', '%GM')}" />
+                    <apex:inputText id="margin" rendered="{!CanEdit}" value="{!vEntry.margin}" styleClass="multiVolField, marginReadOnly" onchange="onMultiVolumeAttribChange({!vEntry.index}, 'margin', {!ShowSubstrateFields});">
+                    </apex:inputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!renderedMap[vEntry.index]['marginPBSO']}">
+                    <apex:outputLabel value="{!IF(ShowSubstrateFields, 'Total Margin', '%GM')}" />
+                    <apex:outputText id="testId" value="{!vEntry.margin}" />
+                </apex:pageBlockSectionItem>
+
+                <!-- BU Price -->
+                <!-- make it read only always, then use js to change to editable if needed -->
+                <apex:pageBlockSectionItem id="pricePBSI" rendered="{!renderedMap[vEntry.index]['pricePBSI']}" >
+                 <apex:outputLabel value="BU Price" styleclass="engBuPriceLabel"/>
+                 <apex:inputText id="price" value="{!vEntry.price}" styleClass="{!vEntry.index}-engBuPrice multiVolField" onchange="onMultiVolumeAttribChange({!vEntry.index}, 'price', {!ShowSubstrateFields});" html-readOnly="readonly" html-removeReadOnly="{!cwrapper.packageFamily.Specific_Service_Configuration_Object__c == null && cWrapper.packageFamily.Name != 'Test'}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!renderedMap[vEntry.index]['pricePBSO']}" >
+                    <apex:outputLabel value="BU Price" />
+                    <apex:outputText value="{!vEntry.price}"/>
+                </apex:pageBlockSectionItem>
+
+                <!-- Cost less Substrate, or Total Cost if no substrate -->
+                    
+                <apex:pageBlockSectionItem id="costLessSubsPBSI" rendered="{!renderedMap[vEntry.index]['costLessSubsPBSI']}">
+                <apex:outputLabel value="{!IF(ShowSubstrateFields, 'Cost Less Substrate', 'Total Cost')}" styleClass="costLessSubsReadOnlyLabel"/>
+                   <apex:inputText id="costLessSubs" value="{!vEntry.costLessSubs}" styleClass="multiVolField, {!IF(wrapper.packageFamily.Product_Group_Name__c == 'MLF','', 'costLessSubsReadOnly')}" onchange="onMultiVolumeAttribChange({!vEntry.index}, 'costLessSubs', {!ShowSubstrateFields});">
+                    </apex:inputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!renderedMap[vEntry.index]['costLessSubsPBSO']}">
+                    <apex:outputLabel value="{!IF(ShowSubstrateFields, 'Cost Less Substrate', 'Total Cost')}"/>
+                    <apex:outputText value="{!vEntry.costLessSubs}"/>
+                </apex:pageBlockSectionItem>
+
+                <!-- Substrate Cost -->
+                <apex:pageBlockSectionItem id="subsCostPBSI" rendered="{!renderedMap[vEntry.index]['subsCostPBSI']}">
+                    <apex:outputLabel value="Materials Substrate"/>
+                    <apex:inputText id="subsCost" value="{!vEntry.subsCost}" styleClass="multiVolField, subsCostReadOnly" onchange="onMultiVolumeAttribChange({!vEntry.index}, 'subsCost', {!ShowSubstrateFields});">
+                    </apex:inputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!renderedMap[vEntry.index]['subsCostPBSO']}">
+                    <apex:outputLabel value="Materials Substrate"/>
+                    <apex:outputText value="{!vEntry.subsCost}"/>
+                </apex:pageBlockSectionItem>
+
+                <apex:repeat value="{!vEntry.subTotalInd}" var="ind" rendered="{!renderedMap[vEntry.index]['engineeringServiceSubTotal']}">
+                <!-- To get layout to correcly display -->
+                    <apex:pageBlockSectionItem >
+                    <apex:outputText value="" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                    <apex:outputText value="" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                    <apex:outputText value="" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!CanEdit}">
+                        <apex:outputLabel value="Sub Total {!ind + 1}" />
+                        <apex:inputText value="{!vEntry.subTotals[ind]}" styleClass="{!vEntry.index}-subTotal" onchange="recalcSubTotals({!vEntry.index})"/>
+                    </apex:pageBlockSectionItem>
+
+                    <apex:pageBlockSectionItem rendered="{!!CanEdit}">
+                        <apex:outputLabel value="Sub Total {!ind + 1}" />
+                        <apex:outputText value="{!vEntry.subTotals[ind]}" styleClass="{!vEntry.index}-subTotal" />
+                    </apex:pageBlockSectionItem>
+
+                </apex:repeat> 
+
+                <!-- Test total prices -->
+                <!-- BU Price Per Hour -->
+                <apex:pageBlockSectionItem rendered="{!renderedMap[vEntry.index]['buPriceHourPBSI']}">
+                    <apex:outputLabel value="BU Price Per Hour"/>
+                    <apex:inputText id="buPriceHour" value="{!vEntry.testInsertionsTotals.buPriceHour}" styleClass="testTotalField-{!vEntry.index}-buPriceHour" >
+                    </apex:inputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!renderedMap[vEntry.index]['buPriceHourPBSO']}">
+                    <apex:outputLabel value="BU Price Per Hour"/>
+                    <apex:outputText value="{!vEntry.testInsertionsTotals.buPriceHour}"/>
+                </apex:pageBlockSectionItem>
+
+                <!-- BU Price per Unit - Test -->
+                <apex:pageBlockSectionItem rendered="{!renderedMap[vEntry.index]['buPriceUnitPBSI']}">
+                    <apex:outputLabel value="BU Price per Unit - Test"/>
+                    <apex:inputText id="buPriceUnit" value="{!vEntry.testInsertionsTotals.buPriceUnit}" styleClass="testTotalField-{!vEntry.index}-buPriceUnit">
+                    </apex:inputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!renderedMap[vEntry.index]['buPriceUnitPBSO']}">
+                    <apex:outputLabel value="BU Price per Unit - Test"/>
+                    <apex:outputText value="{!vEntry.testInsertionsTotals.buPriceUnit}"/>
+                </apex:pageBlockSectionItem>
+
+                <!-- BU Price - Monthly Charge -->
+                <apex:pageBlockSectionItem rendered="{!renderedMap[vEntry.index]['buPriceMonthlyPBSI']}">
+                    <apex:outputLabel value="BU Price - Monthly Charge"/>
+                    <apex:inputText id="buPriceMonthly" value="{!vEntry.testInsertionsTotals.buPriceMonthly}" styleClass="testTotalField-{!vEntry.index}-buPriceMonthly">
+                    </apex:inputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!renderedMap[vEntry.index]['buPriceMonthlyPBSO']}">
+                    <apex:outputLabel value="BU Price - Monthly Charge"/>
+                    <apex:outputText value="{!vEntry.testInsertionsTotals.buPriceMonthly}"/>
+                </apex:pageBlockSectionItem>
+                <!-- End Test Total Prices -->
+
+                <!-- Link to RFQI -->
+                <apex:pageBlockSectionItem rendered="{!renderedMap[vEntry.index]['linkRFQ']}">
+                    <apex:outputLabel value="Created RFQI"/>
+                    <a href="/apex/RFQItemView?id={!vEntry.createdRFQIId}">{!vEntry.createdRFQIName}</a>
+                </apex:pageBlockSectionItem> 
+
+                <!-- Au Adder -->
+                <!-- <apex:pageBlockSectionItem id="auAdderPBSI" rendered="{!ShowPriceEntry && CanEdit && HasGoldWires}">
+                    <apex:outputLabel value="Au Factor"/>
+                    <apex:inputText id="auAdder" value="{!vEntry.auAdder}" styleClass="multiVolField, setReadOnlyTrue">
+                    </apex:inputText>    
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!ShowPriceEntry && !CanEdit && HasGoldWires}">
+                    <apex:outputLabel value="Au Factor"/>
+                    <apex:outputText value="{!vEntry.auAdder}"/>
+                </apex:pageBlockSectionItem> -->
+
+                <!-- Base Unit Price -->
+                <!-- <apex:pageBlockSectionItem id="baseBUPricePBSI" rendered="{!ShowPriceEntry && CanEdit && HasGoldWires}">
+                    <apex:outputLabel value="Base Unit Price"/>
+                    <apex:inputText id="baseBUPrice" value="{!vEntry.baseBUPrice}" styleClass="multiVolField, setReadOnlyTrue">
+                    </apex:inputText>    
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!ShowPriceEntry && !CanEdit && HasGoldWires}">
+                    <apex:outputLabel value="Base Unit Price"/>
+                    <apex:outputText value="{!vEntry.baseBUPrice}"/>
+                </apex:pageBlockSectionItem> -->
+
+                <!-- Gold Billing Flag -->
+                <!-- <apex:pageBlockSectionItem id="goldBillingFlagPBSI" rendered="{!ShowPriceEntry && CanEdit && HasGoldWires}">
+                    <apex:outputLabel value="Gold Billing Method"/>
+                    <apex:inputText id="goldBillingFlag" value="{!vEntry.goldBillingFlag}" styleClass="multiVolField, setReadOnlyTrue">
+                    </apex:inputText>    
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!ShowPriceEntry && !CanEdit && HasGoldWires}">
+                    <apex:outputLabel value="Gold Billing Method"/>
+                    <apex:outputText value="{!vEntry.goldBillingFlag}"/>
+                </apex:pageBlockSectionItem> -->
+
+            </apex:pageBlockSection>
+            <apex:repeat id="testVolRepeat" value="{!vEntry.TestInsertionIndexes}" var="index">
+                <hr class="insertionSeparator" />
+                <c:RFQITestMultiVolume edit="{!edit}" buPage="{!isBUPage}" requestedBySales="{!vEntry.requestedBy == 'Sales'}" showPriceEntry="{!showPriceEntry}" volume="{!vEntry}" testInsertionIndex="{!index}" testType="{!wrapper.specificRfqItem['Test_Type__c']}" quoteUOM="{!wrapper.specificRfqItem['Test_Quote_Unit_of_Measure__c']}" gdpw="{!wrapper.specificRfqItem['GDPW_PK__c']}" isEscalationEditable="{!isEscalationEditable}"/>
+            </apex:repeat>
+
+            <apex:pageBlockSection >
+                <!-- Reload Original -->
+                <!-- <apex:pageBlockSectionItem rendered="{!renderedMap[vEntry.index]['resetV']}">
+                    <apex:commandLink id="resetV" onclick="if(!canRepriceVolume(null, null)) return false; showProgress(); reloadedIndex = {!vEntry.index};" oncomplete="hideProgress(); " action="{!resetPrice}" value="Reload Original" reRender="volPanel, message">  
+                        <apex:param name="index" value="{!vEntry.index}"/>
+                    </apex:commandLink>
+                </apex:pageBlockSectionItem>
+                <br/> -->
+
+                <!-- Remove -->
+                <apex:pageBlockSectionItem rendered="{!renderedMap[vEntry.index]['remV']}">
+                    <apex:commandLink id="remV" onclick="showProgress();" oncomplete="hideProgress();" action="{!removeVolume}" value="Remove" reRender="volPanel, message" > 
+                        <apex:param name="index" value="{!vEntry.index}"/>
+                    </apex:commandLink>
+               </apex:pageBlockSectionItem>
+
+            </apex:pageBlockSection>
+            <hr />
+            
+        </apex:repeat>
+        <br />
+
+        <!-- cannot use outputText because it don't show the data live, instead disable inputField 
+            Cannot use .disabled attribute because the visualforce is not happy with it, and throws a strange error:
+            "element value must resolve to a String type!"-->
+        <script>
+        $(function() {
+
+            //if doMath is false, then there are no calculated fields so everything must be editable
+            $('input[class*="marginReadOnly"]').each(function()
+                {
+                    if({!wrapper.packageFamily.Has_Substrate__c} && doMath) {
+                        this.readOnly =true;
+                        this.style.background = "#ECECEC";
+                    }
+                    
+                }
+            );
+
+            $('input[class*="costLessSubsReadOnly"]').each(function()
+                {
+                    if({!costLessSubsDisabled} && doMath) {
+                        this.readOnly = true;
+                        this.style.background = "#ECECEC";
+                    }
+                    else {
+                         $('label[class*="costLessSubsReadOnlyLabel"]').addClass('customRequiredField');
+                    }
+                }
+            );
+
+            $('input[class*="setReadOnlyTrue"]').each(function()
+                {
+                    this.readOnly = true;
+                    this.style.background = "#ECECEC";
+                }
+            );
+            $('input[class*="engBuPrice"]').each(function()
+                {
+                    if($(this).attr('removeReadOnly') == 'true' || !doMath) {
+                        $(this).removeAttr('readOnly');
+                        $('label[class*="engBuPriceLabel"]').addClass('customRequiredField');
+                    }
+                }
+            );
+            $('[class^="testTotalField"]').each(function()
+                {
+                    this.readOnly = true;
+                    this.style.background = "#ECECEC";
+                });
+
+        });
+        </script>
+        
+        <!-- actionFunction to recalculate -->
+        <apex:actionFunction name="recalculatePriceForVolume" action="{!resetPrice}" reRender="volPanel, message" oncomplete="hideProgress(); onMultiVolumeAttribChange(reloadedIndex, 'costLessSubs', {!wrapper.packageFamily.Has_Substrate__c}) " >
+            <apex:param name="index" value=""/>
+        </apex:actionFunction>
+
+        <br/>
+       
+       <!--  <apex:commandLink rendered="{!ShowPriceEntry && CanEdit && cWrapper.volumeList.size > 0}" id="recalcVolumes" onclick="if(!canRepriceVolume(null, null)) return false; showProgress();" oncomplete="hideProgress();" value="Reload Original for All Configurations" action="{!repriceVolumes}" reRender="volPanel, message, messages" /> 
+        <br/> -->
+        <apex:commandLink rendered="{!CanEdit && !engineeringService && IsEscalationEditable && (!isAddedService || IsBumpOrWLCSP || cWrapper.rfqItem.Test_Type__c == 'Wafer Probe')}" id="addV" onclick="showProgress();" oncomplete="hideProgress();" value="Add Volume" action="{!addVolume}" reRender="volPanel, message, messages" /> 
+        <br />
+        <apex:commandLink rendered="{!CanEdit && !engineeringService && IsEscalationEditable && ShowForecastAsPicklist && (!isAddedService || IsBumpOrWLCSP || cWrapper.rfqItem.Test_Type__c == 'Wafer Probe')}" id="addAllV" onclick="showProgress();" oncomplete="hideProgress();" value="Add Surrounding Volumes" action="{!addAllVolumes}" reRender="volPanel, message, messages" />
+        <br />
+        <apex:commandLink rendered="{!CanEdit && !engineeringService && IsEscalationEditable && CanDeleteOneVolume && (!isAddedService || IsBumpOrWLCSP || cWrapper.rfqItem.Test_Type__c == 'Wafer Probe')}" id="removeAllV" onclick="showProgress();" oncomplete="hideProgress();" value="Remove All" action="{!removeAllVolumes}" reRender="volPanel, message, messages" />
+    </apex:outputPanel>
+
+</apex:component>

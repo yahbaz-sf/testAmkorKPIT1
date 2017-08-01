@@ -1,0 +1,12 @@
+<apex:component >
+<!-- css hackishly overriding sf css to get pretty columns -->
+<style>
+    body .bPageBlock .pbBody .labelCol, body .bPageBlock .pbBody .dataCol, body .bPageBlock .pbBody .data2Col {
+		padding-top: 5px;
+		padding-bottom: 5px;
+		font-size: 90%;
+		width: 13%;
+	}
+</style>
+
+</apex:component>

@@ -1,0 +1,276 @@
+<apex:page controller="RFQStatusUpdateController" showHeader="false" tabStyle="RFQ_Item__c" docType="html-5.0">
+<script type="text/javascript">
+    var inProgress = false;
+    function startProgress() {
+        inProgress = true;
+    }
+    function stopProgress() {
+        inProgress = false;
+    }
+
+    function onMultiselectChanged(selectedList, selectBox)
+    {
+        if (selectedList != null && selectedList.length > 0) {
+            document.getElementById(selectBox).checked = true;
+        }
+        else {
+            document.getElementById(selectBox).checked = false;
+        }
+    }
+
+    function selectCheckbox(changedItem, idToSelect)
+    {
+        var checked = changedItem.value != '' && changedItem.value != null && changedItem.value != '-- None Selected --';
+        document.getElementById(idToSelect).checked = checked;
+    }
+    function noenter(ev)  {
+        if (window.event && window.event.keyCode == 13 || ev.which == 13) {
+            var ele=document.getElementById("{!$Component.f.pb.pbsSearch.searchButton}");
+            ele.click();
+            return false;
+         } else {
+              return true;
+         }
+     }
+</script>
+    <apex:form id="f">
+    <apex:pageMessages id="messages" />
+
+        <apex:pageBlock id="pb">
+            <apex:pageBlockButtons location="top" id="pbb">
+                <apex:actionStatus id="savePage" >
+                <apex:facet name="start">
+                    <apex:commandButton value="Saving..."  disabled="true"/>
+                </apex:facet>
+                <apex:facet name="stop">
+                    <apex:commandButton value="Save" action="{!savePage}" reRender="messages, pbs" status="savePage" onclick="if(inProgress) return false; startProgress();" oncomplete="stopProgress()"/>
+                </apex:facet>
+                </apex:actionStatus>
+                <apex:commandButton value="Close" onclick="window.close();"/>
+                <apex:actionStatus id="firstPage">
+                    <apex:facet name="start">
+                        <apex:commandButton value="Loading first page of items..." disabled="true" />
+                    </apex:facet>
+                    <apex:facet name="stop">
+                        <apex:commandButton value="First Page RFQ Items" action="{!firstPage}" reRender="messages,pbs" status="firstPage" disabled="false" onclick="if(inProgress) return false; startProgress();" oncomplete="stopProgress()"/>
+                    </apex:facet>
+                </apex:actionStatus>
+                <apex:actionStatus id="previousPage">
+                    <apex:facet name="start">
+                    <apex:commandButton value="Loading previous page of items..." disabled="true"/>
+                    </apex:facet>
+                    <apex:facet name="stop">
+                        <apex:commandButton value="Previous Page RFQ Items" action="{!previousPage}" reRender="messages,pbs" status="previousPage" disabled="false" onclick="if(inProgress) return false; startProgress();" oncomplete="stopProgress()"/>
+                    </apex:facet>
+                </apex:actionStatus> 
+                <apex:actionStatus id="nextPage">
+                    <apex:facet name="start">
+                        <apex:commandButton value="Loading next page of items..." disabled="true" />
+                    </apex:facet>
+                    <apex:facet name="stop">
+                        <apex:commandButton value="Next Page RFQ Items" action="{!nextPage}" reRender="messages,pbs" status="nextPage" disabled="false" onclick="if(inProgress) return false; startProgress();" oncomplete="stopProgress()"/>
+                    </apex:facet>
+                </apex:actionStatus> 
+                <apex:actionStatus id="lastPage">
+                    <apex:facet name="start">
+                        <apex:commandButton value="Loading last page of items..." disabled="true" />
+                    </apex:facet>
+                    <apex:facet name="stop">
+                        <apex:commandButton value="Last Page RFQ Items" action="{!lastPage}" reRender="messages,pbs" status="lastPage" disabled="false" onclick="if(inProgress) return false; startProgress();" oncomplete="stopProgress()"/>
+                    </apex:facet>
+                </apex:actionStatus>
+                <br/>
+            </apex:pageBlockButtons>
+
+            <apex:pageBlockTable value="{!sortCrit}" var="s" id="pbt">
+                <apex:column width="5%">
+                    <apex:inputCheckbox id="selectedBox" value="{!s.selected}"/>
+                </apex:column>
+                <apex:column width="10%" >
+                    <apex:outputText value="{!s.column}"/>
+                </apex:column>
+                <apex:column width="85%">
+                    <apex:inputText value="{!s.filterCriteria}" rendered="{!s.filterType == 'input'}" onchange="selectCheckbox(this, '{!$Component.f.pb.pbt.selectedBox}');" onkeypress="selectCheckbox(this, '{!$Component.f.pb.pbt.selectedBox}'); return noenter(event);"/>
+                    <apex:selectList value="{!s.filterCriteria}" size="1" rendered="{!s.filterType == 'picklist'}" onchange="selectCheckbox(this, '{!$Component.f.pb.pbt.selectedBox}');">
+                        <apex:selectOptions value="{!s.StatusList}"/>
+                    </apex:selectList> 
+                    <apex:selectList value="{!s.qYear}" size="1" rendered="{!s.filterType == 'picklist' && s.column == 'Customer Decision to Buy Date'}" onchange="selectCheckbox(this, '{!$Component.f.pb.pbt.selectedBox}');">
+                        <apex:selectOptions value="{!s.Years}"/>
+                    </apex:selectList> 
+                    <c:MultiselectPicklist leftLabel="Available Status"
+                        cleftOptions="{!LeftOptions}"
+                        rightLabel="Selected Status"
+                        crightOptions="{!selectedStatuss}"
+                        size="14"
+                        width="200px"
+                        showUpDownButtons="false"
+                        rendered="{!s.filterType == 'multiselectpicklist'}"
+                        selectBox="{!$Component.f.pb.pbt.selectedBox}"
+                        onChanged="onMultiselectChanged" />
+                </apex:column>
+            </apex:pageBlockTable>
+            <apex:pageBlockSection id="pbsSearch">
+                <apex:actionStatus id="searchStatus">
+                    <apex:facet name="start">
+                        <apex:commandButton value="Searching..." disabled="true" style="float: right;"/>
+                    </apex:facet>
+                    <apex:facet name="stop">
+                        <apex:commandButton value="Search" action="{!searchItems}" reRender="messages,pbs, pbt" status="searchStatus" disabled="false" onclick="if(inProgress) return false; startProgress();" oncomplete="stopProgress()" style="float: right;" id="searchButton"/>
+                    </apex:facet>
+                </apex:actionStatus>
+                <apex:actionStatus id="resetStatus">
+                    <apex:facet name="start">
+                        <apex:commandButton value="Resetting..." disabled="true" style="float: Left;"/>
+                    </apex:facet>
+                    <apex:facet name="stop">
+                        <apex:commandButton value="Reset" action="{!resetCriteria}" reRender="messages,pbs, pbt" status="resetStatus" disabled="false" onclick="if(inProgress) return false; startProgress();" oncomplete="stopProgress()" style="float: Left;"/>
+                    </apex:facet>
+                </apex:actionStatus>
+            </apex:pageBlockSection>
+            
+
+
+           <!-- <apex:pageBlockSection>
+                 <apex:inputField label="Status" value="{!statusesIWant}" /> -->
+                <!-- <apex:repeat value="{!sortCrit}" var="s" >
+                <apex:pageBlockSection >
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Column: " />
+                        <apex:selectList value="{!s.column}" size="1">
+                            <apex:selectOptions value="{!ColumnList}"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem >
+                    <apex:pageBlockSectionItem>
+                        <apex:outputLabel value="Filter Criteria: "/>
+                        <apex:inputText value="{!s.filterCriteria}" />
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+                <apex:pageBlockSection >
+                    <apex:commandLink value="Add Criteria" style="float: right;"/>
+                    <apex:commandLink value="Remove Criteria"  style="float: right;">
+                    </apex:commandLink>
+                </apex:pageBlockSection>
+                <br/>   
+                </apex:repeat> 
+            </apex:pageBlockSection>-->
+
+            <!-- <apex:outputPanel style="float: right;">
+                <apex:repeat value="{!alphabets}" var="a" >
+                    <apex:commandLink value="{!a}" action="{!sortedAlphabet}" rendered="{!selectedAlphabet != a}" onclick="if(inProgress) return false; startProgress();" oncomplete="stopProgress()" reRender="messages,pb">
+                        <apex:param value="{!a}" name="selectedAlphabet" />
+                    </apex:commandLink>
+                    <b>
+                    <apex:commandLink value="{!a}" rendered="{!selectedAlphabet == a}" style="color: blue;" >
+                        <apex:param value="{!a}" name="selectedAlphabet" />
+                    </apex:commandLink>
+                    </b>
+                    |&nbsp;
+                </apex:repeat>
+            </apex:outputPanel > -->
+            <br/>
+            <apex:pageBlockSection > 
+                <apex:pageBlockTable value="{!statusWrappers}" var="row" id="pbs" >
+                    <apex:column value="{!row.rfqItem.RFQ__c}">
+                        <apex:facet name="header" >
+                        <apex:outputPanel >
+                            <apex:commandLink value="RFQ" action="{!sortColumn}" reRender="pb, messages" onclick="if(inProgress) return false; startProgress();" oncomplete="stopProgress()" style="color: blue;">
+                                <apex:image value="{!$Resource.Up_Arrow}" width="10" height="10" rendered="{!sortedColumn == 'RFQ' && sortedASC}">
+                                </apex:image>
+                                <apex:image value="{!$Resource.Down_Arrow}" width="10" height="10" rendered="{!sortedColumn == 'RFQ' && !sortedASC}">
+                                </apex:image>
+                                <apex:param name="columnName" value="RFQ" />
+                            </apex:commandLink>
+                        </apex:outputPanel>
+                        </apex:facet>
+                    </apex:column>
+                    <apex:column value="{!row.rfqItem.Name}" headerValue="RFQ Item Name"/>
+                    <apex:column value="{!row.rfqItem.RFQ__r.SBU_Name__c}" >
+                        <apex:facet name="header" >
+                        <apex:outputPanel >
+                            <apex:commandLink value="SBU Name" action="{!sortColumn}" reRender="pb, messages" onclick="if(inProgress) return false; startProgress();" oncomplete="stopProgress()" style="color: blue;">
+                                <apex:image value="{!$Resource.Up_Arrow}" width="10" height="10" rendered="{!sortedColumn == 'SBU Name' && sortedASC}">
+                                </apex:image>
+                                <apex:image value="{!$Resource.Down_Arrow}" width="10" height="10" rendered="{!sortedColumn == 'SBU Name' && !sortedASC}">
+                                </apex:image>
+                                <apex:param name="columnName" value="SBU Name" />
+                            </apex:commandLink>
+                        </apex:outputPanel>
+                        </apex:facet>
+                    </apex:column>
+                    <apex:column value="{!row.rfqItem.Package_Family_Name__c}" headerValue="Package Family">
+                        <!-- <apex:facet name="header" >
+                        <apex:outputPanel >
+                            <apex:commandLink value="Package Family" action="{!sortColumn}" reRender="pb, messages" onclick="if(inProgress) return false; startProgress();" oncomplete="stopProgress()" style="color: blue;">
+                                <apex:image value="{!$Resource.Up_Arrow}" width="10" height="10" rendered="{!sortedColumn == 'Package Family' && sortedASC}">
+                                </apex:image>
+                                <apex:image value="{!$Resource.Down_Arrow}" width="10" height="10" rendered="{!sortedColumn == 'Package Family' && !sortedASC}">
+                                </apex:image>
+                                <apex:param name="columnName" value="Package Family" />
+                            </apex:commandLink>
+                        </apex:outputPanel >
+                        </apex:facet> -->
+                    </apex:column>
+                    <apex:column value="{!row.rfqItem.Project_Device__c}" >
+                        <apex:facet name="header" >
+                        <apex:outputPanel >
+                            <apex:commandLink value="Project Device" action="{!sortColumn}" reRender="pb, messages" onclick="if(inProgress) return false; startProgress();" oncomplete="stopProgress()" style="color: blue;">
+                                <apex:image value="{!$Resource.Up_Arrow}" width="10" height="10" rendered="{!sortedColumn == 'Project Device' && sortedASC}">
+                                </apex:image>
+                                <apex:image value="{!$Resource.Down_Arrow}" width="10" height="10" rendered="{!sortedColumn == 'Project Device' && !sortedASC}">
+                                </apex:image>
+                                <apex:param name="columnName" value="Project Device" />
+                            </apex:commandLink>
+                        </apex:outputPanel>
+                        </apex:facet>
+                    </apex:column>
+                    <apex:column value="{!row.rfqItem.Dim_XY_Leads_Wires__c}" headerValue="Dim XY - Leads - Wires"/>
+                    <apex:column value="{!row.rfqItem.Forecast__c}" headerValue="Forecast"/>
+                    <apex:column value="{!row.rfqItem.Price_To_Customer__c}" headerValue="Price To Customer"/>
+                    <apex:column value="{!row.rfqItem.Status__c}" >
+                        <apex:facet name="header" >
+                        <apex:outputPanel >
+                            <apex:commandLink value="Status" action="{!sortColumn}" reRender="pb, messages" onclick="if(inProgress) return false; startProgress();" oncomplete="stopProgress()" style="color: blue;">
+                                <apex:image value="{!$Resource.Up_Arrow}" width="10" height="10" rendered="{!sortedColumn == 'Status' && sortedASC}">
+                                </apex:image>
+                                <apex:image value="{!$Resource.Down_Arrow}" width="10" height="10" rendered="{!sortedColumn == 'Status' && !sortedASC}">
+                                </apex:image>
+                                <apex:param name="columnName" value="Status" />
+                            </apex:commandLink>
+                        </apex:outputPanel>
+                        </apex:facet>
+                    </apex:column>
+                    <apex:column headerValue="Select New Status">
+                        <apex:inputField value="{!row.rfqItem.Quoted_Status__c}" />
+                    </apex:column>
+                    <apex:column headerValue="Reason" id="reasoncol">
+                        <apex:inputField value="{!row.rfqItem.StatusReason__c}" required="true" />
+                    </apex:column>
+                    <apex:column headerValue="Comments">
+                        <apex:inputField value="{!row.rfqItem.Status_Comments__c}" />
+                    </apex:column>
+                    <apex:column headerValue="HVM Anticipated Start Date">
+                        <apex:inputField value="{!row.rfqItem.HVP_Anticipated_Start_Date__c}" />
+                    </apex:column>
+                    <apex:column headerValue="Customer Decision to Buy Date">
+                        <apex:inputField value="{!row.rfqItem.Decision_To_Buy__c}" />
+                    </apex:column>
+                    <apex:column value="{!row.lastModString}" headerValue="Status Last Modified"/>
+                    <apex:column >
+                        <apex:outputField value="{!row.rfqItem.RFQ__r.SBU_Name__r.OwnerId}" />
+                        <apex:facet name="header" >
+                        <apex:outputPanel >
+                            <apex:commandLink value="Account Owner" action="{!sortColumn}" reRender="pb, messages" onclick="if(inProgress) return false; startProgress();" oncomplete="stopProgress()" style="color: blue;">
+                                <apex:image value="{!$Resource.Up_Arrow}" width="10" height="10" rendered="{!sortedColumn == 'Account Owner' && sortedASC}">
+                                </apex:image>
+                                <apex:image value="{!$Resource.Down_Arrow}" width="10" height="10" rendered="{!sortedColumn == 'Account Owner' && !sortedASC}">
+                                </apex:image>
+                                <apex:param name="columnName" value="Account Owner" />
+                            </apex:commandLink>
+                        </apex:outputPanel>
+                        </apex:facet>
+                    </apex:column>
+                </apex:pageBlockTable> 
+            </apex:pageBlockSection>
+        </apex:pageBlock>       
+    </apex:form>
+</apex:page>

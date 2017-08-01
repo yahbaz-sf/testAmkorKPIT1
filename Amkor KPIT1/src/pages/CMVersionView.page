@@ -1,0 +1,137 @@
+<apex:page standardController="CM_Version__c" extensions="CMVersionController" action="{!setupViewAction}">  
+<apex:form >
+<apex:sectionHeader title="CM Version" subtitle="View CM Version"/>
+<apex:pageBlock >
+	<apex:pageBlockButtons >
+		<apex:commandButton value="Edit" action="{!editAction}" rendered="{!isPending}"/>
+		<apex:commandButton value="Delete" action="{!deleteAction}" rendered="{!isPending}" onclick="return confirm('Are you sure you wish to delete this Version?')"/>
+		<apex:commandButton value="Make Active" action="{!makeActiveAction}" rendered="{!isPending}"/>
+		<apex:commandButton value="Make New Pending" action="{!makePendingAction}" rendered="{!(isActive && !hasPending)}"/>
+		<apex:commandButton value="View Pending" action="{!showPendingAction}" rendered="{!((isActive || isArchive || isDeleted) && hasPending)}"/>
+		<apex:commandButton value="View Active" action="{!showActiveAction}" rendered="{!((isPending || isArchive || isDeleted) && hasActive)}"/> 
+	</apex:pageBlockButtons>
+	<apex:pageBlockSection columns="2">
+		<apex:outputField value="{!rec.Product_Group__c}" />
+		<apex:outputField value="{!rec.Status__c}"/>
+		<apex:outputField value="{!rec.Name}"/>	
+		<apex:outputField value="{!rec.Version__c}"/>	
+	</apex:pageBlockSection>
+	<apex:pageBlockSection columns="2" title="Wire Calc Values">
+		<apex:outputField value="{!rec.Wire_Die_Thickness__c}"/>	
+		<apex:outputField value="{!rec.Wire_Loop_Height__c}"/>
+		<apex:outputField value="{!rec.Wire_DA_Thickness__c}"/>
+		<apex:outputField value="{!rec.Wire_Paddle_Down__c}"/>
+		<apex:outputField value="{!rec.Wire_Ball_Ratio__c}"/>
+	</apex:pageBlockSection>
+</apex:pageBlock>
+<apex:tabPanel switchType="server" selectedTab="bom" id="tabPanel">
+<apex:tab label="BOMs" name="bom" id="bom">
+<apex:pageBlock title="BOMs">
+	<apex:pageBlockButtons location="top" rendered="{!isPending}">
+		<apex:commandButton value="New BOM" action="{!URLFOR($Action.FCM_BOM__c.New, $ObjectType.FCM_BOM__c)+'&versionId='+rec.id}"/>
+	</apex:pageBlockButtons>
+	<apex:pageBlockTable value="{!bomList}" var="bomRow"> 
+		<apex:column >
+	   		<apex:facet name="header">{!$ObjectType.FCM_BOM__c.fields.name.label}</apex:facet> 
+			<apex:outputLink value="/{!bomRow.id}">{!bomRow.name}</apex:outputLink>
+	   	</apex:column> 
+	   	<apex:column value="{!bomRow.Sequence__c}"/>
+	   	<apex:column value="{!bomRow.Type__c}"/>
+	   	<apex:column value="{!bomRow.Category__c}"/>
+	   	<apex:column value="{!bomRow.Description_Calc__c}"/>
+	   	<apex:column value="{!bomRow.Has_Variants__c}"/>
+	   	<apex:column value="{!bomRow.Package_Family__c}"/>
+	   	<apex:column value="{!bomRow.Filter_Lead_Count__c}"/>
+	</apex:pageBlockTable>
+</apex:pageBlock>
+</apex:tab>
+
+<apex:tab label="Processes" name="process" id="process">
+<apex:pageBlock title="Processes">
+	<apex:pageBlockButtons location="top" rendered="{!isPending}">
+		<apex:commandButton value="New Process" action="{!URLFOR($Action.FCM_Process__c.New, $ObjectType.FCM_Process__c)+'&versionId='+rec.id}"/>
+	</apex:pageBlockButtons>
+	<apex:pageBlockTable value="{!processList}" var="procRow"> 
+		<apex:column >
+			<apex:facet name="header">{!$ObjectType.FCM_Process__c.fields.name.label}</apex:facet> 
+			<apex:outputLink value="/{!procRow.id}">{!procRow.name}</apex:outputLink>
+	   	</apex:column> 
+	   	<apex:column value="{!procRow.Sequence__c}"/>
+	   	<apex:column value="{!procRow.Type__c}"/>
+	   	<apex:column value="{!procRow.Category__c}"/>
+	   	<apex:column value="{!procRow.Has_Variants__c}"/>
+	   	<apex:column value="{!procRow.Package_Family__c}"/>
+	   	<apex:column value="{!procRow.Filter_Lead_Count__c}"/>
+	</apex:pageBlockTable>
+</apex:pageBlock>
+</apex:tab>
+
+<apex:tab label="Factory Assumptions" name="assumption" id="assumption">
+<apex:pageBlock title="Factory Assumptions">
+	<apex:pageBlockButtons location="top" rendered="{!isPending}">
+		<apex:commandButton value="New Assumption" action="{!URLFOR($Action.FCM_Assumption__c.New, $ObjectType.FCM_Assumption__c)+'&versionId='+rec.id}"/>
+	</apex:pageBlockButtons>
+	<apex:pageBlockTable value="{!assumptionList}" var="assumptionRow"> 
+		<apex:column >
+	    	<apex:facet name="header">{!$ObjectType.FCM_Assumption__c.fields.name.label}</apex:facet> 
+			<apex:outputLink value="/{!assumptionRow.id}">{!assumptionRow.name}</apex:outputLink>
+	   	</apex:column> 
+	   	<apex:column value="{!assumptionRow.Factory__c}"/>
+	   	<apex:column value="{!assumptionRow.Package_Family__c}"/>
+	</apex:pageBlockTable>
+</apex:pageBlock>
+</apex:tab>
+
+<apex:tab label="PF Values" name="value" id="value">
+<apex:pageBlock title="Values">
+	<apex:pageBlockButtons location="top" rendered="{!isPending}">
+		<apex:commandButton value="New PF Value" action="{!URLFOR($Action.CM_PF_Value__c.New, $ObjectType.CM_PF_Value__c)+'&versionId='+rec.id}"/>
+	</apex:pageBlockButtons>
+	<apex:pageBlockTable value="{!valueList}" var="valueRow"> 
+		<apex:column >
+	    	<apex:facet name="header">{!$ObjectType.CM_PF_Value__c.fields.name.label}</apex:facet> 
+			<apex:outputLink value="/{!valueRow.id}">{!valueRow.name}</apex:outputLink>
+	   	</apex:column> 
+	   	<apex:column value="{!valueRow.Package_Family__c}"/>
+	   	<apex:column value="{!valueRow.FPP_Rate__c}"/>
+	   	<apex:column value="{!valueRow.RSSB__c}"/>
+	</apex:pageBlockTable>
+</apex:pageBlock>
+</apex:tab>
+
+<apex:tab label="Test Models" name="model" id="model">
+<apex:pageBlock title="Test Models">
+	<apex:pageBlockButtons location="top" rendered="{!isPending}">
+		<apex:commandButton value="New Test Model" action="{!URLFOR($Action.CM_Test_Model__c.New, $ObjectType.CM_Test_Model__c)+'&versionId='+rec.id}"/>
+	</apex:pageBlockButtons>
+	<apex:pageBlockTable value="{!modelList}" var="modelRow"> 
+		<apex:column >
+	    	<apex:facet name="header">{!$ObjectType.CM_Test_Model__c.fields.name.label}</apex:facet> 
+			<apex:outputLink value="/{!modelRow.id}">{!modelRow.name}</apex:outputLink>
+	   	</apex:column> 
+	   	<apex:column value="{!modelRow.Factory__c}"/>
+	   	<apex:column value="{!modelRow.Type__c}"/>
+	   	<apex:column value="{!modelRow.Amkor_Price_Per_Sec__c}"/>
+	   	<apex:column value="{!modelRow.Customer_Price_Per_Sec__c}"/>
+	</apex:pageBlockTable>
+</apex:pageBlock>
+</apex:tab>
+
+<apex:tab label="Factory Values" name="factValues" id="factValues">
+<apex:pageBlock title="Factory Values">
+	<apex:pageBlockButtons location="top" rendered="{!isPending}">
+		<apex:commandButton value="New Factory Value" action="{!URLFOR($Action.CM_Factory_Value__c.New, $ObjectType.CM_Factory_Value__c)+'&versionId='+rec.id}"/>
+	</apex:pageBlockButtons>
+	<apex:pageBlockTable value="{!factValueList}" var="factVal"> 
+		<apex:column >
+	    	<apex:facet name="header">{!$ObjectType.CM_Factory_Value__c.fields.name.label}</apex:facet> 
+			<apex:outputLink value="/{!factVal.id}">{!factVal.name}</apex:outputLink>
+	   	</apex:column> 
+	   	<apex:column value="{!factVal.Key__c}"/>
+	   	<apex:column value="{!factVal.Value__c}"/>
+	</apex:pageBlockTable>
+</apex:pageBlock>
+</apex:tab>
+</apex:tabPanel>
+</apex:form>
+</apex:page>

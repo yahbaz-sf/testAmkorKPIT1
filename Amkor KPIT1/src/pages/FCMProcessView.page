@@ -1,0 +1,87 @@
+<apex:page standardController="FCM_Process__c" extensions="FCMProcessController" action="{!setupAction}">
+<apex:form >
+<apex:sectionHeader title="FCM Process" subtitle="View FCM Process"/>
+<apex:pageBlock >
+	<apex:pageBlockButtons rendered="{!isPending}">
+		<apex:commandButton value="Edit" action="{!editAction}"/>
+		<apex:commandButton value="Clone" action="{!cloneAction}" rendered="{!!isItem}"/>
+		<apex:commandButton value="Delete" action="{!deleteAction}" rendered="{!deleteAllowed}" onclick="return confirm('Are you sure you wish to delete this Process?')"/>
+	</apex:pageBlockButtons>
+	<apex:pageBlockSection columns="2">
+		<apex:outputField value="{!rec.CM_Version__c}" />
+		<apex:pageBlockSectionItem />
+		<apex:outputField value="{!rec.Parent_Process__c}" rendered="{!!isItem}"/>
+		<apex:pageBlockSectionItem rendered="{!!isItem}"/>
+		<apex:outputField value="{!rec.name}"/>
+		<apex:outputField value="{!rec.Type__c}"/>	
+		<apex:outputField value="{!rec.Category__c}"/>
+		<apex:outputField value="{!rec.Has_Variants__c}" rendered="{!isItem}"/>
+		<apex:pageBlockSectionItem rendered="{!!isItem}"/>	
+		<apex:outputField value="{!rec.Sequence__c}"/>
+		<apex:pageBlockSectionItem />
+		<apex:repeat value="{!dataFieldList}" var="lField">
+		<apex:pageBlockSectionItem >
+			<apex:outputText value="{!lField.label}"/>
+			<apex:outputPanel >
+				<apex:outputField value="{!rec[lField.orName]}" rendered="{!!isItem}"/>
+				<apex:outputField value="{!rec[lField.localName]}" rendered="{!rec[lField.orName]}"/>
+			</apex:outputPanel>
+		</apex:pageBlockSectionItem>
+		<apex:pageBlockSectionItem >
+			<apex:outputText value="Value" rendered="{!!isItem}"/>
+			<apex:outputField value="{!rec[lField.calcName]}" rendered="{!!isItem}"/>
+		</apex:pageBlockSectionItem>
+		</apex:repeat> 
+	</apex:pageBlockSection>
+	<apex:pageBlockSection columns="1" title="Variant Filters" rendered="{!!isItem}">
+		<apex:outputField value="{!rec.Package_Family__c}"/>
+		<apex:outputField value="{!rec.Filter_Lead_Count__c}"/>
+		<apex:outputField value="{!rec.Filter_Factory__c}"/>
+	</apex:pageBlockSection>
+</apex:pageBlock>
+<apex:pageBlock title="Variants" rendered="{!(isItem && rec.Has_Variants__c)}">
+	<apex:pageBlockButtons location="top" rendered="{!isPending}">
+		<apex:commandButton value="Add Variant" action="{!URLFOR($Action.FCM_Process__c.New, $ObjectType.FCM_Process__c)+'&parentId='+rec.id}"/>
+	</apex:pageBlockButtons>
+		<apex:pageBlockTable value="{!variantList}" var="vRow"> 
+			<apex:column >
+	    		<apex:facet name="header">Sequence</apex:facet> 
+	    		<apex:outputField value="{!vRow.Sequence__c}" />
+	    	</apex:column> 
+	    	<apex:column >
+	    		<apex:facet name="header"></apex:facet> 
+	    		<apex:outputLink value="/{!vRow.id}"><apex:outputField value="{!vRow.name}" /></apex:outputLink>
+	    	</apex:column>
+	    	<apex:column >
+	    		<apex:facet name="header">Package Family</apex:facet> 
+	    		<apex:outputField value="{!vRow.Package_Family__c}" />
+	    	</apex:column>
+	    	<apex:column >
+	    		<apex:facet name="header">Factory</apex:facet> 
+	    		<apex:outputField value="{!vRow.Filter_Factory__c}" />
+	    	</apex:column>
+	    	<apex:column >
+	    		<apex:facet name="header">Category</apex:facet> 
+	    		<apex:outputField value="{!vRow.Category__c}" />
+	    	</apex:column>
+	    </apex:pageBlockTable>
+</apex:pageBlock>
+<apex:pageBlock title="Match Conditions">
+	<apex:pageBlockButtons location="top" rendered="{!isPending}">
+		<apex:commandButton value="New Match Condition" action="{!URLFOR($Action.FCM_Match_Condition__c.New, $ObjectType.FCM_Match_Condition__c)+'&processId='+rec.id}"/>
+	</apex:pageBlockButtons>
+	<apex:pageBlockTable value="{!matchList}" var="matchRow"> 
+		<apex:column >
+	    	<apex:facet name="header">{!$ObjectType.FCM_Match_Condition__c.fields.name.label}</apex:facet> 
+			<apex:outputLink value="/{!matchRow.id}">{!matchRow.name}</apex:outputLink>
+	   	</apex:column> 
+	   <apex:column value="{!matchRow.Match_Type__c}"/>
+	   	<apex:column value="{!matchRow.RFQI_Field_Def__c}"/>
+	   	<apex:column value="{!matchRow.Operand__c}"/>
+		<apex:column value="{!matchRow.Text_Value__c}"/>
+		<apex:column value="{!matchRow.Numeric_Value__c}"/>
+		<apex:column value="{!matchRow.Boolean_Value__c}"/>
+	</apex:pageBlockTable>
+</apex:pageBlock>
+</apex:form>
+</apex:page>

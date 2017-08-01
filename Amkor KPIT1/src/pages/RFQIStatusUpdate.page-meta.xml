@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>32.0</apiVersion>
+    <availableInTouch>false</availableInTouch>
+    <confirmationTokenRequired>false</confirmationTokenRequired>
+    <description>Displays a list of RFQI&apos;s for the RFQ, listing their statuses (Win, Loss, Cancelled, and Quoted), and offering the ability to edit them.</description>
+    <label>RFQIStatusUpdate</label>
+</ApexPage>

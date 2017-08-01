@@ -1,0 +1,9 @@
+<apex:page standardController="RFQ__c" extensions="RFQController" action="{!setStatusToClosedCanceled}" showHeader="false" >
+	<apex:pagemessages />
+    <apex:outputPanel rendered="{!shouldClose}">
+        <script language="javascript">
+            window.opener.postMessage("RefreshPage", "*");
+            window.close();
+        </script>
+    </apex:outputPanel>
+</apex:page>

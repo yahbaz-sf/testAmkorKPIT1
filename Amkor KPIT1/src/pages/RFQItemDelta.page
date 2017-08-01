@@ -1,0 +1,54 @@
+<apex:page showHeader="true" standardController="RFQ_Item__c" extensions="RFQItemDeltaController" sidebar="true" action="{!init}">
+	
+    <apex:sectionHeader title="Compare Attributes for this line item and another" subtitle="{!wrapper.rfqItem.Name}" description="On this page you can compare the attributes of this RFQI with another"/>
+  
+    <apex:chart height="250" width="350" data="{!data}"> 
+        <apex:pieSeries colorSet="#17D837,#F0832F" dataField="data" labelField="name"/> 
+        <apex:legend position="right"/> 
+    </apex:chart>
+
+	<apex:form >
+	     <apex:pageMessages escape="false"/>  
+		 <apex:pageBlock title="Deltas">
+		    <apex:pageBlockButtons location="top">
+		        <apex:commandButton immediate="true" action="{!backToItem}" value="Return To Item"/>
+		    </apex:pageBlockButtons>
+		    
+	        
+	        <apex:pageBlockTable value="{!delta.deltas}" var="d">
+
+	            <apex:column headerValue="Field">
+	                <apex:outputText value="{!$ObjectType[d.objectName].fields[d.fieldName].Label}  {!d.suffix}" />
+	            </apex:column>
+
+	            <apex:column headerValue="{!rfqiA}"> 
+	                <apex:outputField value="{!d.obj1[d.fieldName]}"/>
+	            </apex:column>
+
+	            <apex:column headerValue="{!rfqiB}"> 
+	                <apex:outputField value="{!d.obj2[d.fieldName]}"/>
+	            </apex:column>
+	        </apex:pageBlockTable> 
+
+	    </apex:pageBlock>
+
+	    <apex:pageBlock title="Similarities">
+	        
+	        <apex:pageBlockTable value="{!delta.sames}" var="d">
+
+	            <apex:column headerValue="Field">
+	                <apex:outputText value="{!$ObjectType[d.objectName].fields[d.fieldName].Label}  {!d.suffix}" />
+	            </apex:column>
+
+	            <apex:column headerValue="{!rfqiA}"> 
+	                <apex:outputField value="{!d.obj1[d.fieldName]}"/>
+	            </apex:column>
+
+	            <apex:column headerValue="{!rfqiB}"> 
+	                <apex:outputField value="{!d.obj2[d.fieldName]}"/>
+	            </apex:column>
+	        </apex:pageBlockTable> 
+
+	    </apex:pageBlock>
+    </apex:form>  
+</apex:page>

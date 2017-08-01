@@ -1,0 +1,111 @@
+<apex:page id="RKRSSNFR_NewsConfiguration" controller="Rknews.RKRSSNFR_ConfigurationController" title="{!$Label.rknews__RKRSSNFR_RedHotConfiguration_Title}"
+	tabstyle="Redhot_News_Settings__tab">
+	
+	<style>.disabled { color: #aaa; }</style>
+				
+	<apex:PageMessages id="pgMsg"></apex:PageMessages>
+	<apex:sectionHeader title="{!$Label.rknews__RKRSSNFR_RedHotConfiguration_Title}" subtitle="{!$Label.rknews__RKRSSNFR_RedHotConfiguration_Subtitle}"/>
+	
+	<apex:form id="frm">
+		
+	<apex:PageBlock mode="edit" id="pbMainConfig">
+		<apex:PageBlockSection title="Red Hot News Configuration" columns="2" id="pbsecGeneralNewsConfig">
+			<apex:pageBlockSectionItem id="pbSecItemGNewsEdition" helpText="{!$Label.rknews__RKRSSNFR_ConfigPage_CountryEdition_HelpText}">
+				<apex:OutputLabel value="{!$ObjectType.Rknews__RKRSSNFR_NewsConfig__c.Fields.Rknews__GoogleNewsEdition__c.Label}" id="lblGoogleNewsEdition"/>
+				<apex:selectList id="GoogleNewsEdition" value="{!NewsConfig.Rknews__GoogleNewsEdition__c}" size="1">
+					<apex:selectOptions value="{!GoogleCountryList}" id="sPGoogleCountryList" />
+				</apex:selectList>
+			</apex:pageBlockSectionItem>
+			
+			<apex:pageBlockSectionItem id="pbSecItemEnableSearch" dataStyle="vertical-align: middle;" helpText="{!Label_EnableAdvancedSearch_HelpText}">
+				<apex:inputCheckbox value="{!NewsConfig.Rknews__EnableSearchOverride__c}" styleClass="CheckBox" id="chkEnableSearchOverride" />
+				<apex:OutputLabel value="{!$ObjectType.Rknews__RKRSSNFR_NewsConfig__c.Fields.Rknews__EnableSearchOverride__c.Label}" id="lblEnableSearchOverride"/>
+			</apex:pageBlockSectionItem>
+						
+			<apex:pageBlockSectionItem helpText="{!Label_NumOfSearchResults_HelpText}">
+				<apex:OutputLabel Value="{!$ObjectType.Rknews__RKRSSNFR_NewsConfig__c.Fields.Rknews__SearchResultCount__c.Label}" id="lblpSearchResultCount"/>
+				<apex:InputText value="{!NewsConfig.Rknews__SearchResultCount__c}" id="inpSearchResultCount"/>
+			</apex:pageBlockSectionItem>
+			
+			<apex:pageBlockSectionItem helpText="{!$Label.rknews__RKRSSNFR_ConfigPage_CacheTimeInMinutes_HelpText}">
+				<apex:OutputLabel Value="{!$ObjectType.Rknews__RKRSSNFR_NewsConfig__c.Fields.Rknews__Cache_Time_in_minutes__c.Label}" id="lblpCacheTimeInMinutes"/>
+				<apex:InputText value="{!NewsConfig.Rknews__Cache_Time_in_minutes__c}" id="inpCacheTimeInMinutes"/>
+			</apex:pageBlockSectionItem>
+			
+			<apex:pageBlockSectionItem helpText="{!$Label.rknews__RKRSSNFR_ConfigPage_SortByDateRelevance_HelpText}">
+				<apex:OutputLabel Value="{!$ObjectType.Rknews__RKRSSNFR_NewsConfig__c.Fields.Rknews__OrderScore__c.Label}" id="lblOrderScore"/>
+				<apex:selectList id="SelectlstOrderScore" value="{!NewsConfig.Rknews__OrderScore__c}" size="1">
+					<apex:selectOption itemValue="r" itemLabel="Relevance" />
+					<apex:selectOption itemValue="n" itemLabel="Date" />
+				</apex:selectList>
+			</apex:pageBlockSectionItem>
+			
+			<apex:pageBlockSectionItem />
+			
+		</apex:PageBlockSection>
+
+		<!------------------------------------- Share Options --------------------------------------------->
+		<apex:PageBlockSection title="Share Options" columns="2" id="pbsecShareOption" >
+			<apex:pageBlockSectionItem id="pbSecItemShareOption" datastyle="vertical-align: middle;" helpText="{!$Label.rknews__RKRSSNFR_ConfigPage_ShareChatter_HelpText}">
+				<apex:inputField value="{!NewsConfig.Rknews__ShareArticleUsingChatter__c}" styleClass="CheckBox" />
+				<apex:OutputLabel value="{!$ObjectType.Rknews__RKRSSNFR_NewsConfig__c.Fields.Rknews__ShareArticleUsingChatter__c.Label}" />
+			</apex:pageBlockSectionItem>
+
+			<apex:pageBlockSectionItem id="pbSecItemEmailSharing" dataStyle="vertical-align: middle;" helpText="{!$Label.rknews__RKRSSNFR_ConfigPage_ShareEmail_HelpText}">
+				<apex:inputCheckbox value="{!NewsConfig.Rknews__EnableEmailSharing__c}" styleClass="CheckBox" id="chkSharebyEmail" >
+					<apex:actionSupport event="onclick" action="{!nothing}" rerender="rdbDesktopEmail,rdbSalesforceEmail" status="disableEmail"/>
+				</apex:inputCheckbox>
+				<apex:OutputLabel value="{!$ObjectType.Rknews__RKRSSNFR_NewsConfig__c.Fields.Rknews__EnableEmailSharing__c.Label}" id="olSharebyEmail">
+					<apex:actionStatus id="disableEmail" stopText="" startText=" processing">
+						<apex:facet name="start">
+							<img src="{!URLFOR($Resource.RKNews ,'img/loading.gif')}" />
+						</apex:facet>
+						<apex:facet name="stop" />
+					</apex:actionStatus>
+				</apex:OutputLabel>
+			</apex:pageBlockSectionItem>
+			
+			<apex:pageBlockSectionItem id="pbSecItemLinkedInSharing" datastyle="vertical-align: middle;" helpText="{!$Label.rknews__RKRSSNFR_ConfigPage_ShareLinkedIn_HelpText}">
+				<apex:inputField value="{!NewsConfig.Rknews__ShareArticleUsingLinkedIn__c}"	styleClass="CheckBox" id="inpShareOnLinkedIn" />
+				<apex:OutputLabel value="{!$ObjectType.Rknews__RKRSSNFR_NewsConfig__c.Fields.Rknews__ShareArticleUsingLinkedIn__c.Label}" id="olShareOnLinkedIn" />
+			</apex:pageBlockSectionItem>
+			
+			<apex:pageBlockSectionItem id="pbSecItemEmailDeskOption">
+				<apex:OutputLabel id="lblBlank2" />
+				<apex:selectRadio disabled="{!NOT(NewsConfig.Rknews__EnableEmailSharing__c)}" value="{!emailDesktopValue}" styleclass="Email" disabledClass="disabled" layout="pageDirection" id="rdbDesktopEmail" >
+					<apex:selectOption itemValue="true" itemLabel="{!$ObjectType.Rknews__RKRSSNFR_NewsConfig__c.Fields.Rknews__Share_Using_Desktop_Email__c.Label}" />
+					<apex:actionSupport event="onclick" action="{!toggleRadio}" rerender="rdbSalesforceEmail" status="disableEmail">
+						<apex:param name="firstParam" assignTo="{!toggle}" value="Desktop" />
+					</apex:actionSupport>
+				</apex:selectRadio>
+			</apex:pageBlockSectionItem>
+			
+			<apex:pageBlockSectionItem id="pbSecItemFaceBookSharing" datastyle="vertical-align: middle;" helpText="{!$Label.rknews__RKRSSNFR_ConfigPage_ShareFacebook_HelpText}">
+				<apex:inputField value="{!NewsConfig.Rknews__Share_Article_Using_Facebook__c}" styleClass="CheckBox" id="inpShareOnFacebook" />
+				<apex:OutputLabel value="{!$ObjectType.Rknews__RKRSSNFR_NewsConfig__c.Fields.Rknews__Share_Article_Using_Facebook__c.Label}" id="olShareOnFacebook" />
+			</apex:pageBlockSectionItem>
+			
+			<apex:pageBlockSectionItem id="pbSecItemEmailSfdcOption" >
+				<apex:OutputLabel id="lblBlank2" />
+				<apex:selectRadio disabled="{!NOT(NewsConfig.Rknews__EnableEmailSharing__c)}" value="{!emailSalesforceValue}" Styleclass="Email" disabledClass="disabled" layout="pageDirection" id="rdbSalesforceEmail" >
+					<apex:selectOption itemValue="true" itemLabel="{!$ObjectType.Rknews__RKRSSNFR_NewsConfig__c.Fields.Rknews__Share_Using_SalesForce_Email__c.Label}" />
+					<apex:actionSupport event="onclick" action="{!toggleRadio}" rerender="rdbDesktopEmail" status="disableEmail">
+						<apex:param name="firstParam" assignTo="{!toggle}" value="Salesforce" />
+					</apex:actionSupport>
+				</apex:selectRadio>
+			</apex:pageBlockSectionItem>
+
+			<apex:pageBlockSectionItem id="pbSecItemTwitterSharing" datastyle="vertical-align: middle;" helpText="{!$Label.rknews__RKRSSNFR_ConfigPage_ShareTwitter_HelpText}">
+				<apex:inputField value="{!NewsConfig.Rknews__ShareArticleUsingTwitter__c}" styleClass="CheckBox" id="inpShareOnTwitter" />
+				<apex:OutputLabel value="{!$ObjectType.Rknews__RKRSSNFR_NewsConfig__c.Fields.Rknews__ShareArticleUsingTwitter__c.Label}" id="olShareOnTwitter" />
+			</apex:pageBlockSectionItem>
+
+		</apex:PageBlockSection>
+
+		<apex:pageBlockButtons >
+			<apex:commandButton action="{!save}" value="{!$Label.rknews__RKRSSNFR_Save}" id="btnSave" />
+			<apex:commandButton action="{!cancel}" value="{!$Label.rknews__RKRSSNFR_Cancel}" id="btnCancel" />
+		</apex:pageBlockButtons>
+	</apex:PageBlock>
+	</apex:form>	
+</apex:page>

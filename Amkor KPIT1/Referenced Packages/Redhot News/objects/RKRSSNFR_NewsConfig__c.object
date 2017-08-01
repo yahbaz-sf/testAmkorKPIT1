@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customSettingsType>Hierarchy</customSettingsType>
+    <description>Stores and maintains the configuration parameters for the Redhot News app</description>
+    <enableFeeds>false</enableFeeds>
+    <fields>
+        <fullName>Account_MRU_ResultCount__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Number of Account&apos;s returned in the Recently Viewed results.</description>
+        <externalId>false</externalId>
+        <label>Account MRU Result Count</label>
+        <length>4</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Cache_Time_in_minutes__c</fullName>
+        <defaultValue>&quot;15&quot;</defaultValue>
+        <deprecated>false</deprecated>
+        <description>Amount of time before new cached data is retrieved.  In minutes.  Use 0 (zero) to disable caching.</description>
+        <externalId>false</externalId>
+        <label>Cache Time (in minutes)</label>
+        <length>4</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>EnableEmailSharing__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>Use the Redhot News Config option on the Redkite side tab on any Account view. (System Administrator only)</inlineHelpText>
+        <label>Share Article via Email</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>EnableSearchOverride__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>Use the Redhot News Config option on the Redkite side tab on any Account view. (System Administrator only)</inlineHelpText>
+        <label>Enable Advanced Search</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>FacebookPopupParameter__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Sharing Dialog window parameters</description>
+        <externalId>false</externalId>
+        <label>Facebook Popup Parameter</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>TextArea</type>
+    </fields>
+    <fields>
+        <fullName>FacebookUrl__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Facebook Sharing Url</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>TextArea</type>
+    </fields>
+    <fields>
+        <fullName>GoogleNewsEdition__c</fullName>
+        <defaultValue>&quot;us&quot;</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>Use the Redhot News Config option on the Redkite side tab on any Account view. (System Administrator only)</inlineHelpText>
+        <label>Google News Edition</label>
+        <length>10</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>InputEncoding__c</fullName>
+        <defaultValue>&quot;UTF-8&quot;</defaultValue>
+        <deprecated>false</deprecated>
+        <description>Encoding format used to send input to Google News search. E.g. &quot;UTF-8&quot;</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Encoding format used to send input to Google News search. E.g. &quot;UTF-8&quot;</inlineHelpText>
+        <label>Input Encoding Format</label>
+        <length>20</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>LinkedInSharingUrl__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>LinkedIn Sharing Url</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>TextArea</type>
+    </fields>
+    <fields>
+        <fullName>LinkedInUrl__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Not Used</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Not Used</inlineHelpText>
+        <label>LinkedIn Url</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>TextArea</type>
+    </fields>
+    <fields>
+        <fullName>LinkedPopupParameter__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Sharing Dialog window parameters</description>
+        <externalId>false</externalId>
+        <label>Linked Popup Parameter</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>TextArea</type>
+    </fields>
+    <fields>
+        <fullName>OrderScore__c</fullName>
+        <defaultValue>&quot;r&quot;</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>Use the Redhot News Config option on the Redkite side tab on any Account view. (System Administrator only)</inlineHelpText>
+        <label>Order Search Results By</label>
+        <length>10</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>OutputEncoding__c</fullName>
+        <defaultValue>&quot;UTF-8&quot;</defaultValue>
+        <deprecated>false</deprecated>
+        <description>Encoding format used for the response received from Google News search .e.g. &quot;UTF-8&quot;</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Encoding format used for the response received from Google News search .e.g. &quot;UTF-8&quot;</inlineHelpText>
+        <label>Output Encoding Format</label>
+        <length>20</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>OutputFormat__c</fullName>
+        <defaultValue>&quot;rss&quot;</defaultValue>
+        <deprecated>false</deprecated>
+        <description>The format in which the response is required from Google News Search. Possible values are &quot;rss&quot; or &quot;atom&quot;.</description>
+        <externalId>false</externalId>
+        <inlineHelpText>The format in which the response is required from Google News Search. Possible values are &quot;rss&quot; or &quot;atom&quot;.</inlineHelpText>
+        <label>OutputFormat</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>PopupTarget__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Deprecated</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Deprecated</inlineHelpText>
+        <label>PopupTarget</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>TextArea</type>
+    </fields>
+    <fields>
+        <fullName>PreferredLanguageForInterface__c</fullName>
+        <defaultValue>&quot;en&quot;</defaultValue>
+        <deprecated>false</deprecated>
+        <description>Language preference for the interface. Eg: &quot;en&quot;.</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Language preference for the interface. Eg: &quot;en&quot;.</inlineHelpText>
+        <label>Preferred Language for Interface</label>
+        <length>20</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>PreferredLanguageForResults__c</fullName>
+        <defaultValue>&quot;en&quot;</defaultValue>
+        <deprecated>false</deprecated>
+        <description>Language preference of the Google News Search results. Eg: &quot;en&quot;</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Language preference of the Google News Search results. Eg: &quot;en&quot;</inlineHelpText>
+        <label>Preferred Language for Results</label>
+        <length>20</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>RedirectionActivityUrl__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Redirection Activity Url</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>TextArea</type>
+    </fields>
+    <fields>
+        <fullName>RedirectionEmailUrl__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Redirection Email Url</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>TextArea</type>
+    </fields>
+    <fields>
+        <fullName>SearchResultCount__c</fullName>
+        <defaultValue>&quot;10&quot;</defaultValue>
+        <deprecated>false</deprecated>
+        <description>Max value is 25.</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Use the Redhot News Config option on the Redkite side tab on any Account view. (System Administrator only)</inlineHelpText>
+        <label>Number of Search Results</label>
+        <length>2</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>ShareArticleUsingChatter__c</fullName>
+        <defaultValue>true</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>Use the Redhot News Config option on the Redkite side tab on any Account view. (System Administrator only)</inlineHelpText>
+        <label>Share Article via Chatter</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>ShareArticleUsingLinkedIn__c</fullName>
+        <defaultValue>true</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>Use the Redhot News Config option on the Redkite side tab on any Account view. (System Administrator only)</inlineHelpText>
+        <label>Share Article via LinkedIn</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>ShareArticleUsingTwitter__c</fullName>
+        <defaultValue>true</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>Use the Redhot News Config option on the Redkite side tab on any Account view. (System Administrator only)</inlineHelpText>
+        <label>Share Article via Twitter</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Share_Article_Using_Facebook__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>Use the Redhot News Config option on the Redkite side tab on any Account view. (System Administrator only)</inlineHelpText>
+        <label>Share Article via Facebook</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Share_Using_Desktop_Email__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>Use the Redhot News Config option on the Redkite side tab on any Account view. (System Administrator only)</inlineHelpText>
+        <label>Use Desktop Email</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Share_Using_SalesForce_Email__c</fullName>
+        <defaultValue>true</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>Use the Redhot News Config option on the Redkite side tab on any Account view. (System Administrator only)</inlineHelpText>
+        <label>Use Salesforce Email</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>TwitterPopupParameter__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Sharing Dialog window parameters</description>
+        <externalId>false</externalId>
+        <label>Twitter Popup Parameter</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>TextArea</type>
+    </fields>
+    <fields>
+        <fullName>TwitterSharingUrl__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Twitter Sharing Url</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>TextArea</type>
+    </fields>
+    <fields>
+        <fullName>TwitterUrl__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Twitter Url</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>TextArea</type>
+    </fields>
+    <label>News Feed Configuration</label>
+    <visibility>Public</visibility>
+</CustomObject>

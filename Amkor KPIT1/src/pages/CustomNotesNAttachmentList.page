@@ -1,0 +1,21 @@
+<apex:page standardController="Scorecard__c" extensions="CreateNotesAndAttachmentController">
+   <apex:pageBlock >
+       <apex:pageBlockSection >
+           <apex:pageBlockTable value="{!attachmentWrapperList}" var="na" columns="2" >           
+               <apex:column onclick="openNotesOrAttachment('{!na.Id}')"  >
+                   <apex:outputLink >{!na.Title}</apex:outputLink>
+                   <apex:facet name="header">Name</apex:facet>
+               </apex:column>
+               <apex:column value="{!na.whattype}" >
+                   <apex:facet name="header">Type</apex:facet>
+               </apex:column>
+           </apex:pageBlockTable> 
+       </apex:pageBlockSection>
+   </apex:pageBlock>
+    <script>
+        function openNotesOrAttachment(id){
+            top.location = '/'+id;
+        }
+    </script>
+     
+</apex:page>

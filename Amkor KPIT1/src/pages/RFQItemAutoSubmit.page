@@ -1,0 +1,17 @@
+<apex:page showHeader="false" sidebar="false" standardController="RFQ_Item__c" extensions="RFQItemAutoSubmitController" >
+<apex:form >
+<apex:pageBlock >
+	<apex:pageBlockSection rendered="{!numberLeft > 0}">
+		<apex:outputText value="{0} record(s) remaining">
+			<apex:param value="{!numberLeft}" />
+			<img src="{!$Resource.Spinner}"/>
+		</apex:outputText>
+	</apex:pageBlockSection>
+</apex:pageBlock>
+	<apex:pageMessages escape="false"/>
+	<apex:actionFunction action="{!submitItemAutomatic}" name="submitNext" />
+</apex:form>
+<script type="text/javascript">
+	submitNext();
+</script>
+</apex:page>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexComponent xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>20.0</apiVersion>
+    <description>This component is used on a Sites page by a contact to edit a task assigned to them.</description>
+    <label>Edit Contact Task</label>
+    <packageVersions>
+        <majorNumber>3</majorNumber>
+        <minorNumber>7</minorNumber>
+        <namespace>InSituGen</namespace>
+    </packageVersions>
+</ApexComponent>

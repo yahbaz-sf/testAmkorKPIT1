@@ -1,0 +1,21 @@
+<apex:component >
+	<apex:attribute name="wrapper" type="RFQItemWrapper" description="A RFQItemWrapper"/>
+	<apex:attribute name="mode" type="String"  description="display mode" default="view"/>
+	<apex:attribute name="locked" type="Boolean"  description="is locked by state" default="false"/>
+    <apex:attribute name="columns" type="Integer"  description="Number of columns wide" default="3"/>
+    <apex:attribute name="layout" type="RFQILayout" description="Layout for component"/>
+    <apex:attribute name="layoutDeprecated" type="Boolean" description="True if layout is deprecated" default="false" />
+
+
+	 <!-- Wire Description Section -->
+	<apex:pageBlockSection title="Wire Description" id="wireSection" columns="1" rendered="{!layout.enabledSections['Wire Description']}">
+		<apex:repeat value="{!wrapper.wireConfigurations}"  var="wireConfiguration">    
+		     <apex:pageBlockSection columns="{!columns}">
+			     <apex:repeat value="{!layout.sectionMap['Wire Description'].attributes}" var="attribute">
+			         <apex:outputField rendered="{!mode=='view' || locked && (!layoutDeprecated || wireConfiguration[attribute.fieldAPIName] != null)}" value="{!wireConfiguration[attribute.fieldAPIName]}" />
+			         <apex:inputField rendered="{!mode=='edit' && !locked}" style="{!IF(attribute.isDefaultDriver,'background-color: #CCFFFF','')}" value="{!wireConfiguration[attribute.fieldAPIName]}" required="{!attribute.isRequired}"/>
+			     </apex:repeat>
+		     </apex:pageBlockSection>  
+		</apex:repeat>
+	</apex:pageBlockSection>
+</apex:component>

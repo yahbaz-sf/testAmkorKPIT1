@@ -1,0 +1,100 @@
+<apex:page standardController="Configured_Part_Number__c" extensions="CPNAddController">
+<apex:pageMessages />
+<apex:form > 
+    <apex:sectionHeader title="" subtitle="Create Configured Part Number" description="Choose Package Group and Package Family for CPN"/>
+	<apex:pageblock id="pb">
+	    <apex:pageBlockButtons >
+	        <apex:commandButton value="Create CPN" action="{!createCpn}"/>
+	        <apex:commandButton value="Cancel" action="{!cancel}"/>
+	    </apex:pageBlockButtons>   
+  
+	    <apex:pageBlockSection id="packageFamilyPbs" showHeader="false" columns="1">
+	        <apex:pageBlockSectionItem >
+	            <apex:outputText value="What Product Group does this CPN belong to?"/>
+	            <apex:selectList size="1" value="{!itemPackageGroup}">
+                    <apex:selectOptions value="{!packageGroups}"/>
+                    <apex:actionSupport event="onchange" reRender="packageFamilyPbs"/>
+                </apex:selectList> 
+            </apex:pageBlockSectionItem> 
+            <apex:pageBlockSectionItem >     
+	            <apex:outputText value="What Package Family does this CPN belong to?"/>
+	                <apex:selectList size="1" value="{!itemPackageFamily}">
+                        <apex:selectOptions value="{!packageFamilies}"/>
+                    </apex:selectList>
+	        </apex:pageBlockSectionItem>
+	        <apex:pageBlockSectionItem >
+	        	<apex:outputText value="" />
+	        	<apex:commandButton value="Use Selected Package Family" action="{!setSelectedPackageFamily}"/>
+	        </apex:pageBlockSectionItem>
+ 
+    	</apex:pageBlockSection>
+ 
+    	
+ 
+ 
+    	<apex:pageBlockSection id="attributesPbs" columns="1">
+    		<apex:pageBlockSection rendered="{!showAttributes}" columns="1">
+
+			    <apex:pageBlockSection title="Quote Information" columns="3" rendered="{!layout.enabledSections['Quote Information']}">
+			        <apex:repeat value="{!layout.sectionMap['Quote Information'].attributes}" var="attribute">
+			            <apex:outputField value="{!itemWrapper.specificRfqItem[attribute.fieldAPIName]}" rendered="{!attribute.includeOnQuote && attribute.objectAPIName != 'RFQ_Item__c'}" />
+    					<apex:outputField value="{!itemWrapper.rfqItem[attribute.fieldAPIName]}" rendered="{!attribute.includeOnQuote && attribute.objectAPIName == 'RFQ_Item__c'}" />
+			        </apex:repeat>  
+			    </apex:pageBlockSection>
+			    
+			    <apex:pageBlockSection title="Package Description" columns="3" rendered="{!layout.enabledSections['Package Description']}">
+			        <apex:repeat value="{!layout.sectionMap['Package Description'].attributes}" var="attribute">
+			            <apex:inputField value="{!itemWrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+			        </apex:repeat>  
+			    </apex:pageBlockSection>
+
+			    <apex:pageBlockSection title="CPN Drivers" columns="3" rendered="{!layout.enabledSections['CPN Drivers']}">
+			        <apex:repeat value="{!layout.sectionMap['CPN Drivers'].attributes}" var="attribute">
+			            <apex:inputField value="{!itemWrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+			        </apex:repeat>  
+			    </apex:pageBlockSection>
+			    
+			    <apex:pageBlockSection title="Wire Description" id="wireSection" columns="1" rendered="{!layout.enabledSections['Wire Description']}">
+			        <apex:repeat value="{!itemWrapper.wireConfigurations}"  var="wireConfiguration">    
+		                <apex:pageBlockSection columns="3" showHeader="true" collapsible="false">
+				            <apex:repeat value="{!layout.sectionMap['Wire Description'].attributes}" var="attribute">
+		                        <apex:inputField value="{!wireConfiguration[attribute.fieldAPIName]}"/>
+				            </apex:repeat>
+				        </apex:pageBlockSection>  
+			        </apex:repeat>
+			    </apex:pageBlockSection>
+			    
+			    <apex:pageBlockSection showHeader="false" columns="2" id="wireCommandPbs" rendered="{!layout.enabledSections['Wire Description']}">
+			    	<apex:commandButton value="Add Wire Configuration" action="{!addWireConfiguration}" reRender="wireSection" />
+	        		<apex:commandButton value="Remove Last Wire Configuration" action="{!removeWireConfiguration}" reRender="wireSection" />
+			    </apex:pageBlockSection>
+			    
+			    <apex:pageBlockSection title="Die Description" id="dieSection" columns="1" rendered="{!layout.enabledSections['Die Description']}" >  
+			    	<apex:pageMessage summary="{!dieConfigMessage}" severity="info"/> 
+	                <apex:repeat value="{!itemWrapper.dieConfigurations}"  var="dieConfiguration">    
+	                     <apex:pageBlockSection columns="{!layout.salesColumns}">
+	                         <apex:repeat value="{!layout.sectionMap['Die Description'].attributes}" var="attribute">
+	                             <apex:inputField value="{!dieConfiguration[attribute.fieldAPIName]}" />
+	                         </apex:repeat>
+	                     </apex:pageBlockSection>  
+	                </apex:repeat> 
+            	</apex:pageBlockSection> 
+
+			    <apex:pageBlockSection showHeader="false" columns="2" id="dieCommandPbs" rendered="{!layout.enabledSections['Die Description']}">
+			    	<apex:commandButton value="Add Die Configuration" action="{!addDieConfiguration}" reRender="dieSection" />
+	        		<apex:commandButton value="Remove Last Die Configuration" action="{!removeDieConfiguration}" reRender="dieSection" />
+			    </apex:pageBlockSection>
+
+
+			    <apex:pageBlockSection title="Adders" columns="3" rendered="{!layout.enabledSections['Adders']}">
+			        <apex:repeat value="{!layout.sectionMap['Adders'].attributes}" var="attribute">
+			            <apex:inputField value="{!itemWrapper.specificRfqItem[attribute.fieldAPIName]}"/>
+			        </apex:repeat>  
+			    </apex:pageBlockSection>
+
+    		</apex:pageBlockSection>
+    	</apex:pageBlockSection>
+
+    </apex:pageblock>
+</apex:form>
+</apex:page>

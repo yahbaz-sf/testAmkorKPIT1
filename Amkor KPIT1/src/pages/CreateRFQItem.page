@@ -1,0 +1,389 @@
+<apex:page controller="CreateRFQItemController" tabStyle="RFQ__c" action="{!autoCreateRedirect}">
+
+<style>
+    input.customRequiredField, textarea.customRequiredField, select.customRequiredField {
+        border-left: 5px solid #f00;
+    }   
+</style>
+
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+var inProgress = false;
+
+function setInProgress(cssClass) {
+    $j = jQuery.noConflict();
+
+    inProgress = true;
+    $j("."+cssClass).css("display", "block");
+}
+
+function resetProgress() {
+    $j = jQuery.noConflict();
+
+    inProgress = false;
+    $j("."+cssClass).css("display", "none");
+}
+
+var inProgressTest = false;
+
+</script>
+
+<style type="text/css">
+    .inProgressIndicator {
+        display: none;
+        text-align: center;
+        width: 400px;
+    }
+
+    .inProgressIndicatorTest {
+        display: none;
+        text-align: center;
+        width: 400px;
+    }
+
+    .inProgressIndicatorTestPkg {
+        display: none;
+        text-align: center;
+        width: 400px;
+    }
+
+</style>
+    
+    <apex:form >
+    <apex:pageMessages id="messages"/>
+    <center><apex:commandButton value="Back" action="{!cancel}" rendered="{!!isPageVisible}"/></center>
+    <apex:sectionHeader title="" subtitle="Create RFQ Item" description="Choose Package Group and Package Family for RFQ Item" rendered="{!isPageVisible}"/>
+    <apex:pageblock id="pb" rendered="{!isPageVisible}">
+        <apex:pageBlockButtons >
+            <apex:commandButton value="Create Item" action="{!createLineItem}" onclick="if (inProgress) return false; inProgress = true;" oncomplete="inProgress = false;" reRender="messages"/>
+            <apex:commandButton value="Cancel" action="{!cancel}"/>
+        </apex:pageBlockButtons> 
+        
+        <apex:pageBlockSection id="pbs" showHeader="false" columns="1">
+            <apex:pageBlockSectionItem >
+               <apex:outputLabel for="ProductGroup" value="Select Assembly Product Group or Service"/> 
+                <!-- to show required fields on non sobject bound control -->
+                <apex:outputPanel layout="block" styleClass="requiredInput">
+                <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                    <apex:selectList id="ProductGroup" size="1" value="{!itemPackageGroup}">
+                        <apex:selectOptions value="{!productGroups}"/>
+                        <apex:actionSupport event="onchange" action="{!resetSelection}" reRender="pb"/>
+                    </apex:selectList>
+                </apex:outputPanel> 
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSectionItem rendered="{!itemPackageGroup == 'Other Services'}">     
+                <apex:outputLabel for="OtherServices" value="Which Service or Advanced Product?"/>
+                <apex:outputPanel layout="block" styleClass="requiredInput">
+                <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                    <apex:selectList id="otherServices" size="1" value="{!otherService}">
+                        <apex:selectOptions value="{!OtherServices}"/>
+                        <apex:actionSupport event="onchange" reRender="pb" action="{!CopyOtherServicesToItemPackageFamily}" onsubmit="setInProgress('inProgressIndicatorTest');" oncomplete="resetProgress('inProgressIndicatorTest');" />             
+                    </apex:selectList>
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem> 
+            
+            <apex:pageBlockSectionItem rendered="{!OtherService == 'Engineering Services'}">     
+                <apex:outputLabel for="EngineeringServices" value="Which Engineering Service?"/>
+                <apex:outputPanel layout="block" styleClass="requiredInput">
+                <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                    <apex:selectList id="otherServices" size="1" value="{!engineeringService}">
+                        <apex:selectOptions value="{!EngineeringServices}"/>
+                        <apex:actionSupport event="onchange" reRender="pb" action="{!CopyEngineeringServicesToItemPackageFamily}" onsubmit="setInProgress('inProgressIndicatorTest');" oncomplete="resetProgress('inProgressIndicatorTest');" />             
+                    </apex:selectList>
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSectionItem rendered="{!OtherService == 'Advanced Product Development'}">     
+                <apex:outputLabel for="AdvProduct" value="Which Advanced Product?"/>
+                <apex:outputPanel layout="block" styleClass="requiredInput">
+                <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                    <apex:selectList id="otherServices" size="1" value="{!advProduct}">
+                        <apex:selectOptions value="{!AdvProducts}"/>
+                        <apex:actionSupport event="onchange" reRender="pb" action="{!CopyAdvProductsToItemPackageFamily}" onsubmit="setInProgress('inProgressIndicatorTest');" oncomplete="resetProgress('inProgressIndicatorTest');" />             
+                    </apex:selectList>
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem> 
+
+            <apex:pageBlockSectionItem rendered="{!itemPackageGroup != 'Other Services'}">     
+                <apex:outputLabel for="PackageFamily" value="Select Package Family or Service"/>
+                <apex:outputPanel layout="block" styleClass="requiredInput">
+                <apex:outputPanel layout="block" styleClass="requiredBlock"/> 
+                    <apex:selectList id="PackageFamily" size="1" value="{!itemPackageFamily}">
+                        <apex:selectOptions value="{!packageFamilies}"/>
+                    <apex:actionSupport event="onchange" action="{!populateDefaultConfigurationNumbers}" reRender="pbs" onsubmit="setInProgress('inProgressIndicator');" oncomplete="resetProgress('inProgressIndicator');" />
+                    </apex:selectList>
+               </apex:outputPanel>
+            </apex:pageBlockSectionItem>  
+
+            <apex:outputPanel styleClass="inProgressIndicator">
+                <i>Loading...</i>
+            </apex:outputPanel>
+            
+            <apex:pageBlockSectionItem rendered="{!isDesign}">     
+                <apex:outputLabel for="ServiceType" value="Service Type?"/>
+                <apex:outputPanel layout="block" styleClass="requiredInput">
+                <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                    <apex:selectList id="ServiceType" size="1" value="{!serviceDesignType}">
+                        <apex:selectOptions value="{!serviceTypeOptions}"/>
+                        <apex:actionSupport event="onchange" reRender="pbs" onsubmit="setInProgress('inProgressIndicator');" oncomplete="resetProgress('inProgressIndicator');"/>
+                    </apex:selectList>
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSectionItem rendered="{!IsDesignPackageFamilies}">     
+                <apex:outputLabel for="PackageType" value="Package Type?"/>
+                <apex:outputPanel layout="block" styleClass="requiredInput">
+                <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                    <apex:selectList id="PackageType" size="1" value="{!packageType}">
+                        <apex:selectOptions value="{!packageTypeOptions}"/>
+                    </apex:selectList>
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSectionItem rendered="{!itemPackageFamily == 'Engineering Service'}">     
+                <apex:outputLabel for="Engineering Services" value="Which Engineering Service?"/>
+                <apex:outputPanel layout="block" styleClass="requiredInput">
+                <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                    <apex:selectList id="TestType" size="1" value="{!testType}">
+                        <apex:selectOptions value="{!TestTypeOptions}"/>
+                        <apex:actionSupport event="onchange" reRender="pbs,pbz,pbz1" onsubmit="setInProgress('inProgressIndicatorTest');" oncomplete="resetProgress('inProgressIndicatorTest');"/>             
+                    </apex:selectList>
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSectionItem rendered="{!IsFinalTestPackageFamily}">     
+                <apex:outputLabel for="TestType" value="Test Type?"/>
+                <apex:outputPanel layout="block" styleClass="requiredInput">
+                <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                    <apex:selectList id="TestType" size="1" value="{!testType}">
+                        <apex:selectOptions value="{!TestTypeOptions}"/>
+                        <apex:actionSupport event="onchange" reRender="pbs,pbz,pbz1" onsubmit="setInProgress('inProgressIndicatorTest');" oncomplete="resetProgress('inProgressIndicatorTest');"/>                         
+                    </apex:selectList>
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSectionItem rendered="{!IsFinalTestPackageFamily && testType != null}">     
+                <apex:outputLabel for="TestUOM" value="Test Quote UOM?"/>
+                <apex:outputPanel layout="block" styleClass="requiredInput">
+                <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                    <apex:selectList id="TestUOM" size="1" value="{!testUOM}">
+                        <apex:selectOptions value="{!TestUOMOptions}"/>
+                        <apex:actionSupport event="onchange" reRender="pbs,pbz,pbz1" onsubmit="setInProgress('inProgressIndicatorTest');" oncomplete="resetProgress('inProgressIndicatorTest');" action="{!populateDefaultConfigurationNumbers}"/>                        
+                    </apex:selectList>
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+
+            <apex:outputPanel styleClass="inProgressIndicatorTest" >
+                <i>Loading...</i>
+            </apex:outputPanel>
+
+            <apex:pageBlockSectionItem rendered="{!IsFinalTestPackageFamily && IsTestPerTime && testType != 'Post-Test Services Only' && testType != 'Strip Test'}" >     
+                <apex:outputLabel for="FinalTestPackageType" value="Time Unit of Measurement?"/>
+                <apex:outputPanel layout="block" styleClass="requiredInput">
+                <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                    <apex:selectList id="finalTestPackageFamily" size="1" value="{!testTimeUOM}">
+                        <apex:selectOptions value="{!TestTimeOptions}"/>
+                    </apex:selectList>
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSectionItem rendered="{!IsFinalTestPackageFamily && testUOM != null}" >     
+                <apex:outputLabel for="FinalTestPackageType" value="Assembly Package/Wafer for Test?"/>
+                <apex:outputPanel layout="block" styleClass="requiredInput">
+                <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                    <apex:selectList id="finalTestPackageFamily" size="1" value="{!finalTestPackageFamily}">
+                        <apex:selectOptions value="{!AllPackageFamilies}" />
+                            <apex:actionSupport event="onchange" reRender="pbs,pbz,pbz1" onsubmit="setInProgress('inProgressIndicatorTestPkg');" oncomplete="resetProgress('inProgressIndicatorTestPkg');" action="{!setupAssemblyPfFieldDefs}">
+                        </apex:actionSupport>
+                    </apex:selectList>
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+
+            <apex:outputPanel styleClass="inProgressIndicatorTestPkg" >
+                <i>Loading...</i>
+            </apex:outputPanel>
+
+            <apex:pageBlockSectionItem rendered="{!IsFinalTestPackageFamily && IsTestPerTime && testType != 'Post-Test Services Only'}">      
+                    <apex:outputLabel for="BodyX" value="Package Body Size X"/>
+                    <apex:inputText id="BodyX" value="{!testBodyX}"/>
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSectionItem rendered="{!IsFinalTestPackageFamily && IsTestPerTime && testType != 'Post-Test Services Only'}">         
+                    <apex:outputLabel for="BodyY" value="Package Body Size Y"/>
+                    <apex:inputText id="BodyY" value="{!testBodyY}"/>
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSectionItem rendered="{!IsFinalTestPackageFamily && IsTestPerTime && testType != 'Post-Test Services Only'}">   
+                    <apex:outputLabel for="BodyZ" value="Package Body Size Z"/>
+                    <apex:inputText id="BodyZ" value="{!testBodyZ}"/>
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSectionItem rendered="{!IsFinalTestPackageFamily && IsTestPerTime && testType != 'Post-Test Services Only'}">     
+                <apex:outputLabel for="PackageLead" value="Package Ball/Lead Count"/>
+                <apex:inputText id="PackageLead" value="{!testPackageLead}"/>
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSection id="pbz" title="Assembly Package Details" rendered="{!IsFinalTestPackageFamily && !IsTestPerTime && finalTestPackageFamily != null && !IsProbeUnit}">
+                <apex:repeat value="{!assemblyTestPfFieldDefs}" var="fieldDef" rendered="{!assemblyTestPfFieldDefs != null}">
+                    <apex:inputField value="{!specificRfqItem[fieldDef.RFQI_Field_Def__r.Name]}" styleClass="customRequiredField"/>
+                    <br/>
+                </apex:repeat>
+            </apex:pageBlockSection>
+
+            <apex:pageBlockSection id="pbz1" title="Assembly Package Details" rendered="{!IsFinalTestPackageFamily && !IsTestPerTime && finalTestPackageFamily != null && IsProbeUnit}">
+                 <apex:pageBlockSectionItem >     
+                    <apex:outputLabel for="WaferSize" value="Wafer Size"/>
+                    <apex:outputPanel layout="block" styleClass="{!requiredInput}">
+                    <apex:outputPanel layout="block" styleClass="{!requiredBlock}"/>
+                        <apex:selectList id="WaferSize" size="1" value="{!waferSize}" >
+                            <apex:selectOptions value="{!WaferSizeOptions}"/>                                
+                        </apex:selectList>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <br/>
+                <apex:pageBlockSectionItem >     
+                    <apex:outputLabel for="GDPW" value="Gross Die Per Wafer"/>
+                    <apex:outputPanel layout="block" styleClass="{!requiredInput}">
+                    <apex:outputPanel layout="block" styleClass="{!requiredBlock}"/>
+                        <apex:inputText value="{!grossDiePerWafer}"/>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            
+            <apex:pageBlockSectionItem rendered="{!HasWireConfiguration && NOT(isOppOnly)}">     
+                <apex:outputLabel for="NumberWires" value="What are the number of Wire Types & Configurations?"/>
+                <apex:outputPanel layout="block" styleClass="requiredInput">
+                <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                    <apex:selectList id="NumberWires" size="1" value="{!numberOfWires}">
+                        <apex:selectOptions value="{!numberOfWiresOptions}"/>
+                    </apex:selectList>
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSectionItem rendered="{!HasDieConfiguration && NOT(isOppOnly)}">     
+                <apex:outputLabel for="NumberDie" value="What are the number of Die?"/>
+                <apex:outputPanel layout="block" styleClass="requiredInput">
+                <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                    <apex:selectList id="NumberDie" size="1" value="{!numberOfDies}">
+                        <apex:selectOptions value="{!numberOfDiesOptions}"/>
+                    </apex:selectList>
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSectionItem rendered="{!HasPassiveConfiguration && NOT(isOppOnly)}">     
+                <apex:outputLabel for="NumberPassives" value="What are the number of Passive SID Numbers?"/>
+                <apex:outputPanel layout="block" styleClass="requiredInput">
+                       <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                    <apex:selectList id="NumberPassives" size="1" value="{!numberOfPassives}">
+                            <apex:selectOptions value="{!numberOfPassivesOptions}"/>
+                        </apex:selectList>
+                    </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSectionItem rendered="{!HasInsertionConfiguration && testUom != '/Time' && testType != 'Post-Test Services Only' && testUom != null}">     
+                <apex:outputLabel for="NumberInsertion" value="What are the number of Test Insertions?"/>
+                <apex:outputPanel layout="block" styleClass="requiredInput">
+                    <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                    <apex:selectList id="NumberInsertion" size="1" value="{!numberOfInsertions}">
+                            <apex:selectOptions value="{!numberOfInsertionOptions}"/>
+                        </apex:selectList>
+                   </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSectionItem rendered="{!HasServiceConfiguration && NOT(isOppOnly)}">     
+                <apex:outputLabel for="NumberService" value="What are the number of Services?"/>
+                <apex:outputPanel layout="block" styleClass="requiredInput">
+                    <apex:outputPanel layout="block" styleClass="requiredBlock"/>
+                    <apex:selectList id="NumberService" size="1" value="{!numberOfServices}">
+                            <apex:selectOptions value="{!NumberOfServiceOptions}"/>
+                        </apex:selectList>
+                   </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+            
+            <!-- Bhanu - 04-May-2016 : SALESFORCE-27 SiP Question changes - Text needs to be updated ends -->
+            <!-- Added output panel to hide old logic table when Package family is FC BGA or FC CSP -->
+            
+            <apex:outputpanel rendered="{!!showNewLogicTable}">
+                 <apex:pageBlockSection columns="1" rendered="{!IsSiP}">
+                    <apex:inputCheckbox label="Does the device have any of the following components?"  value="{!SiPQ1}" >
+                        <apex:actionSupport reRender="pb" event="onchange"/>
+                    </apex:inputCheckbox>
+                    <apex:outputText value="-Power or Power Management ICs (PMIC)" />
+                    <apex:outputText value="-Non-decoupling Capacitors, Resistors (R), or Inductors (L)" />
+                    <apex:outputText value="-Integrated Passive Device (IPD)" />
+                    <apex:outputText value="-Crystal Oscillator or Voltage Controlled Oscillator (VCO)" />
+                    <apex:outputText value="-SAW/BAW Filter" />
+                    <apex:outputText value="-Any Antenna" />
+    
+                    <apex:inputCheckbox label="Does the device have any compartmental shielding?" value="{!SiPQ2}" >
+                        <apex:actionSupport reRender="pb" event="onchange"/>
+                    </apex:inputCheckbox>
+                    <apex:outputText value="-Metal or Conformal" />
+    
+    
+                    <apex:inputCheckbox value="{!SiPQ3}" selected="true" disabled="true" label="Package Construction = SiP" rendered="{!SiPQ1 || SiPQ2}" />
+                </apex:pageBlockSection> 
+            </apex:outputpanel>
+            
+            <!-- Bhanu - 09-Mar-2016 : SALESFORCE-27 SiP Question changes - Text needs to be updated -->
+            <!-- Commenting As per New Logic table
+            <apex:pageBlockSection columns="1" rendered="{!isSiP}">
+                    <apex:inputCheckbox label="Number of die + WLCSP + prepackaged parts
+                                            (excluding memory device(s)) is equal to
+                                            or greater than 2"  value="{!SiPQ2}" >
+                        <apex:actionSupport reRender="pb" event="onchange"/>
+                    </apex:inputCheckbox>
+                    
+                    <apex:inputCheckbox label="Does the device have any of the following
+                                            components ?" value="{!SiPQ1}" >
+                        <apex:actionSupport reRender="pb" event="onchange"/>
+                    </apex:inputCheckbox>
+                    
+                    <apex:outputText value="-Inductor(L), Resistor(R), Antenna," />
+                    <apex:outputText value="SAW/BAW/FBAR Filters, Integrated Passive" />
+                    <apex:outputText value="Device (IPD), Crystal, Oscillator, VCO" />
+                                
+                    <apex:inputCheckbox value="{!SiPQ3}" selected="true" disabled="true" label="Package Construction = SiP" rendered="{!SiPQ1 || SiPQ2}" />
+            </apex:pageBlockSection>
+             -->
+            <!-- Bhanu - 09-Mar-2016 : SALESFORCE-27 SiP Question changes - Text needs to be updated ends -->
+            
+            <!-- Bhanu - 04-May-2016 : SALESFORCE-27 SiP Question changes - Text needs to be updated --->
+            
+            <apex:pageBlockSection columns="1" rendered="{!showNewLogicTable}">
+                    <apex:inputCheckbox label="Number of die + WLCSP + prepackaged parts 
+                                            excluding memory device equal
+                                            or greater than 2"  value="{!SiPQ2}" >
+                        <apex:actionSupport reRender="pb" event="onchange"/>
+                    </apex:inputCheckbox>
+                    
+                    <apex:inputCheckbox label="Does the device have any of the Following
+                                            components" value="{!SiPQ1}" >
+                        <apex:actionSupport reRender="pb" event="onchange"/>
+                    </apex:inputCheckbox>
+                    
+                    <apex:outputText value="-Inductor (L), Resistor (R), Antenna,"  />
+                    <apex:outputText value="SAW/BAW/FBAR Filters, Crystal, Oscillator, VCO"/>
+                    
+                    <apex:inputCheckbox label="Is this a Finger Print Sensor" value="{!SiPQ4}" >
+                        <apex:actionSupport reRender="pb" event="onchange"/>
+                    </apex:inputCheckbox>
+                    
+                    <br/>
+                    <br/>
+                                
+                    <apex:inputCheckbox value="{!SiPQ3}" selected="true" disabled="true" label="Package Construction = SiP" rendered="{!SiPQ1 || SiPQ2 || SiPQ4 }"/>
+            </apex:pageBlockSection>
+            <!-- Bhanu - 04-May-2016 : SALESFORCE-27 SiP Question changes - Text needs to be updated ends -->
+                        
+        </apex:pageBlockSection>
+
+       
+    </apex:pageblock>
+</apex:form>
+</apex:page>

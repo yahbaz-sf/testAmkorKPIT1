@@ -1,0 +1,140 @@
+<apex:page showHeader="true" sidebar="true" standardController="Opportunity" extensions="RFQNewOppController" tabStyle="Opportunity">
+<script type="text/javascript">
+var prob = "{!$Component.form.pb.OppInfoPBS.prob}";
+var type = "{!$Component.form.pb.OppInfoPBS.type}";
+var stage = "{!$Component.form.pb.OppInfoPBS.stage}";
+var inProgress = false;
+
+
+function resetProgress() {
+    inProgress = false;
+}
+
+function setStage() {
+    var typeName = document.getElementById(type).value;
+    if(typeName == "Existing Business") {
+        setProbab("RFQ", stage);
+        setProbability();
+    }
+}
+
+
+//Bhanu - 21-June-2016 : Salesforce 69 - Opportunity Status Change
+//Updating Existing values with new value
+/*
+function setProbability() {
+    var stageName = document.getElementById("{!$Component.form.pb.OppInfoPBS.stage}").value;
+    if(stageName == "Prospecting") {
+        setProbab("0", prob);
+        HideStageNameField();
+    }
+    else if(stageName == "Investigation") {
+        setProbab("0", prob);
+        HideStageNameField();
+    }
+    else if(stageName == "BU/Factory/Sales Alignment") {
+        setProbab("0", prob);
+        HideStageNameField();
+    }
+    else if(stageName == "Product/Service Selection") {
+        setProbab("10", prob);
+        HideStageNameField();
+    }
+    else if(stageName == "Value Proposition") {
+        setProbab("20", prob);
+        HideStageNameField();
+    }
+    else if(stageName == "RFQ") {
+        setProbab("50", prob);
+        HideStageNameField();
+    }
+    else if(stageName == "Build Execution") {
+        setProbab("75", prob);
+        HideStageNameField();
+    }
+}
+*/
+
+function setProbability() {
+    var stageName = document.getElementById("{!$Component.form.pb.OppInfoPBS.stage}").value;
+    if(stageName == "Discovery") {
+        setProbab("0", prob);
+        HideStageNameField();
+    }
+    else if(stageName == "BU/Factory/Sales Alignment") {
+        setProbab("25", prob);
+        HideStageNameField();
+    }
+    else if(stageName == "RFQ/Quote") {
+        setProbab("50", prob);
+        HideStageNameField();
+    }
+    else if(stageName == "Qual") {
+        setProbab("75", prob);
+        HideStageNameField();
+    }
+}
+
+function setProbab(val, fieldId) {
+    document.getElementById(fieldId).value=val;
+}
+</script>
+<apex:pageMessages id="messages" />
+<apex:sectionHeader title="Opportunity Edit" subtitle="New Opportunity"/>
+<apex:form id="form" >
+    <apex:pageBlock title="Opportunity Edit" id="pb">
+
+    <apex:pageBlockButtons id="pbb">
+        <apex:commandButton value="Save" action="{!saveOnly}" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();" reRender="pb, output"/>
+        <apex:commandButton value="Save & New" action="{!saveAndNew}" reRender="pb, messages" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();"/>
+        <apex:commandButton value="Cancel" action="{!cancel}"/>
+    </apex:pageBlockButtons>
+
+        <apex:pageBlockSection title="Opportunity Information" collapsible="false" id="OppInfoPBS"> 
+
+            <apex:inputField value="{!newOpp.AccountId}" required="true"/>
+            <apex:inputField value="{!newOpp.Name}"/>
+
+
+            <apex:inputField value="{!newOpp.LeadSource}" rendered="{!!showUpside}" />
+            <apex:inputField value="{!newOpp.CloseDate}"/>
+            
+            <apex:inputField value="{!newOpp.NextStep}" />            
+            <apex:inputField value="{!newOpp.HVM_Start_Date__c}" required="true"/>
+
+            <apex:inputField value="{!newOpp.Type}" onchange="setStage();" id="type"/>            
+            <apex:inputField value="{!newOpp.Projected_Revenue__c}" required="true"/>            
+
+            <apex:inputField value="{!newOpp.StageName}" onchange="setProbability();" id="stage" />            
+            <apex:inputText value="{!newOpp.Probability}" required="false" id="prob"/>
+                        
+            <apex:inputField value="{!newOpp.Category__c}" required="true"/>
+            <apex:inputField value="{!newOpp.Business_Benefit__c}"/>
+            
+            <!-- Bhanu - 29-June-2016 : Salesforce 69 :   Added the Primary Campaign Source in the page of opportunity creation as per the production code !-->
+            <apex:inputField value="{!newOpp.CampaignId}" required="false" />
+            
+        </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1" >            
+              <apex:inputField value="{!newOpp.Additional_Comments__c}" style="width:75%;"/>
+        </apex:pageBlockSection>   
+
+        <apex:pageBlockSection title="Upside Request Information" collapsible="false" id="upReqPBS" rendered="{!showUpside}"> 
+            <apex:inputField value="{!newOpp.Plant__c}" />
+            <apex:selectList id="PackageFamily" size="1" value="{!newOpp.Package_Family__c}">
+                <apex:selectOptions value="{!PackageFamilies}"/>
+            </apex:selectList>
+            <apex:inputField value="{!newOpp.Business__c}" />
+            <apex:inputField value="{!newOpp.Customer_Device_Name__c}" />
+            <apex:inputField value="{!newOpp.Upside_Start_WW__c}" />
+            <apex:inputField value="{!newOpp.Upside_End_WW__c}" />
+            <apex:inputField value="{!newOpp.Weekly_K_Units__c}" />
+            <apex:inputField value="{!newOpp.Upside_Customer_Special_Requirements__c}" />
+            <apex:inputField value="{!newOpp.Upside_Reason__c}" />
+        </apex:pageBlockSection>
+
+        <apex:actionFunction name="ShowStageNameField" action="{!shouldShowUpside}" reRender="pb, messages" immediate="true" />
+        <apex:actionFunction name="HideStageNameField" action="{!shouldHideUpside}" reRender="pb, messages" immediate="true"/>
+    </apex:pageBlock>
+</apex:form>
+</apex:page>

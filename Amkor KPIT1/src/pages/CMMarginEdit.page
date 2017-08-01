@@ -1,0 +1,22 @@
+<apex:page standardController="CM_Margin__c" extensions="CMMarginController" action="{!setupAction}">
+<apex:form >
+<apex:sectionHeader title="CM Margin" subtitle="View CM Margin"/>
+<apex:pageBlock >
+	<apex:pageBlockButtons >
+		<apex:commandButton value="Save" action="{!saveAction}"/>
+		<apex:commandButton value="Cancel" action="{!cancelAction}" immediate="true"/>
+	</apex:pageBlockButtons>
+	<apex:pageBlockSection columns="1">
+		<apex:inputField value="{!rec.Name}"/>
+		<apex:inputField value="{!rec.Lead_Count__c}"/>
+		<apex:inputField value="{!rec.Wire_Material__c}"/>
+		<apex:inputField value="{!rec.Package_Family__c}"/>
+	</apex:pageBlockSection>
+	<apex:pageBlockSection columns="2" title="Values">
+		<apex:inputField value="{!rec.Tier__c}"/>
+		<apex:inputField value="{!rec.Volume_Floor__c}"/>
+		<apex:inputField value="{!rec.Margin__c}"/>
+	</apex:pageBlockSection>
+</apex:pageBlock>
+</apex:form>
+</apex:page>

@@ -1,0 +1,27 @@
+<apex:page controller="firstrain.FRCustomSettingsListController" sidebar="false">
+<head>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.js"></script>
+<script type='text/javascript'> 
+$(document).ready(function() {
+    $("#loadform").submit();
+});
+</script>
+</head>
+<apex:iframe scrolling="true" height="1200px" src="" id="frMarketIframe" />
+
+<form action="https://apps.firstrain.com/sfdc/001/dynamic/enterprise.do" method="post" target="frMarketIframe" id="loadform">
+                <input type="hidden" name='sessionId' value='{!$Api.Session_ID}'></input>
+                <input type="hidden" name='serverURL' value='{!$Api.Partner_Server_URL_180}'></input>
+                <input type="hidden" name='view' value='newscomponent'></input>
+                <input type="hidden" name='entrprsid' value='{!enterpriseId}'></input>
+                <input type="hidden" name='accesstoken' value='{!accesstoken}'></input>
+                <input type="hidden" name='userid' value='{!$User.Id}'></input>
+                <input type="hidden" name='userEmail' value='{!$User.Email}'></input>
+                <input type="hidden" name='userFirstName' value='{!$User.FirstName}'></input>
+                <input type="hidden" name='userLastName' value='{!$User.LastName}'></input>
+                <input type="hidden" name='endPoint' value='{!$Api.Enterprise_Server_URL_270}'></input>
+                <input type="hidden" name='pf' value='sf'></input>
+                <input type="hidden" name='sfresturl' value='{!resturl}'></input>
+                
+</form>
+</apex:page>

@@ -1,0 +1,5 @@
+<apex:page >
+<script type="text/javascript">
+window.close();
+</script>
+</apex:page>

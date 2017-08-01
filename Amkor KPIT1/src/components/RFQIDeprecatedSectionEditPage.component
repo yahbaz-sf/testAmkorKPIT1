@@ -1,0 +1,54 @@
+<apex:component controller="RFQIDeprecatedSectionEditController">
+	<apex:attribute name="wrapper" type="RFQItemWrapper" description="A RFQItemWrapper"/>
+    <apex:attribute name="columns" type="Integer"  description="Number of columns wide" default="1"/>
+    <apex:attribute name="renderFactorySection" type="Boolean"  description="Should the factory field be rendered" default="false"/>
+    <apex:attribute name="theLayout" type="RFQILayout" assignTo="{!lay}" description="Layout for component"/>
+    <apex:attribute name="salesPage" type="Boolean" default="false" description="True if this component is on a sales page" />
+    <apex:attribute name="buPage" type="Boolean" default="false" description="True if this component is on a bu page" />
+
+    <apex:pageBlockSection title="Deprecated Fields" columns="{!columns}">
+    	<!-- Package -->
+        <apex:repeat value="{!packageFields}" var="attribute">
+            <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" rendered="{!wrapper.specificRfqItem[attribute.fieldAPIName] != null}"/>
+        </apex:repeat>
+
+        <!-- Wire -->
+        <apex:repeat value="{!wrapper.wireConfigurations}"  var="wireConfiguration">  
+        	<apex:pageBlockSection columns="{!columns}">
+                <apex:repeat value="{!wireFields}" var="attribute">
+                    <apex:outputField value="{!wireConfiguration[attribute.fieldAPIName]}" rendered="{!wireConfiguration[attribute.fieldAPIName] != null}"/>
+                </apex:repeat>
+            </apex:pageBlockSection>  
+        </apex:repeat> 
+
+        <!-- Die -->
+        <apex:repeat value="{!wrapper.dieConfigurations}"  var="dieConfiguration">  
+        	<apex:pageBlockSection columns="{!columns}">
+                <apex:repeat value="{!dieFields}" var="attribute">
+                    <apex:outputField value="{!dieConfiguration[attribute.fieldAPIName]}" rendered="{!dieConfiguration[attribute.fieldAPIName] != null}"/>
+                </apex:repeat>
+            </apex:pageBlockSection>  
+        </apex:repeat> 
+
+        <!-- Passive -->
+        <apex:repeat value="{!wrapper.passiveConfigurations}"  var="passiveConfiguration">  
+        	<apex:pageBlockSection columns="{!columns}">
+                <apex:repeat value="{!passiveFields}" var="attribute">
+                    <apex:outputField value="{!passiveConfiguration[attribute.fieldAPIName]}" rendered="{!passiveConfiguration[attribute.fieldAPIName] != null}"/>
+                </apex:repeat>
+            </apex:pageBlockSection>  
+        </apex:repeat> 
+
+        <!-- Insertion -->
+        <apex:repeat value="{!wrapper.insertionConfigurations}"  var="insertionConfiguration">  
+        	<apex:pageBlockSection columns="{!columns}">
+                <apex:repeat value="{!insertionFields}" var="attribute">
+                    <apex:outputField value="{!insertionConfiguration[attribute.fieldAPIName]}" rendered="{!insertionConfiguration[attribute.fieldAPIName] != null}"/>
+                </apex:repeat>
+            </apex:pageBlockSection>  
+        </apex:repeat> 
+
+    </apex:pageBlockSection>
+
+
+</apex:component>

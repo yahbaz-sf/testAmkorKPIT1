@@ -1,0 +1,186 @@
+<apex:page standardController="RFQ_Ac_Map__c" extensions="RFQAcMapEditController">
+
+
+
+<apex:form id="form">
+
+	<apex:sectionHeader title="Create Account File Map" />
+
+	<apex:pageMessages />
+
+	<apex:pageBlock rendered="{!!shouldShowControls}">
+		<apex:pageBlockButtons location="bottom">
+			<apex:commandButton value="Return to Account" action="{!cancel}" />
+		</apex:pageBlockButtons>
+
+	</apex:pageBlock>
+
+	<apex:pageblock id="mainBody" rendered="{!shouldShowControls}"> 
+
+		<apex:pageBlockButtons location="bottom">
+			<apex:commandButton value="Previous" rendered="{!currentStep != 1}" action="{!previousStep}" />
+			<apex:commandButton value="Cancel" action="{!cancel}" />
+			<apex:commandButton value="Next" rendered="{!currentStep != finalStep}" action="{!nextStep}" />
+			
+			<apex:commandButton value="Save" rendered="{!currentStep == finalStep && !allowDraftSave}" action="{!saveMappingClone}" />
+			<apex:commandButton value="Save as Active" rendered="{!currentStep == finalStep && allowDraftSave}" action="{!saveMappingActive}" />
+			<apex:commandButton value="Save as Draft" rendered="{!currentStep == finalStep && allowDraftSave}" action="{!saveMappingDraft}" />
+		</apex:pageBlockButtons>
+
+		<!-- ************************************* -->
+		<!-- Step One - Enter name and the columns -->
+		<!-- ************************************* -->
+
+		<apex:pageBlockSection title="Account File Map Info" Columns="2" rendered="{!currentStep == 1}">
+			<!-- Name and account Info -->
+
+			<apex:outputField value="{!accountMap.Account__c}" />
+			<apex:outputField value="{!accountMap.Version__c}" />
+			<apex:inputField value="{!accountMap.Name}" />
+
+		</apex:pageBlockSection>
+
+		<apex:pageBlockSection title="Account File Columns" columns="1" rendered="{!currentStep == 1}">
+		
+			<!-- List of columns -->
+			<b>Upload Example CSV to Determine columns</b><br/>
+			<apex:inputFile value="{!fileContent}" filename="{!fileName}" />
+
+			<br/>
+			<i>-- or --</i>
+			<br/><br/>
+
+			<b>Specify Columns Manually</b>
+			<apex:dataTable value="{!accountMapColumns}" var="mapColumn" id="mapColumnTable">
+			
+				<apex:column >
+					<apex:inputCheckbox value="{!mapColumn.selected}" />
+				</apex:column>
+				<apex:column > 
+					<apex:facet name="header">Column Name</apex:facet>
+					<apex:inputText value="{!mapColumn.accountMapColumn.name}" />
+				</apex:column>
+			
+			</apex:dataTable>
+			
+			<apex:outputPanel >
+				<apex:commandButton value="Add New" action="{!addAccountColumn}" /> <!-- rerender="mapColumnTable" -->
+				<apex:commandButton value="Remove Selected" action="{!removeSelectedColumns}"  /> <!-- rerender="mapColumnTable" -->
+			</apex:outputPanel>
+
+		</apex:pageBlockSection>
+
+		<!-- ************************************ -->
+		<!-- Step Two - Select device name column -->
+		<!-- ************************************ -->
+
+		<apex:pageBlockSection title="Account File Multiple Device Setup" columns="1" rendered="{!currentStep == 2}">
+
+			<apex:pageBlockSectionItem helpText="{!$ObjectType.RFQ_Ac_Map__c.fields.Device_Name_Column__c.inlineHelpText}">
+
+				<apex:outputLabel value="{!$ObjectType.RFQ_Ac_Map__c.fields.Device_Name_Column__c.Label}" for="deviceNameSelect"/>
+				
+				<apex:selectList size="1" id="deviceNameSelect" value="{!accountMap.Device_Name_Column__c}">
+                        <apex:selectOptions value="{!accountColumnOptions}"/>
+                </apex:selectList>
+        	</apex:pageBlockSectionItem>
+
+		</apex:pageBlockSection>
+
+		<!-- ************************************** -->
+		<!-- Step Three - Create attribute mappings -->
+		<!-- ************************************** -->
+
+		<apex:pageBlockSection title="Package Family Attribute Mappings" columns="1" rendered="{!currentStep == 3}">
+
+			<apex:repeat value="{!pfMappings}" var="mappingHolder">
+
+				<apex:pageBlockSection columns="1" title="Mapping Item">
+
+					<!-- Product Group Select -->
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel value="Product Group" for="productGroupSelect"/>
+						<apex:selectList size="1" id="productGroupSelect" value="{!mappingHolder.pfMap.Product_Group__c}">
+	                        <apex:selectOptions value="{!productGroupOptions}"/>
+	                        <apex:actionSupport event="onchange" reRender="packageFamilySelect"/>
+	                	</apex:selectList>
+                	</apex:pageBlockSectionItem>
+
+                	<!-- Package family select -->
+                	<apex:pageBlockSectionItem >
+                		<apex:outputLabel value="Package Family" for="packageFamilySelect"/>
+						<apex:selectList size="1" id="packageFamilySelect" value="{!mappingHolder.pfMap.Package_Family__c}">
+	                        <apex:selectOptions value="{!mappingHolder.selectablePackageFamilies}"/>
+	                        <apex:actionSupport event="onchange" reRender="fieldOutputPanel" action="{!mappingPackageFamilyChanged}">
+	                        	<apex:param value="{!mappingHolder.uniqueId}" name="uniqueId" />
+	                        </apex:actionSupport>
+	                	</apex:selectList> 
+
+                	</apex:pageBlockSectionItem>
+
+                	<!-- The account device name -->
+                	<apex:inputField value="{!mappingHolder.pfMap.Account_Device_Name__c}" />
+
+                	<!-- List of Column->API Field mappings -->
+
+                	<apex:outputPanel id="fieldOutputPanel">
+
+                		<apex:outputPanel rendered="{!IF(ISBLANK(mappingHolder.pfMap.Package_Family__c) , false , true)}">
+		                	<apex:dataTable id="fieldsDataTable" value="{!mappingHolder.fieldMaps}" var="fieldMap" >
+
+		                		<apex:column >
+		                			<apex:inputCheckbox value="{!fieldMap.selected}" rendered="{!!fieldMap.autoAdded}"/>
+		 	                	</apex:column>
+
+		                		<apex:column >
+		                			<apex:facet name="header">Cost Attribute</apex:facet>
+		                			<apex:selectList size="1" id="columnFieldSelect" value="{!fieldMap.pfColumn.RFQI_PF_Field_Def__c}" disabled="{!fieldMap.autoAdded}">
+			                        	<apex:selectOptions value="{!mappingHolder.selectableFields}"/>
+			                		</apex:selectList>
+		                		</apex:column>
+
+		                		<apex:column >
+		                			<apex:facet name="header">File Column</apex:facet>
+		                			<apex:selectList size="1" id="fileColumnSelect" value="{!fieldMap.pfColumn.RFQ_Ac_Map_Column__c}">
+			                        	<apex:selectOptions value="{!accountColumnOptions}" />
+			                		</apex:selectList>
+		                		</apex:column>
+
+		                		<apex:column >
+		                			<apex:facet name="header">Configuration #</apex:facet>
+		                			<apex:selectList size="1" id="indexSelect" value="{!fieldMap.pfColumn.Object_Index__c}">
+		                				<apex:selectOptions value="{!indexColumnOptions}" />
+		                			</apex:selectList>
+
+		                		</apex:column>
+
+		                	</apex:dataTable>
+
+		                	<apex:outputPanel >
+			                	<apex:commandButton value="Add Column Mapping" action="{!mappingHolder.addFieldMapping}" rerender="fieldsDataTable" />
+	                			<apex:commandButton value="Remove Selected" action="{!mappingHolder.removeFieldMappings}" rerender="fieldsDataTable" />
+                			</apex:outputPanel>
+	                	</apex:outputPanel>
+
+                	</apex:outputPanel>
+
+            	</apex:pageBlockSection>
+
+			</apex:repeat>
+
+			<!-- PF Mapping Action Buttons -->
+			<apex:outputPanel >
+				<apex:commandButton value="Add New PF Mapping" action="{!addPfMapping}" />
+				<apex:commandButton value="Remove Last PF Mapping" action="{!removeLastPfMapping}"/> 
+			</apex:outputPanel>
+
+		</apex:pageBlockSection>
+
+
+
+	</apex:pageblock>
+
+
+</apex:form>
+
+</apex:page>

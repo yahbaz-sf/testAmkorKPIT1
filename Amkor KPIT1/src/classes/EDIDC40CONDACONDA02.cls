@@ -1,0 +1,40 @@
+global class EDIDC40CONDACONDA02 {
+	
+    webservice String TABNAM {get; set;}
+    webservice String MANDT {get; set;}
+    webservice String DOCNUM {get; set;}
+    webservice String DOCREL {get; set;}
+    webservice String STATUS {get; set;}
+    webservice String DIRECT {get; set;}
+    webservice String OUTMOD {get; set;}
+    webservice String EXPRSS {get; set;}
+    webservice String TEST {get; set;}
+    webservice String IDOCTYP {get; set;}
+    webservice String CIMTYP {get; set;}
+    webservice String MESTYP {get; set;}
+    webservice String MESCOD {get; set;}
+    webservice String MESFCT {get; set;}
+    webservice String STD {get; set;}
+    webservice String STDVRS {get; set;}
+    webservice String STDMES {get; set;}
+    webservice String SNDPOR {get; set;}
+    webservice String SNDPRT {get; set;}
+    webservice String SNDPFC {get; set;}
+    webservice String SNDPRN {get; set;}
+    webservice String SNDSAD {get; set;}
+    webservice String SNDLAD {get; set;}
+    webservice String RCVPOR {get; set;}
+    webservice String RCVPRT {get; set;}
+    webservice String RCVPFC {get; set;}
+    webservice String RCVPRN {get; set;}
+    webservice String RCVSAD {get; set;}
+    webservice String RCVLAD {get; set;}
+    webservice String CREDAT {get; set;}
+    webservice String CRETIM {get; set;}
+    webservice String REFINT {get; set;}
+    webservice String REFGRP {get; set;}
+    webservice String REFMES {get; set;}
+    webservice String ARCKEY {get; set;}
+    webservice String SERIAL {get; set;}
+    webservice String SEGMENT {get; set;}
+}

@@ -1,0 +1,26 @@
+<apex:page standardController="Scorecard__c" extensions="CreateScoreCardController" tabStyle="Account">
+     <apex:form id="form" >
+        <apex:pageBlock >
+            <apex:pagemessages ></apex:pagemessages>
+            <apex:pageBlockSection title="Scorecard Detail" collapsible="false" columns="2" rendered="{!isPageVisible}"> 
+                
+                <apex:inputField id="ParentCustomer" value="{!scoreCard.SBUAccount__c}"/>
+                <apex:inputField id="Name" value="{!scoreCard.Customer_Scorecard_Name__c}" />
+                <apex:inputField id="FiscalYear" value="{!scoreCard.Year__c}" required="true"/>
+                <apex:inputField id="CreateDate" value="{!scoreCard.Create_Date__c}"/>
+                <apex:inputField id="FiscalQuarter" value="{!scoreCard.Quarter__c}" required="true"/>
+                <apex:inputField id="ScorecardDate" value="{!scoreCard.Scorecard_Date__c}"/>          
+                <apex:inputField id="CustomerScore" value="{!scoreCard.Customer_Score__c}"/>
+                <apex:inputField id="CustomerMaximumScore" value="{!scoreCard.Customer_Maximum_Score__c}"/>
+                <apex:inputField id="AmkorRank" value="{!scoreCard.Amkor_Rank__c}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockButtons location="bottom" rendered="{!isPageVisible}">
+                    <apex:commandButton action="{!save}" value="Save" id="save"/>
+                    <apex:commandButton action="{!cancel}" value="Cancel" id="cancel"/> 
+            </apex:pageBlockButtons>  
+            <apex:pageBlockButtons location="bottom" rendered="{!!isPageVisible}">
+                    <apex:commandButton action="{!cancel}" value="Back" id="back"/> 
+            </apex:pageBlockButtons>           
+        </apex:pageBlock>    
+    </apex:form>
+</apex:page>

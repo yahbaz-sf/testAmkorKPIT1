@@ -1,0 +1,35 @@
+<apex:page Controller="InSituDtm.InSitu_SchedProcess_Controller" showHeader="true" tabStyle="InSituGen__InSitu_AppSetting__c" >
+    <apex:sectionHeader title="Schedule Batch Process" subtitle="{!ProcessName}"></apex:sectionHeader>
+    <apex:pageMessages />    
+    <apex:form > 
+ 
+        <apex:pageBlock mode="Edit">
+        
+           	<apex:pageBlockButtons location="Top">
+               <apex:commandButton action="{!gotoScheduler}" value="Schedule" />
+               <apex:commandButton action="{!returnToManage}" value="Cancel" />
+           	</apex:pageBlockButtons>
+    
+    		<apex:outputPanel layout="block" styleclass="message infoM3" id="theMsg" >   
+				<table cellspacing="0" cellpadding="0" border="0" style="padding:0px;margin:0px;" class="messageTable">
+					<tbody>
+						<tr valign="top">
+							<td><img title="info" class="msgIcon" src="/s.gif" alt="info"/></td>
+							<td class="messageCell">
+								<div id="msgBody" class="messageText">
+									<span id="msgTitle">
+										<h4>Schedule {!ProcessName}</h4>
+									</span>
+										Click Schedule to go to the Salesforce Schedule Apex page where you can set up the day(s) and time for the {!ProcessName} to run. You must select <b>{!ProcessClass}</b> as the Apex Class.<br/> 
+                						To change or delete a scheduled Status Check, go to Setup | Monitoring | Scheduled Jobs.  
+									<br/>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</apex:outputPanel>
+			
+    	</apex:pageBlock> 
+    </apex:form>
+</apex:page>

@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>RKRSSNFR_About_Redkite</fullName>
+        <categories>Redhot News, Sidetab</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Sidetab link for Redkite</shortDescription>
+        <value>About Redkite</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_About_Redkite_Tooltip</fullName>
+        <categories>Redhot News, Sidetab, Tooltip</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Sidetab Tooltip for Redkite</shortDescription>
+        <value>Click to view the Redkite website</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AccountSelection_BlankSearchText</fullName>
+        <categories>Redhot News, Account Selection</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Message to display when Account search text is blank</shortDescription>
+        <value>Please enter some text in the &quot;{0}&quot; field and then click &quot;{1}&quot;</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AccountSelection_InstructionalText</fullName>
+        <categories>Redhot News, Account Selection</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Instructional text on the Account Selection Page</shortDescription>
+        <value>Select the {1} that will be displayed on the Redhot News Home page by dragging a {0} into the right pane.  Remove a {0} by dragging it into the left pane. You can change the {1} that appear in the left pane, by selecting a &quot;Filter&quot; option. &lt;br/&gt;&lt;br/&gt;The order of your selections will set the order of the {1} on the Redhot News Home page. A maximum of 10 selected {1} are allowed.&lt;br/&gt;&lt;br/&gt;If you have Chatter, and you have not selected all 10 of you Home page {1}, Redhot News will fill in the Home page with your recently followed {1}.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AccountSelection_Subtitle</fullName>
+        <categories>Redhot News, Account Selection</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Account Selection Page Subtitle</shortDescription>
+        <value>Home Page {1} Selection</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AccountSelection_Title</fullName>
+        <categories>Redhot News, Account Selection</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Account Selection Page Title</shortDescription>
+        <value>Redhot News</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_Account_AddedonHomeFailiure</fullName>
+        <categories>Redhot News, Add To Homepage</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Message to display when Add to Home tab fails to update the custom setting</shortDescription>
+        <value>An error occurred while trying to add this {0} to the Redhot News Home page.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_Account_AddedonHomeSuccessful</fullName>
+        <categories>Redhot News, Deprecated</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Message to display when Account is successfully added to Home Page</shortDescription>
+        <value>Selected account has been successfully added to the Redhot News Home page.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_Addedtohomepage</fullName>
+        <categories>Redhot News, Sidetab</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Link which indicates that the current Account has been selected for the homepage</shortDescription>
+        <value>Added to Home Page</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_Addtohomepage</fullName>
+        <categories>Redhot News, Sidetab</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Sidetab Link for Add to Homepage</shortDescription>
+        <value>Add {0} to Home Page</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_Addtohomepage_HelpText</fullName>
+        <categories>Redhot News, Sidetab, Tooltip</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Add to home page Tooltip</shortDescription>
+        <value>Click to add this {0} to the Redhot News Home page</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AdvancedSearch</fullName>
+        <categories>Redhot News, Sidetab</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Advanced Search link name on the sidetab</shortDescription>
+        <value>Change News Search Criteria</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AdvancedSearch_AdminNote</fullName>
+        <categories>Redhot News, Advanced Search</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Admin note that appears if the user has the System Admin profile</shortDescription>
+        <value>System Admin Note: The Simple Search phrase is stored in a field on the {0} called &quot;News Search Override&quot;.  If your Salesforce Org uses a {0} naming convention which prevents Redhot News from returning news results, a workflow rule can be created to populate the &quot;News Search Override&quot; field, or a tool like Data Loader can be used to load values into this field.  Advanced Search criteria, if entered by the users, would still override these loaded search phrases.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AdvancedSearch_AdvancedOverrideNote</fullName>
+        <categories>Redhot News, Advanced Search</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Note shown at the bottom the Advanced Search form</shortDescription>
+        <value>Note: The Advanced Search criteria will override the Simple Search phrase.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AdvancedSearch_All_these_words</fullName>
+        <categories>Redhot News, Advanced Search</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Advanced Search Page label for &quot;All these words&quot;</shortDescription>
+        <value>All these words</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AdvancedSearch_At_least_one_of_these_words</fullName>
+        <categories>Redhot News, Advanced Search</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Advanced Search Page label for &quot;At least one of these words&quot;</shortDescription>
+        <value>At least one of these words</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AdvancedSearch_CurrentlyUsing</fullName>
+        <categories>Redhot News, Advanced Search</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>The message that informs the user what Search type is currently being used</shortDescription>
+        <value>For &lt;b&gt;{0}&lt;/b&gt;, Redhot News is currently using &lt;b&gt;{1}&lt;/b&gt; search with the search criteria &lt;i&gt;{2}&lt;/i&gt;.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AdvancedSearch_Find_news_stories</fullName>
+        <categories>Redhot News, Advanced Search</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Advanced Search Page Search Criteria Title</shortDescription>
+        <value>Find news stories that have...</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AdvancedSearch_HelpText</fullName>
+        <categories>Redhot News, Sidebar, Helptext</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Help text for the Advanced Search link</shortDescription>
+        <value>Click to change the search criteria for this {0}</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AdvancedSearch_InstructionalText</fullName>
+        <categories>Redhot News, Advanced Search</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Message at the top of the Search page which tells the Users how to use this page</shortDescription>
+        <value>Use this page to change the search criteria that is used to fetch Google News articles.  Normally, Redhot News will take the {0} name and send this to Google News as a search phrase.&lt;br/&gt;&lt;br/&gt;If the name of the {0} does not return the news results you are looking for, entering a new Search Phrase in the Simple Search tab can get you better results.  If you want to have even more control over the news results, use the Advanced Search tab. Changes made to the search criteria affect &lt;b&gt;everyone&lt;/b&gt; that sees this {0}.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AdvancedSearch_None_of_these_words</fullName>
+        <categories>Redhot News, Advanced Search</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Advanced Search Page label for &quot;None of these words&quot;</shortDescription>
+        <value>None of these words</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AdvancedSearch_Override_simple</fullName>
+        <categories>Redhot News, Advanced Search</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Advanced Search Page label for &quot;Search Override simple phrase&quot;</shortDescription>
+        <value>Search for news articles with this phrase...</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AdvancedSearch_SimpleOverridden</fullName>
+        <categories>Redhot News, Advanced Search</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Note shown to user if Simple Search has been overwridden</shortDescription>
+        <value>Note: The criteria entered on the Advanced Search tab takes precedence.  To use the Simple Search phrase, go to the Advanced Search tab and clear the values on that tab.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AdvancedSearch_Simple_search</fullName>
+        <categories>Redhot News, Advanced Search</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Advanced Search Page label for &quot;Simple search phrase&quot;</shortDescription>
+        <value>Search Phrase</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AdvancedSearch_Then_narrow</fullName>
+        <categories>Redhot News, Advanced Search</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Advanced Search Page Title for Filter section</shortDescription>
+        <value>Then narrow your results by...</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AdvancedSearch_This_exact_phrase</fullName>
+        <categories>Redhot News, Advanced Search</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Advanced Search Page label for &quot;This exact phrase&quot;</shortDescription>
+        <value>This exact phrase</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_AdvancedSearch_Title</fullName>
+        <categories>Redhot News, Advanced Search</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>RedHot News Advanced Search Page Title</shortDescription>
+        <value>Redhot News Search Criteria</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_Cancel</fullName>
+        <categories>Redhot News, Dialog, Chatter</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>&quot;Cancel&quot; button label on ChatterPostDialog</shortDescription>
+        <value>Cancel</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_ChatterPostFailiure</fullName>
+        <categories>Redhot News, Dialog, Chatter</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Message to display when Chatter post fails</shortDescription>
+        <value>An error occurred while trying to post a message to Chatter.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_ChatterPostSuccessful</fullName>
+        <categories>Redhot News, Dialog, Chatter</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Message to display when content is successfully posted on Chatter</shortDescription>
+        <value>Selected news article has been successfully posted on Chatter.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_Close</fullName>
+        <categories>Redhot News, Account Selection, Dialog</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>&apos;Close&apos; button on the Error dialog for the Account Selection Page</shortDescription>
+        <value>Close</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_ConfigPage_CacheTimeInMinutes_HelpText</fullName>
+        <categories>Redhot News, Config Page, Help Text</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Helptext for cache time in minutes on Config Page</shortDescription>
+        <value>Specifies the amount of cache time, in minutes.  Use zero &apos;0&apos; to disable caching feature.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_ConfigPage_CountryEdition_HelpText</fullName>
+        <categories>Redhot News, Config Page, Help Text</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Helptext for the Google News Edition Option</shortDescription>
+        <value>Specify the country of the Google News Edition.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_ConfigPage_EnableAdvancedSearch_HelpText</fullName>
+        <categories>Redhot News, Config Page, Help Text</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Helptext for the Enable Advanced Search Option</shortDescription>
+        <value>Redhot News will normally search for news articles based on the name of the {0}.  Enabling this feature will allow users to override this criteria and specify a different search criteria.  Only one criteria can be specified per {0}.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_ConfigPage_NumOfSearchResults_HelpText</fullName>
+        <categories>Redhot News, Config Page, Help Text</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Helptext for number of search results on Config Page</shortDescription>
+        <value>Specifies the number of articles that is displayed per {0} or {2}.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_ConfigPage_ShareChatter_HelpText</fullName>
+        <categories>Redhot News, Config Page, Help Text</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Helptext for Share via Chatter</shortDescription>
+        <value>Enable / Disable posting of articles through Chatter.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_ConfigPage_ShareEmail_HelpText</fullName>
+        <categories>Redhot News, Config Page, Help Text</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Helptext for Share via Email</shortDescription>
+        <value>Enable / Disable posting of articles through email.  Additional you can specify if the email used is either Salesforce&apos;s email page or the Users default email client.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_ConfigPage_ShareFacebook_HelpText</fullName>
+        <categories>Redhot News, Config Page, Help Text</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Helptext for Share via Facebook</shortDescription>
+        <value>Enable / Disable posting of articles through Facebook.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_ConfigPage_ShareLinkedIn_HelpText</fullName>
+        <categories>Redhot News, Config Page, Help Text</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Helptext for Share via LinkedIn</shortDescription>
+        <value>Enable / Disable posting of articles through LinkedIn.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_ConfigPage_ShareTwitter_HelpText</fullName>
+        <categories>Redhot News, Config Page, Help Text</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Helptext for Share via Twitter</shortDescription>
+        <value>Enable / Disable posting of articles through Twitter.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_ConfigPage_SortByDateRelevance_HelpText</fullName>
+        <categories>Redhot News, Config Page, Help Text</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Helptext for the Sort By Date / Relevance option</shortDescription>
+        <value>Specifies the Google News sort parameter which allows news articles to be returned by Relevance or Date. Note: The &quot;All&quot; tab on the Redhot News Home page is always sorted by Date.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_Edit_Configuration_Tooltip</fullName>
+        <categories>Redhot News, Sidetab, Tooltip</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Edit Configuration Tooltip</shortDescription>
+        <value>System Administrators can click here to configure Redhot News settings.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_FacebookUrl</fullName>
+        <categories>Redhot News, Config, Url</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Url for showing a Facebook popup</shortDescription>
+        <value>http://www.facebook.com/sharer.php?u=</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_GoogleNewsSearchBaseUrl</fullName>
+        <categories>Redhot News, Config, Url</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Base url for Google News Search</shortDescription>
+        <value>http://news.google.com/?q=</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_HomePage_AccountSelectionMessage</fullName>
+        <categories>Redhot News, Homepage</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Message shown when no accounts are shown on the RHN homepage</shortDescription>
+        <value>You have not selected any {1} to be displayed for the Redhot News Home page.  Select {1} by clicking on the Redkite tab to the right and clicking &quot;{2}&quot;. If you are using Chatter, you can also simply follow {1} to add them to this view.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_Hompage_AccountSelection_link</fullName>
+        <categories>Redhot News, Sidetab, Homepage</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Homepage Sidetab Account Selection link</shortDescription>
+        <value>Select Home Page {1}</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_Hompage_AccountSelection_link_Tooltip</fullName>
+        <categories>Redhot News, Sidetab, Tooltip</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>RKRSSNFR Edit Account Selection Tooltip</shortDescription>
+        <value>Click to configure the {1} that appear on the Redhot News Home page</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_HtmlTagRemoverRegex</fullName>
+        <categories>Redhot News, Config</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Regex to remove the Html tags from Google RSS News Feed article descriptions</shortDescription>
+        <value>&lt;/?\w+((\s+\w+(\s*=\s*(?:&quot;.*?&quot;|&apos;.*?&apos;|[^&apos;&quot;&gt;\s]+))?)+\s*|\s*)/?&gt;</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_HttpErrorMessage</fullName>
+        <categories>Redhot News</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Message displayed when the http response code is 4xx or 5xx.</shortDescription>
+        <value>The Google News service is currently unavailable. Please try again later.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_InvalidSearchConfigValue</fullName>
+        <categories>Redhot News</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>RKRSSNFR_InvalidSearchConfigValue</shortDescription>
+        <value>{0} must be between 1 and 25.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_LinkedInUrl</fullName>
+        <categories>Redhot News, Config, Url</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Url LinkedIn Share button</shortDescription>
+        <value>https://www.linkedin.com/uas/connect/user-signin?session_redirect=</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_Loading</fullName>
+        <categories>Redhot News</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Loading text appears when page loads</shortDescription>
+        <value>Loading...</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_MaxAccountSelectionNotification</fullName>
+        <categories>Redhot News, Account Selection</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Max Account Selection limit Notification</shortDescription>
+        <value>You have selected too many {1}.  Please remove at least {2}.</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_News_Source</fullName>
+        <categories>Redhot News, Footer</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Information about the source of the news data</shortDescription>
+        <value>News data is provided by Google News.  Redhot News is provided by Redkite and is not affiliated in any way with Google</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_NoNewsArticleNotification</fullName>
+        <categories>Redhot News</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>No News Article Notification</shortDescription>
+        <value>Currently there are no news articles for {0}</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_OpportunityPage_NoAccount</fullName>
+        <categories>Redhot News, Opportunity Page</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>message shown when Opportunity does not have a related Acccount</shortDescription>
+        <value>{0} does not have a related {2}</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_Post</fullName>
+        <categories>Redhot News, Dialog, Chatter</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>&apos;Post&apos; caption for button on ChatterPostDialog</shortDescription>
+        <value>Post</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_RedHotConfiguration_Subtitle</fullName>
+        <categories>Redhot News, Config Page</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Subtitle on the Redhot News Config page</shortDescription>
+        <value>Configure Org Settings</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_RedHotConfiguration_Title</fullName>
+        <categories>Redhot News, Config Page</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>RKRSSNFR RedHotConfiguration Title</shortDescription>
+        <value>Redhot News Settings</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_RedirectionActivityUrl</fullName>
+        <categories>Redhot News, Config, Url</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Url for redirection to the standard New Task page.</shortDescription>
+        <value>/00T/e?</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_RedirectionEmailUrl</fullName>
+        <categories>Redhot News, Config, Url</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Url for redirection to the standard Send Email page.</shortDescription>
+        <value>/_ui/core/email/author/EmailAuthor?</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_Regex_clean_description_from_Google_RSS_News</fullName>
+        <categories>Redhot News, Config</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Regex to get the clean description from Google RSS News</shortDescription>
+        <value>&lt;font size=&quot;-1&quot;&gt;(.+?)&lt;/font&gt;</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_Salesforce_DefaultHomePage_Path</fullName>
+        <categories>Redhot News, Config</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Salesforce default home page path to redirect on Home page</shortDescription>
+        <value>/home/home.jsp</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_Save</fullName>
+        <categories>Redhot News, Account Selection, Config Page</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>&apos;Save&apos; caption for button on used on pages</shortDescription>
+        <value>Save</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_SearchCleanserRegex</fullName>
+        <categories>Redhot News, Config</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Regex to remove unwanted words from Search value for Google News Feed</shortDescription>
+        <value>(\s*(\W|\b(and|ag|associates|bank|bv|company|co|corp|division|fcu|gmbh|group|holdings|inc|industries|limited|llc|lp|ltd|ltd.|nv|partners|plc|private|public limited company|pvt|pvt.|solutions|sons|son|sa|technologies|trust)\W?))*$</value>
+    </labels>
+    <labels>
+        <fullName>RKRSSNFR_TwitterUrl</fullName>
+        <categories>Redhot News, Config, Url</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Url for showing a Twitter popup</shortDescription>
+        <value>http://twitter.com/intent/tweet?original_referer=</value>
+    </labels>
+</CustomLabels>

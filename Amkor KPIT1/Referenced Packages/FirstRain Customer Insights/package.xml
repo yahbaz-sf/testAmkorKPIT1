@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FirstRain Customer Insights</fullName>
+    <apiAccessLevel>Unrestricted</apiAccessLevel>
+    <description>FirstRain Customer Insights is a big data analytics solution for enterprise sales and marketing professionals. It delivers relevant, real-time customer and market-focused intelligence that puts their go-to-market strategy into action.</description>
+    <namespacePrefix>firstrain</namespacePrefix>
+    <setupWeblink>Configure</setupWeblink>
+    <types>
+        <members>FRAccountControllerExt</members>
+        <members>FRCustomSettingsListController</members>
+        <members>FROpportunityControllerExt</members>
+        <members>FRSettingsController</members>
+        <members>FRTest</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>FirstRain_Account_SF1</members>
+        <members>FirstRain_Account_Snapshot</members>
+        <members>FirstRain_Carousel</members>
+        <members>FirstRain_Home_SF1</members>
+        <members>FirstRain_Market_Landscape</members>
+        <members>FirstRain_Opportunity_Snapshot</members>
+        <members>FirstRain_Settings</members>
+        <name>ApexPage</name>
+    </types>
+    <types>
+        <members>Configure</members>
+        <name>CustomPageWebLink</name>
+    </types>
+    <types>
+        <members>FirstRain_Insights</members>
+        <members>Market_Landscape</members>
+        <name>CustomTab</name>
+    </types>
+    <types>
+        <members>FirstRain</members>
+        <name>Document</name>
+    </types>
+    <types>
+        <members>My Intelligence Carousel</members>
+        <name>HomePageComponent</name>
+    </types>
+    <version>36.0</version>
+</Package>

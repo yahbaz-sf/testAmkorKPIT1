@@ -1,0 +1,38 @@
+<apex:page showHeader="false" 
+    controller="firstrain.FRCustomSettingsListController">
+    
+    <head>
+        
+    </head>
+    <apex:iframe height="320" width="310" id="frCarouselIframe"  src="https://apps.firstrain.com/sf1/001/dynamic/homescreen.do?entrprsid={!enterpriseId}&accesstoken={!accesstoken}&userid={!$User.Id}&userEmail={!$User.Email}&sessionId={!$Api.Session_ID}&serverURL={!$Api.Partner_Server_URL_180}&userFirstName={!URLENCODE($User.FirstName)}&userLastName={!URLENCODE($User.LastName)}&endPoint={!$Api.Enterprise_Server_URL_270}&pf=sf"></apex:iframe>
+
+
+    <script type='text/javascript'>
+        try {
+            var ele = document.getElementById("frCarouselIframe");
+            ele.setAttribute("height", window.innerHeight);
+            ele.setAttribute("width", window.innerWidth);
+                
+            if(window.addEventListener) {
+               window.addEventListener("message", receiveMessage, false);
+            }
+            function receiveMessage(event) {
+               if(event && event.data) {
+                   //console.log(event.data);
+                   try {
+                    var jsonData = JSON.parse(event.data);
+                    if(jsonData.url) {
+                        if(jsonData.opt == 'close') {
+                            window.open(jsonData.url)
+                        } else {
+                            sforce.one.navigateToURL(jsonData.url);
+                        }
+                    }
+                  } catch(e) {}
+               }
+            }
+         
+        } catch(e){}
+    </script>
+
+</apex:page>

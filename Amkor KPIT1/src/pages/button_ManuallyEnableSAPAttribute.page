@@ -1,0 +1,1 @@
+<apex:page standardController="SAP_Package_Attribute__c" extensions="SAPPackageAttributeController" action="{!enable}"/>

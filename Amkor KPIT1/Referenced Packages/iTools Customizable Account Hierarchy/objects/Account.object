@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fields>
+        <fullName>Ultimate_Parent_Flag__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Ultimate Parent Flag</label>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Ultimate_Parent__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Ultimate Parent</label>
+        <referenceTo>Ultimate_Parent__c</referenceTo>
+        <relationshipLabel>Ultimate Parent</relationshipLabel>
+        <relationshipName>Accounts</relationshipName>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Lookup</type>
+    </fields>
+    <webLinks>
+        <fullName>Hierarchy_Builder</fullName>
+        <availability>online</availability>
+        <displayType>button</displayType>
+        <height>600</height>
+        <linkType>page</linkType>
+        <masterLabel>Hierarchy Builder</masterLabel>
+        <openType>sidebar</openType>
+        <page>InSitu_AHBuilder</page>
+        <protected>false</protected>
+    </webLinks>
+    <webLinks>
+        <fullName>View_Hierarchy</fullName>
+        <availability>online</availability>
+        <description>View customized account hierarchy</description>
+        <displayType>button</displayType>
+        <height>600</height>
+        <linkType>page</linkType>
+        <masterLabel>View Hierarchy</masterLabel>
+        <openType>sidebar</openType>
+        <page>InSitu_Account_Hierarchy</page>
+        <protected>false</protected>
+    </webLinks>
+</CustomObject>

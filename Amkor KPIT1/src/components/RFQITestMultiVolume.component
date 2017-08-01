@@ -1,0 +1,260 @@
+<apex:component >
+<apex:attribute name="edit" type="Boolean" description="Edit Mode" />
+<apex:attribute name="buPage" type="Boolean" description="BU Page" />
+<apex:attribute name="requestedBySales" type="Boolean" description="Requested by Sales" />
+<apex:attribute name="showPriceEntry" type="Boolean" description="Show Price Entry" />
+<apex:attribute name="testInsertionIndex" type="Integer" description="Index of the test volume" />
+<apex:attribute name="testType" type="String" description="Test type of item" />
+<apex:attribute name="quoteUOM" type="String" description="Requested unit of measure" />
+<apex:attribute name="gdpw" type="String" description="GDPW" />
+<apex:attribute name="volume" type="RFQIVolume" description="The RFQI Volume" />
+<apex:attribute name="isEscalationEditable" type="Boolean" description="Item is in escalation" />
+<!-- <apex:variable value="{!volume.testInsertions[testInsertionIndex]}" var="volume.testInsertions[testInsertionIndex]" /> -->
+
+<script type="text/javascript">
+var testType = '{!testType}';
+var quoteUOM = '{!quoteUOM}';
+var gdpw = '{!gdpw}';
+var testInsertionConstants;
+//only need one set of constants per index because the user can't change
+//these values per multi volume, so insertion n on all multi volumes
+//will have the same constants
+if (testInsertionConstants === undefined) testInsertionConstants = {};
+testInsertionConstants[{!testInsertionIndex}] = {
+    'testTime' : {!volume.testInsertions[testInsertionIndex].testTime},
+    'indexTime' : {!volume.testInsertions[testInsertionIndex].indexTime},
+    'sitesInParallel' : {!volume.testInsertions[testInsertionIndex].sitesInParallel}
+};
+
+
+//function taken from http://stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format
+function sprintf(format, etc) {
+    var arg = arguments;
+    var i = 1;
+    return format.replace(/%((%)|s)/g, function (m) { return m[2] || arg[i++] })
+}
+
+function getMapKeyFromId(id)
+{
+    parts = id.split(':');
+    if (parts.length > 0)
+        return parts[parts.length - 1];
+    return null;
+}
+
+function calculateTestSubTotals(volumeIndex, testVolIndex, changedField)
+{
+    //keys in maps:
+    //testerValue
+    //handlerValue
+    //buPriceMonthly
+    //buPriceHour
+    //buPriceSecond
+    //buPriceUnit
+
+    var elementMap = {};
+    var valueMap = {};
+    var searchString = sprintf('input[class*="index-%s-%s-"]', volumeIndex, testVolIndex);
+	$(searchString).each(function()
+	{
+        var mapKey = getMapKeyFromId(this.id);
+        elementMap[mapKey] = this;
+        valueMap[mapKey] = isNaN(this.value) ? 0 : this.value;
+
+	});
+
+    valueMap['buPriceSecond'] = valueMap['buPriceHour'] / 3600;
+
+    if (testType != 'Strip Test')
+    {
+        var testTime = testInsertionConstants[testVolIndex]['testTime'];
+        var indexTime = testInsertionConstants[testVolIndex]['indexTime'];
+        var sitesInParallel = testInsertionConstants[testVolIndex]['sitesInParallel'];
+        gdpw = parseFloat(gdpw)
+        valueMap['buPriceUnit'] = (sitesInParallel == 0) ? 0 : ((testTime + indexTime) / sitesInParallel) * valueMap['buPriceSecond'];
+        if (quoteUOM == '/Wafer') valueMap['buPriceUnit'] = valueMap['buPriceUnit'] * (isNaN(gdpw) ? 1 : gdpw);
+    }
+
+    for (e in valueMap) 
+    {
+        if (!valueMap.hasOwnProperty(e)) continue;
+        valueMap[e] = Number(valueMap[e]).toFixed(6);
+    }
+
+    if (changedField != 'buPriceSecond' && 'buPriceSecond' in elementMap) elementMap['buPriceSecond'].value = valueMap['buPriceSecond'];
+    if (changedField != 'buPriceUnit' && 'buPriceUnit' in elementMap) elementMap['buPriceUnit'].value = valueMap['buPriceUnit'];
+
+    calculateTestTotals(volumeIndex, changedField);
+}
+
+function calculateTestTotals(volumeIndex, changedField)
+{
+    var childSearchString = sprintf('input[class*="index-%s-"]', volumeIndex);
+    
+    var childValueMap = {};
+
+    $(childSearchString).each(function()
+    {
+        var mapKey = getMapKeyFromId(this.id);
+        if (mapKey in childValueMap) childValueMap[mapKey] += isNaN(this.value) ? 0 : +this.value;
+        else childValueMap[mapKey] = isNaN(this.value) ? 0 : +this.value;
+
+        //mad hacks to convert to 6 decimal places
+        childValueMap[mapKey] = +(+childValueMap[mapKey]).toFixed(6);
+    });
+
+    var parentElementMap = {};
+    var parentSearchString = sprintf('input[class^="testTotalField-%s"]', volumeIndex);
+    $(parentSearchString).each(function() {
+        
+        var mapKey = getMapKeyFromId(this.id);
+        parentElementMap[mapKey] = this;
+    });
+
+    if ('buPriceHour' in childValueMap)
+    {
+        childValueMap['buPriceMinute'] = (childValueMap['buPriceHour'] / 60).toFixed(6);
+        childValueMap['buPriceSecond'] = (childValueMap['buPriceMinute'] / 60).toFixed(6);
+    }
+    else
+    {
+        childValueMap['buPriceMinute'] = (0).toFixed(6);
+        childValueMap['buPriceSecond'] = (0).toFixed(6);
+    }
+
+    if ('buPriceHour' in parentElementMap)
+    {
+        parentElementMap['buPriceHour'].value = 'buPriceHour' in childValueMap ? childValueMap['buPriceHour'] : 0;
+    }
+    if ('buPriceSecond' in parentElementMap)
+    {
+        parentElementMap['buPriceSecond'].value = 'buPriceSecond' in childValueMap ? childValueMap['buPriceSecond'] : 0;
+    }
+    if ('buPriceMinute' in parentElementMap)
+    {
+        parentElementMap['buPriceMinute'].value = 'buPriceMinute' in childValueMap ? childValueMap['buPriceMinute'] : 0;
+    }
+    if ('buPriceUnit' in parentElementMap)
+    {
+        parentElementMap['buPriceUnit'].value = 'buPriceUnit' in childValueMap ? childValueMap['buPriceUnit'] : 0;
+    }
+    if ('buPriceMonthly' in parentElementMap)
+    {
+        parentElementMap['buPriceMonthly'].value = 'buPriceMonthly' in childValueMap ? childValueMap['buPriceMonthly'] : 0;
+    }
+
+    var finalBUPrice;
+    if (quoteUOM == '/Hr') finalBUPrice = childValueMap['buPriceHour'];
+    else if (quoteUOM == '/Sec') finalBUPrice = childValueMap['buPriceSecond'];
+    else if (quoteUOM == '/Min') finalBUPrice = childValueMap['buPriceMinute'];
+    else if (quoteUOM == '/Unit' || quoteUOM == '/Wafer') finalBUPrice = childValueMap['buPriceUnit'];
+    else if (quoteUOM == '/Month') finalBUPrice = childValueMap['buPriceMonthly'];
+
+    //decrement volume index because the volume index counting starts at 1
+    var priceSearchString = sprintf('[id$="price"][id*=":%s:"]', volumeIndex - 1);
+    $(priceSearchString).val(finalBUPrice);
+
+}
+
+</script>
+<br />
+<apex:pageBlockSection id="testVolPBS" columns="{!IF(showPriceEntry, 4, 3)}" >
+	<!-- Tester Value -->
+    <!-- <apex:pageBlockSectionItem rendered="{!edit && showPriceEntry}">
+        <apex:outputLabel value="Tester Value"/>
+        <apex:inputText id="testerValue" value="{!volume.testInsertions[testInsertionIndex].testerValue}" styleClass="index-{!volume.index}-{!testInsertionIndex}-testerValue" onchange="calculateTestSubTotals({!volume.index}, {!testInsertionIndex}, 'testerValue');">
+        </apex:inputText>
+    </apex:pageBlockSectionItem>
+    <apex:pageBlockSectionItem rendered="{!!edit && showPriceEntry}">
+        <apex:outputLabel value="Tester Value"/>
+        <apex:outputText value="{!volume.testInsertions[testInsertionIndex].testerValue}"/>
+    </apex:pageBlockSectionItem> -->
+
+    <!-- Handler Value -->
+    <!-- <apex:pageBlockSectionItem rendered="{!edit && showPriceEntry}">
+        <apex:outputLabel value="Handler Value"/>
+        <apex:inputText id="handlerValue" value="{!volume.testInsertions[testInsertionIndex].handlerValue}" styleClass="index-{!volume.index}-{!testInsertionIndex}-handlerValue" onchange="calculateTestSubTotals({!volume.index}, {!testInsertionIndex}, 'handlerValue');">
+        </apex:inputText>
+    </apex:pageBlockSectionItem>
+    <apex:pageBlockSectionItem rendered="{!!edit && showPriceEntry}">
+        <apex:outputLabel value="Handler Value"/>
+        <apex:outputText value="{!volume.testInsertions[testInsertionIndex].handlerValue}"/>
+    </apex:pageBlockSectionItem> -->
+
+    <apex:pageBlockSectionItem >
+        <apex:outputLabel value="Test Configuration #"/>
+        <apex:outputText value="{!testInsertionIndex + 1}"/>
+    </apex:pageBlockSectionItem>
+
+    <!-- BU Price -Monthly Charge- -->
+    <apex:pageBlockSectionItem rendered="{!showPriceEntry && quoteUOM == '/Month'}">
+        <apex:outputLabel value="BU Price -Monthly Charge-"/>
+        <apex:outputText value="{!volume.testInsertions[testInsertionIndex].buPriceMonthly}"/>
+    </apex:pageBlockSectionItem>
+
+    <apex:pageBlockSectionItem rendered="{!showPriceEntry && quoteUOM == '/Month'}">
+        <apex:outputLabel value="" />
+        <apex:outputText value="" />
+    </apex:pageBlockSectionItem>
+    <apex:pageBlockSectionItem rendered="{!showPriceEntry && quoteUOM == '/Month'}">
+        <apex:outputLabel value="" />
+        <apex:outputText value="" />
+    </apex:pageBlockSectionItem>
+
+    <!-- BU Price per Hour -->
+    <apex:pageBlockSectionItem rendered="{!edit && showPriceEntry && isEscalationEditable && quoteUOM != '/Month'}">
+        <apex:outputLabel value="BU Price per Hour" styleClass="buPriceHourLabel"/>
+        <apex:inputText id="buPriceHour" value="{!volume.testInsertions[testInsertionIndex].buPriceHour}" styleClass="index-{!volume.index}-{!testInsertionIndex}-buPriceHour" onchange="calculateTestSubTotals({!volume.index}, {!testInsertionIndex}, 'buPriceHour');">
+        </apex:inputText>
+    </apex:pageBlockSectionItem>
+    <apex:pageBlockSectionItem rendered="{!(!edit || !isEscalationEditable) && showPriceEntry && quoteUOM != '/Month'}">
+        <apex:outputLabel value="BU Price per Hour"/>
+        <apex:outputText value="{!volume.testInsertions[testInsertionIndex].buPriceHour}"/>
+    </apex:pageBlockSectionItem>
+
+    <!-- BU Price per Unit-Test -->
+    <apex:pageBlockSectionItem rendered="{!edit && showPriceEntry && isEscalationEditable && quoteUOM != '/Month'}">
+        <apex:outputLabel value="BU Price per Unit-Test" styleClass="buPriceUnitLabel"/>
+        <apex:inputText id="buPriceUnit" value="{!volume.testInsertions[testInsertionIndex].buPriceUnit}" styleClass="index-{!volume.index}-{!testInsertionIndex}-buPriceUnit" onchange="calculateTestSubTotals({!volume.index}, {!testInsertionIndex}, 'buPriceUnit');">
+        </apex:inputText>
+    </apex:pageBlockSectionItem>
+    <apex:pageBlockSectionItem rendered="{!(!edit || !isEscalationEditable) && showPriceEntry && quoteUOM != '/Month'}">
+        <apex:outputLabel value="BU Price per Unit-Test"/>
+        <apex:outputText value="{!volume.testInsertions[testInsertionIndex].buPriceUnit}"/>
+    </apex:pageBlockSectionItem>
+    <apex:pageBlockSectionItem rendered="{!showPriceEntry && quoteUOM != '/Month'}">
+        <apex:outputLabel value="" />
+        <apex:outputText value="" />
+    </apex:pageBlockSectionItem>
+
+
+</apex:pageBlockSection>
+
+<script type="text/javascript">
+//disable all prices because they are all totals
+$(function() {
+    $('.testTotalField').each(function()
+    {
+        this.readOnly = true;
+        this.style.background = "#ECECEC";
+    });
+    if(testType == 'Strip Test') {
+        if(quoteUOM == '/Unit') {
+            $('label[class*="buPriceUnitLabel"]').addClass('customRequiredField');
+        }
+        else {
+            $('label[class*="buPriceHourLabel"]').addClass('customRequiredField');
+        }
+    }
+    if(testType != 'Strip Test')
+    {
+        $('[class$="buPriceUnit"]').each(function() {
+            this.readOnly = true;
+            this.style.background = "#ECECEC";
+        });
+        $('label[class*="buPriceHourLabel"]').addClass('customRequiredField');
+    }
+});
+</script>
+
+</apex:component>

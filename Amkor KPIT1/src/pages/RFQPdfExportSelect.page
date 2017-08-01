@@ -1,0 +1,113 @@
+<apex:page sidebar="false" showHeader="false" controller="RFQPdfExportSelectController">
+
+	<head>
+		<style type="text/css">
+			.selectionDiv {
+				margin: 20px !important;
+			}
+			
+			.itemTable td {
+				padding: 3px;
+			}
+			
+			.columnHeader {
+				padding: 5px;
+			}
+
+			.pageButtons {
+				width: 300px;
+			}
+		</style> 
+	</head>
+
+	<div class="selectionDiv">
+		
+			<apex:form >
+				<apex:pageMessages />
+				<apex:pageBlock >
+				
+					<apex:outputPanel rendered="{!IF(allItemsList.size > 0, true, false)}">
+						<apex:pageBlockSection title="Select RFQ Items to include in this quote:" columns="1">
+							<apex:dataTable value="{!allItemsList}" var="itemRow" styleClass="itemTable" id="itemTable" headerClass="columnHeader">
+								<apex:column >
+									<apex:inputCheckbox value="{!itemRow.selected}">
+									</apex:inputCheckbox>
+								</apex:column>
+								<apex:column >
+									<apex:facet name="header">RFQ Item Number</apex:facet>
+									<apex:outputText value="{!itemRow.item.Name}" />
+								</apex:column>
+								<apex:column >
+									<apex:facet name="header">Package Family</apex:facet>
+									<apex:outputText value="{!itemRow.item.Package_Family_Name_fml__c}" />
+								</apex:column>
+								<apex:column >
+									<apex:facet name="header">DIM XY - Leads - Wires</apex:facet>
+									<apex:outputText value="{!itemRow.item.Dim_XY_Leads_Wires__c}" />
+								</apex:column>
+								<apex:column >
+									<apex:facet name="header">Volume K/Wk</apex:facet>
+									<apex:outputText value="{!itemRow.item.Forecast__c}" />
+								</apex:column>
+								<apex:column >
+									<apex:facet name="header">Customer Target Price</apex:facet>
+									<apex:outputText value="{!itemRow.item.Customer_Target_Price__c}" />
+								</apex:column>
+								<apex:column >
+									<apex:facet name="header">Price to Customer</apex:facet>
+									
+									<apex:outputText value="{0, number, ###,##0.00000} {1}">
+										<apex:param value="{!itemRow.item.Price_To_Customer__c}" />
+										<apex:param value="{!itemRow.item.BU_Price_Label__c}" />
+									</apex:outputText>
+								</apex:column>
+								<apex:column >
+									<apex:facet name="header">Breakout Adders?</apex:facet>
+									<apex:inputCheckbox value="{!itemRow.adderBreakout}" />
+								</apex:column>
+								<apex:column >
+									<apex:facet name="header">Lot Charge?</apex:facet>
+									<apex:inputCheckbox value="{!itemRow.lotCharge}" />
+								</apex:column>
+								<apex:column >
+									<apex:facet name="header">TEST Separate Post Test?</apex:facet>
+									<apex:inputCheckbox value="{!itemRow.separatePostTest}" rendered="{!itemRow.item.Package_Family__r.Name == 'Test'}"/>
+								</apex:column>
+							</apex:dataTable>
+
+							<apex:outputPanel layout="block" styleclass="pageButtons">
+								<apex:pageBlockSection columns="4">
+									<apex:commandButton value="Select None" action="{!deselectAllItems}" rerender="itemTable" styleClass="pageButton" />
+									<apex:commandButton value="Select All" action="{!selectAllItems}" rerender="itemTable" styleClass="pageButton" />
+									<apex:commandButton value="Select All Breakout Adders" action="{!selectAllBreakout}" rerender="itemTable" styleClass="pageButton" />
+									<apex:commandButton value="Select All Lot Charges" action="{!selectAllLotCharge}" rerender="itemTable" styleClass="pageButton" />
+									<apex:commandButton value="Select All TEST for Separate Post Test Pricing" action="{!selectAllSeparatePostTest}" rerender="itemTable" styleClass="pageButton" />
+								</apex:pageBlockSection>
+							</apex:outputPanel>
+													
+							
+						</apex:pageBlockSection>
+
+						<apex:pageBlockSection title="Comments:">
+							<apex:inputTextArea id="commentsField" value="{!comments}" cols="100" rows="6" />
+						</apex:pageBlockSection>
+
+						<apex:commandButton value="Generate PDF" action="{!itemsSelected}" styleClass="pageButton" oncomplete="genPDF()"/>
+						<apex:commandButton value="Generate Excel" action="{!itemsSelected}" styleClass="pageButton" oncomplete="genExcel()"/>
+					</apex:outputPanel>
+
+					<apex:actionFunction action="{!generatePDF}" name="genPDF" />
+					<apex:actionFunction action="{!generateExcel}" name="genExcel" />
+					
+					<apex:outputPanel rendered="{!IF(allItemsList.size == 0, true, false)}">
+						<p>
+							<i>There are no items for this RFQ that are in a 'Price Complete' or 'Quoted' status</i>
+						</p>
+					</apex:outputPanel>
+				</apex:pageBlock>
+				
+			</apex:form>
+		
+	</div>
+
+</apex:page>

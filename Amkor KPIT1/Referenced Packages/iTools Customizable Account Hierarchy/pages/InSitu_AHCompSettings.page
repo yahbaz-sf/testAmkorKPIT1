@@ -1,0 +1,595 @@
+<apex:page controller="InSituCah.InSitu_AHCompSettingsController" standardStylesheets="true" action="{!checkMode}" tabStyle="InSituGen__InSitu_AppSetting__c">
+	<apex:form id="AHCompSettingsForm">
+    	<apex:sectionHeader title="{!HeadingAHCompSettings}" subtitle="{!SubHeadingAHCompSettings}"></apex:sectionHeader>
+   	    <apex:messages />
+
+		<apex:outputPanel layout="block" id="NewUserSpecificOverride" rendered="{!ShowChooseUser}">
+	        <apex:pageBlock title="iTools Setting Edit">
+	           <apex:pageBlockButtons location="Top" id="DefaultButtons">
+	               <apex:commandButton action="{!saveUser}" value="Continue" rerender="AHCompSettingsForm"/>
+	               <apex:commandButton action="{!returnToPreviousPage}" value="Cancel" />
+	           </apex:pageBlockButtons>
+	           <apex:pageBlockSection columns="1">
+	               <apex:inputField value="{!AppSetting.InSituGen__Scope_User__c}" id="ScopeUserInput"/> 
+	               <apex:outputField value="{!AppSetting.InSituGen__Description__c}"/>            
+	           </apex:pageBlockSection>
+	        </apex:pageBlock>
+		</apex:outputPanel>
+
+		
+		<apex:outputPanel layout="block" id="NewProfileSpecificOverride" rendered="{!ShowChooseProfile}">
+	        <apex:pageBlock title="iTools Setting Edit">
+	           <apex:pageBlockButtons location="Top" id="DefaultButtons">
+	               <apex:commandButton action="{!saveProfile}" value="Continue" rerender="AHCompSettingsForm"/>
+	               <apex:commandButton action="{!returnToPreviousPage}" value="Cancel" />
+	           </apex:pageBlockButtons>
+	           <apex:pageBlockSection columns="1">
+					<apex:pageBlockSectionItem rendered="{!IsProfileSpecific}">
+						<apex:outputLabel value="Profile" />
+						<apex:selectList value="{!ProfileID}" size="7" >
+							<apex:selectOptions value="{!ProfileOptions}"/>
+						</apex:selectList>
+		            </apex:pageBlockSectionItem>
+	                <apex:outputField value="{!AppSetting.InSituGen__Description__c}"/>            
+    	       </apex:pageBlockSection>
+			</apex:pageBlock>
+		</apex:outputPanel>
+		
+		<apex:outputPanel layout="block" id="ComponentOptions" rendered="{!ShowEdit}">
+			<apex:pageBlock id="ShowCustomTab" rendered="{!ShowCustomTabSection}">    
+				<apex:outputText styleClass="pbSubheader tertiaryPalette" value="{!LabelShowCustomTabHeader}" />
+				
+				<apex:outputPanel layout="block" styleClass="pbSubbody" >
+					<apex:outputPanel layout="block" >
+						<apex:outputLabel styleClass="selectTitle" value="{!LabelCustomObjSourceList}"  />
+					</apex:outputPanel>
+
+					<apex:outputPanel layout="block">
+		           		<apex:selectList value="{!CurrentCustomObjSource}" disabled="{!DisableCustomObjSources}" size="1" title="Custom Object" id="CustomObjSourceList" >
+		                	<apex:selectOptions value="{!CustomObjSources}" />
+		                	<apex:actionSupport event="onchange" rerender="TabNameFields,ComponentOptions, EditMySettings"/>
+		            	</apex:selectList>
+					</apex:outputPanel>
+					
+					<br/>
+					
+					<apex:outputPanel layout="block" id="TabNameFields">
+						<apex:outputLabel styleClass="selectTitle" value="Tab Name:&nbsp;&nbsp;" for="TabNameLabel" escape="false" />
+		           		<apex:inputText value="{!TabNameLabel}" title="Tab Name" id="TabNameLabel" /> 
+					</apex:outputPanel>
+					
+				</apex:outputPanel>
+		    </apex:pageBlock>
+
+			<apex:pageBlock id="ShowObjTab" rendered="{!ShowStep1Section}">    
+				<apex:outputText styleClass="pbSubheader tertiaryPalette" value="{!LabelShowObjTabHeader}" />
+				
+				<apex:outputPanel layout="block" styleClass="pbSubbody" >
+					<apex:outputPanel layout="block" id="ShowTabWrapper">
+						<apex:inputCheckbox value="{!chkShowObjTab}" id="chkShowObjTab" disabled="{!DisableShowObjTab}"/>
+						<apex:outputLabel value="{!LabelShowObjTabChk}" for="chkShowObjTab" />
+					</apex:outputPanel>
+				</apex:outputPanel>
+		    </apex:pageBlock>
+	
+			<apex:pageBlock id="SelectFields" rendered="{!ShowStep2Section}">    
+				<apex:outputText styleClass="pbSubheader tertiaryPalette" value="{!LabelSelectFieldsHeader}" />
+				
+				<apex:outputPanel layout="block" styleClass="duelingListBox" id="FieldChooserWrapper" >
+				
+					<table class="layout">
+					<tbody>
+					<tr>
+						<td class="selectCell">
+							<apex:outputPanel layout="block" style="padding-bottom:10px;padding-top:10px;" >
+								<apex:outputLabel styleClass="selectTitle" value="From:&nbsp;&nbsp;" for="SourceList" escape="false" />
+				           		<apex:selectList value="{!CurrentSourceField}" size="1" title="From" id="SourceList" >
+				                	<apex:selectOptions value="{!FieldSources}"/>
+				                	<apex:actionSupport event="onchange" rerender="SelectFields"/>
+				            	</apex:selectList>
+							</apex:outputPanel>
+	
+							<apex:outputPanel layout="block" rendered="{!ShowAvailableFieldList}">
+								<apex:outputLabel styleClass="selectTitle" value="Available Fields" for="FieldList" />
+							</apex:outputPanel>
+							
+							<apex:outputPanel layout="block" id="AvailableFields" rendered="{!ShowAvailableFieldList}">
+					           	<apex:selectList value="{!CurrentAvailableField}" size="15" title="Available Fields" id="FieldList">
+					                <apex:selectOptions value="{!AvailableFields}"/>
+					                <apex:actionSupport event="ondblclick" action="{!doAdd}" rerender="popupErrMsg,SelectedFields,sortCriteria,ColHeadDisplay"/>
+					            </apex:selectList>
+							</apex:outputPanel>
+							
+							<apex:outputPanel layout="block" id="FieldEditItem" rendered="{!ShowAdvancedFieldEdit}" style="padding-top:10px;" >
+								<apex:outputLabel styleClass="selectTitle" value="Field:&nbsp;&nbsp;" for="AdvancedFieldEdit" escape="false"/>
+								<apex:inputText value="{!AdvancedFieldEdit}" id="AdvancedFieldEdit" /> 
+							</apex:outputPanel>
+							
+							<apex:outputPanel layout="block" rendered="{!ShowAdvancedFieldEdit}" style="padding-top:10px;" >
+								<apex:outputLabel styleClass="selectTitle" value="Label:&nbsp;&nbsp;" for="AdvancedFieldEditLabel" escape="false"/>
+								<apex:inputText value="{!AdvancedFieldEditLabel}" id="AdvancedFieldEditLabel" /> 
+							</apex:outputPanel>
+	
+							<apex:outputPanel layout="block" id="DisplayTypeSection" rendered="{!ShowDisplayType}" style="padding-top:10px;" >
+					           	<apex:outputLabel styleClass="selectTitle" value="Display Type:&nbsp;&nbsp;" for="DisplayTypeList" escape="false"/>
+					           	<apex:selectList value="{!CurrentDisplayType}" size="1" title="Type" id="DisplayTypeList" >
+					                <apex:selectOptions value="{!DisplayTypes}"/>
+					            </apex:selectList>
+				            </apex:outputPanel>
+							
+							<apex:outputPanel layout="block" id="FieldError" rendered="{!ShowFieldError}" style="padding-top:10px;">
+				            	<apex:outputText value="{!FieldErrorMsg}" style="color: #CC0000" />
+				            </apex:outputPanel>	            
+	
+						</td>
+					
+						<td class="buttonCell">
+	
+							<apex:outputPanel layout="block" >
+								<apex:outputLabel value="Add" />
+							</apex:outputPanel>
+	
+							<apex:outputPanel layout="block" >
+								<apex:image value="/s.gif" alt="Add" styleClass="rightArrowIcon" >
+									<apex:actionSupport event="onclick" action="{!doAdd}" rerender="popupErrMsg,SelectFields,sortCriteria,ColHeadDisplay"/>
+								</apex:image> 
+							</apex:outputPanel>
+	
+							<br/>
+							
+							<apex:outputPanel layout="block" >
+								<apex:image value="/s.gif" alt="Remove" styleClass="leftArrowIcon" >
+									<apex:actionSupport event="onclick" action="{!doRemove}" rerender="popupErrMsg,SelectedFields,sortCriteria,ColHeadDisplay"/>
+								</apex:image> 
+							</apex:outputPanel>
+							
+							<apex:outputPanel layout="block" >
+								<apex:outputLabel value="Remove" />
+							</apex:outputPanel>
+	
+						</td>
+						
+						<td class="selectCell"  style="padding-top:40px;">
+	
+							<apex:outputPanel layout="block" >
+								<apex:outputLabel styleClass="selectTitle" value="Selected Fields" for="colselector_select_1"/>
+							</apex:outputPanel>
+							
+							
+							<apex:outputPanel layout="block" id="SelectedFields" >
+					           	<apex:selectList value="{!CurrentSelectedField}" style="width:100%" size="12" title="Selected Fields" id="SelectedFieldList">
+					                <apex:selectOptions value="{!SelectedFields}"/>
+					                <apex:actionSupport event="onchange" rerender="ColHeadDisplay"/>
+					                <apex:actionSupport event="ondblclick" action="{!doRemove}" rerender="popupErrMsg,SelectedFields,sortCriteria,ColHeadDisplay"/>
+					                
+					            </apex:selectList>
+							</apex:outputPanel>
+							
+							<br/>
+	
+							<apex:outputPanel layout="block" rendered="{!ShowColHeading}">
+								<apex:outputPanel layout="block">
+									<apex:outputLabel styleClass="selectTitle" value="Column Heading:" for="ColHeadDisplay"  />
+								</apex:outputPanel>
+								<apex:outputPanel layout="block">
+					           		<apex:outputText value="{!CurrentColHeading}" title="ColumnHeading" id="ColHeadDisplay" />
+						            <apex:outputText value="&nbsp;&nbsp" escape="false"/>
+						            <apex:commandButton value="Edit" action="{!doEditLabel}" rerender="popupErrMsg,popup" />
+								</apex:outputPanel>
+							</apex:outputPanel>
+						</td>
+						
+						<td class="buttonCell">
+						
+							<apex:outputPanel layout="block" >
+								<apex:outputLabel value="Top" />
+							</apex:outputPanel>
+	
+							<apex:outputPanel layout="block" >
+								<apex:image value="/s.gif" alt="Top" styleClass="doubleArrowUp" >
+									<apex:actionSupport event="onclick" action="{!doTop}" rerender="popupErrMsg,SelectedFields"/>
+								</apex:image> 
+							</apex:outputPanel>
+	
+							<br/>
+		
+							<apex:outputPanel layout="block" >
+								<apex:outputLabel value="Up" />
+							</apex:outputPanel>
+	
+							<apex:outputPanel layout="block" >
+								<apex:image value="/s.gif" alt="Up" styleClass="upArrowIcon" >
+									<apex:actionSupport event="onclick" action="{!doUp}" rerender="popupErrMsg,SelectedFields"/>
+								</apex:image> 
+							</apex:outputPanel>
+						
+							<apex:outputPanel layout="block" >
+								<apex:image value="/s.gif" alt="Down" styleClass="downArrowIcon" >
+									<apex:actionSupport event="onclick" action="{!doDown}" rerender="popupErrMsg,SelectedFields"/>
+								</apex:image> 
+							</apex:outputPanel>
+						
+							<apex:outputPanel layout="block" >
+								<apex:outputLabel value="Down" />
+							</apex:outputPanel>
+							
+							<br/>
+		
+							<apex:outputPanel layout="block" >
+								<apex:image value="/s.gif" alt="Bottom" styleClass="doubleArrowDwn" >
+									<apex:actionSupport event="onclick" action="{!doBottom}" rerender="popupErrMsg,SelectedFields" />
+								</apex:image> 
+							</apex:outputPanel>
+						
+							<apex:outputPanel layout="block" >
+								<apex:outputLabel value="Bottom" />
+							</apex:outputPanel>
+							
+						</td>
+					</tr>
+					</tbody>
+					</table>
+				</apex:outputPanel>
+		    </apex:pageBlock>
+	
+
+			<apex:pageBlock id="FilterCriteria" rendered="{!ShowStep3Section}">    
+                <apex:outputPanel layout="block" style="padding-bottom:12px;">
+					<apex:outputText styleClass="pbSubheader tertiaryPalette" value="{!LabelFilterCriteriaHeader}" />
+				</apex:outputPanel>
+
+		       	<apex:pageBlockTable value="{!SearchCriteria}" var="crit" styleClass="tableClass"  rows="4" frame="none" width="250px" >
+		
+		            <apex:column headerValue="Field" style="white-space:nowrap;text-align: left;vertical-align:top;padding-top:6px;" >
+	                    <apex:outputPanel layout="block" id="CriteriaField">
+	                        <apex:selectList value="{!crit.CriterionField}" size="1" title="Criterion Field" >
+	                            <apex:selectOptions value="{!crit.CriterionFieldOptions}"/>
+	                            <apex:actionSupport event="onchange" rerender="CriteriaOperator,CriteriaValue,CriteriaValueList" />
+	                        </apex:selectList>
+	                    </apex:outputPanel>
+		            </apex:column>
+
+		            <apex:column headerValue="Operator" style="white-space:nowrap;text-align: left;vertical-align:top;padding-top:6px;" >
+	                    <apex:outputPanel layout="block" id="CriteriaOperator">
+	                        <apex:selectList value="{!crit.CriterionOperator}" size="1" title="Criteria Operator"  >
+	                            <apex:selectOptions value="{!crit.CriterionOperatorOptions}"/>
+	                            <apex:actionSupport event="onchange" rerender="CriteriaValue" />
+	                        </apex:selectList>
+	                    </apex:outputPanel>
+		            </apex:column>
+
+		            <apex:column headerValue="Value" style="white-space:nowrap;text-align: left;vertical-align:top;padding-top:6px;" >
+						<apex:outputPanel layout="block" id="CriteriaValue">
+						    <apex:selectList value="{!crit.CriterionValue}" size="1" multiselect="false" title="Criteria Value" rendered="{!crit.ShowCriterionValueOptions}" >
+						        <apex:selectOptions value="{!crit.CriterionValueOptions}"/>
+						    </apex:selectList>
+						    <apex:inputText value="{!crit.CriterionValue}" title="Criteria Value"  rendered="{!crit.ShowCriterionValueInput}" />
+							<apex:image url="{!URLFOR($Resource.InSituCah__InSitu_Down_Arrow)}"  rendered="{!crit.ShowLookupButton}">
+								<apex:actionSupport event="onclick" action="{!crit.doShowLookupSelectPanel}" rerender="CriteriaValue" />
+							</apex:image> 
+						    <apex:selectList value="{!crit.CriterionValues}" size="5" multiselect="true" title="Criteria Value" rendered="{!crit.ShowLookupSelectPanel}" >
+						        <apex:selectOptions value="{!crit.CriterionValueOptions}"/>
+						    </apex:selectList>
+							<apex:outputPanel layout="block" id="CriterionValueButtons" style="padding-top:6px;">
+							    <apex:commandButton action="{!crit.doInsertSelected}" value="Insert" rerender="CriteriaValue" rendered="{!crit.ShowLookupSelectPanel}" />
+							    <apex:commandButton action="{!crit.doHideLookupSelectPanel}" value="Cancel" rerender="CriteriaValue, CriterionValueButtons" rendered="{!crit.ShowLookupSelectPanel}" />
+							</apex:outputPanel>
+						</apex:outputPanel>
+						
+		            </apex:column>
+
+		            <apex:column width="50%" >
+                        <apex:outputPanel layout="block">
+                            <apex:outputText value="{!crit.CriterionConnector}" />
+                        </apex:outputPanel>
+                    </apex:column>
+		            
+				</apex:pageBlockTable>
+		    </apex:pageBlock>
+
+
+			<apex:pageBlock id="SelectOther" rendered="{!ShowStep4Section}">    
+                <apex:outputPanel layout="block" style="padding-bottom:12px;">
+					<apex:outputText styleClass="pbSubheader tertiaryPalette" value="{!LabelSelectOtherOptionsHeader}" />
+				</apex:outputPanel>
+
+                <apex:outputPanel layout="block" style="padding-bottom:6px;">
+		       		<apex:outputText value="{!LabelSortField}" />
+		       	</apex:outputPanel>
+		       	
+		       	<apex:pageBlockTable value="{!SortCriteria}" id="sortCriteria" var="sortCrit" styleClass="tableClass"  rows="3" frame="none"  >
+		
+		            <apex:column style="white-space:nowrap;" >
+                        <apex:outputText value="{!sortCrit.sortLabel}" />
+		            </apex:column>
+
+		            <apex:column headerValue="Sort Field" style="white-space:nowrap;text-align: left;vertical-align:top;padding-top:6px;" >
+	                    <apex:outputPanel layout="block" >
+	                        <apex:selectList value="{!sortCrit.sortField}" size="1" title="Sort Field"  >
+	                            <apex:selectOptions value="{!SortFieldOptionList}"/>
+	                        </apex:selectList>
+	                    </apex:outputPanel>
+		            </apex:column>
+
+		            <apex:column headerValue="Sort Order" style="white-space:nowrap;text-align: left;vertical-align:top;padding-top:6px;" >
+	                    <apex:outputPanel layout="block" >
+	                        <apex:selectList value="{!sortCrit.sortOrder}" size="1" title="Sort Order"  >
+	                            <apex:selectOptions value="{!SortOrderOptionList}"/>
+	                        </apex:selectList>
+	                    </apex:outputPanel>
+		            </apex:column>
+		            
+		            <apex:column width="99%" >
+                        <apex:outputPanel layout="block">
+                            <apex:outputText value="&nbsp;&nbsp;" escape="false" />
+                        </apex:outputPanel>
+                    </apex:column>
+
+				</apex:pageBlockTable>
+				
+				<apex:outputPanel layout="block" id="OtherOptionsWrapper" style="padding-top:12px;">
+	
+					<apex:outputPanel layout="block">
+						<apex:outputLabel value="&nbsp;Number of items per page:&nbsp;&nbsp;" for="PageSizeEdit" escape="false" />
+		           		<apex:inputText value="{!PageSize}" title="PageSize" id="PageSizeEdit" >
+		            	</apex:inputText>
+					</apex:outputPanel>
+						
+					<apex:outputPanel layout="block" id="HierSortPanel" style="padding-top:10px;" rendered="{!ShowHierSort}">
+						<apex:inputCheckbox value="{!chkHierSort}" id="chkHierSort" />
+						<apex:outputLabel value="{!LabelHierSortChk}" for="chkHierSort" />
+					</apex:outputPanel>
+	
+				</apex:outputPanel>
+	
+		    </apex:pageBlock>
+		    
+		    <apex:pageBlock id="EditMySettings" rendered="{!ShowStep5Section}">    
+				<apex:outputText styleClass="pbSubheader tertiaryPalette" value="{!LabelEditMySettingsHeader}" />
+				
+				<apex:outputPanel layout="block"  >
+					<apex:outputPanel layout="block" style="padding-bottom:10px;padding-top:10px;">
+						<apex:inputCheckbox value="{!chkEditMySettings}" disabled="{!DisableChkEditMySettings}" id="chkEditMySettings" >
+							<apex:actionSupport event="onclick" rerender="AvailableFldsWrapper, CustomRestrictNote" />
+						</apex:inputCheckbox>
+						<apex:outputLabel value="{!LabelEditMySettingsChk}" for="chkEditMySettings" />
+					</apex:outputPanel>
+					
+					<apex:outputPanel layout="block" id="CustomRestrictNote" >
+						<apex:outputText value="{!CustomRestrictNote}" rendered="{!ShowCustomRestrictNote}" style="padding-top:5px;padding-bottom:5px;padding-left:30px;color:#CC0000;font-weight: bold;" />
+					</apex:outputPanel>
+					
+					<apex:outputPanel layout="block" styleClass="duelingListBox" id="AvailableFldsWrapper" >
+						<apex:outputPanel layout="block" rendered="{!chkEditMySettings}" >
+						
+						<table class="layout">
+						<tbody>
+
+						<tr >
+							<td class="selectCell" >
+								<apex:outputPanel layout="block" style="padding-top:10px;padding-left:20px" >
+									<apex:outputText value="&nbsp;&nbsp;" escape="false" />
+									<apex:outputText styleClass="pbSubheader tertiaryPalette" value="Choose which fields should NOT be available for User Selection" />
+								</apex:outputPanel>
+							</td>
+						</tr>
+
+						<tr>
+							<td class="selectCell">
+								<apex:outputPanel layout="block" style="padding-bottom:10px;padding-top:10px;padding-left:20px" >
+									<apex:outputLabel styleClass="selectTitle" value="From:&nbsp;&nbsp;" for="SourceList2" escape="false" />
+					           		<apex:selectList value="{!CurrentSourceField2}" size="1" title="From" id="SourceList2" >
+					                	<apex:selectOptions value="{!FieldSources2}"/>
+					                	<apex:actionSupport event="onchange" rerender="AvailableFields2"/>
+					            	</apex:selectList>
+								</apex:outputPanel>
+
+								<apex:outputPanel layout="block" id="AvailableFields2"  style="padding-left:20px">
+						           	<apex:selectList value="{!CurrentAvailableField2}" size="15" title="Available Fields" id="FieldList2">
+						                <apex:selectOptions value="{!AvailableFields2}"/>
+						                <apex:actionSupport event="ondblclick" action="{!doAdd2}" rerender="SelectedFields2,chkEditMySettings"/>
+						            </apex:selectList>
+								</apex:outputPanel>
+								
+							</td>
+							<td class="buttonCell">
+		
+								<apex:outputPanel layout="block" >
+									<apex:outputLabel value="Add" />
+								</apex:outputPanel>
+		
+								<apex:outputPanel layout="block" >
+									<apex:image value="/s.gif" alt="Add" styleClass="rightArrowIcon" >
+										<apex:actionSupport event="onclick" action="{!doAdd2}" rerender="SelectedFields2,chkEditMySettings"/>
+									</apex:image> 
+								</apex:outputPanel>
+		
+								<br/>
+								
+								<apex:outputPanel layout="block" >
+									<apex:image value="/s.gif" alt="Remove" styleClass="leftArrowIcon" >
+										<apex:actionSupport event="onclick" action="{!doRemove2}" rerender="SelectedFields2,chkEditMySettings"/>
+									</apex:image> 
+								</apex:outputPanel>
+								
+								<apex:outputPanel layout="block" >
+									<apex:outputLabel value="Remove" />
+								</apex:outputPanel>
+		
+							</td>
+							
+							<td class="selectCell"  style="padding-top:40px;">
+		
+								<apex:outputPanel layout="block" >
+									<apex:outputLabel styleClass="selectTitle" value="Fields NOT Available for User Selection" />
+								</apex:outputPanel>
+								
+								<apex:outputPanel layout="block" id="SelectedFields2" >
+						           	<apex:selectList value="{!CurrentSelectedField2}" style="width:100%" size="12" title="Selected Fields" id="SelectedFieldList2">
+						                <apex:selectOptions value="{!SelectedFields2}"/>
+						                <apex:actionSupport event="ondblclick" action="{!doRemove2}" rerender="SelectedFields2,chkEditMySettings"/>
+						                
+						            </apex:selectList>
+								</apex:outputPanel>
+								
+								<br/>
+		
+							</td>
+							
+							<td class="buttonCell">
+							</td>
+						
+						</tr>
+						</tbody>
+						</table>
+						</apex:outputPanel>
+					</apex:outputPanel>
+					
+				</apex:outputPanel>
+		    </apex:pageBlock>
+
+           	<apex:pageBlock >
+	           	<apex:pageBlockButtons location="Bottom" id="DefaultButtons">
+	               <apex:commandButton action="{!save}" value="Save" rerender="popupErrMsg" />
+	               <apex:commandButton action="{!doSaveAs}" value="Save As" rendered="{!ShowSaveAsBtn}" rerender="popupSaveAs" />
+	               <apex:commandButton action="{!returnToPreviousPage}" value="Cancel" />
+	           	</apex:pageBlockButtons>
+           	</apex:pageBlock>
+	
+		</apex:outputPanel>
+		
+		<apex:outputPanel id="popup">
+			<apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!ShowEditLabel}"/>
+            <apex:outputPanel styleClass="customPopup" layout="block" rendered="{!ShowEditLabel}">
+
+				<apex:outputPanel layout="block">
+					<apex:outputLabel styleClass="selectTitle" value="Column Heading:&nbsp;&nbsp;" for="NewColHeadEdit" escape="false" />
+	           		<apex:inputText value="{!NewColHeading}" title="Column Heading" id="NewColHeadEdit" />
+				</apex:outputPanel>
+
+				<br/>
+
+				<apex:outputPanel layout="block">
+	                <apex:commandButton value="Save" action="{!saveEditLabel}" rerender="popup,SelectedFields,sortCriteria,ColHeadDisplay"/>
+	                <apex:commandButton value="Cancel" action="{!cancelEditLabel}" rerender="popup,ColHeadDisplay"/>
+				</apex:outputPanel>
+	                
+            </apex:outputPanel>
+        </apex:outputPanel>
+		<apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!ShowEditLabel}"/>
+
+		<apex:outputPanel id="popupSaveAs">
+			<apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!ShowSaveAsPopUp}"/>
+            <apex:outputPanel styleClass="customPopup" layout="block" rendered="{!ShowSaveAsPopUp}">
+
+				<apex:outputPanel layout="block">
+				
+					<apex:outputPanel layout="block" >
+						<apex:outputLabel value="<b>Save as New:</b>&nbsp;&nbsp;" for="saveasOptions" escape="false" />
+						<apex:selectRadio id="saveasOptions" value="{!selectedSaveAsOption}" >
+							<apex:selectOptions value="{!SaveAsOptions}"/>
+							<apex:actionSupport event="onchange" action="{!doSaveAsOptionSelected}" rerender="saveAsOptionsDetails"/>
+						</apex:selectRadio>
+					</apex:outputPanel>
+
+					<apex:outputPanel layout="block" id="saveAsOptionsDetails" styleClass="pbSubbody">
+						<apex:outputPanel layout="block" rendered="{!ShowSaveAsProfile}" >
+							<apex:outputPanel layout="block" >
+								<apex:outputLabel value="<b>Select Profile:</b>&nbsp;&nbsp;" for="saveasProfile" escape="false" />
+							</apex:outputPanel>
+							<apex:outputPanel layout="block" >
+								<apex:selectList id="saveasProfile" value="{!SaveAsAppSetting.InSituGen__Scope_ProfileID__c}" size="7" >
+									<apex:selectOptions value="{!ProfileOptions}"/>
+								</apex:selectList>
+							</apex:outputPanel>
+						</apex:outputPanel>
+
+						<apex:outputPanel layout="block" rendered="{!ShowSaveAsUser}" >
+							<apex:outputPanel layout="block" >
+								<apex:outputLabel styleClass="selectTitle" value="<b>Select User:</b>&nbsp;&nbsp;" for="saveasUser" escape="false" />
+							</apex:outputPanel>
+							<apex:outputPanel layout="block" >
+				               <apex:inputField id="saveasUser" value="{!SaveAsAppSetting.InSituGen__Scope_User__c}" /> 
+							</apex:outputPanel>
+						</apex:outputPanel>
+
+						<apex:outputPanel layout="block" >
+							<apex:outputText value="{!SaveAsErrMsgText}" style="font-weight:bold;color:red"/>
+						</apex:outputPanel>
+
+					</apex:outputPanel>
+					
+					
+				</apex:outputPanel>
+
+				<br/>
+
+				<apex:outputPanel layout="block">
+	                <apex:commandButton value="Save As" action="{!saveSaveAs}" rerender="popupSaveAs,popupErrMsg"/>
+	                <apex:commandButton value="Cancel" action="{!cancelSaveAs}" rerender="popupSaveAs"/>
+				</apex:outputPanel>
+	                
+            </apex:outputPanel>
+        </apex:outputPanel>
+		<apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!ShowSaveAsPopUp}"/>
+
+
+
+
+
+		<apex:outputPanel id="popupErrMsg">
+			<apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!ShowPopupErrMsg}"/>
+            <apex:outputPanel styleClass="customPopup" layout="block" rendered="{!ShowPopupErrMsg}">
+
+				<apex:outputPanel layout="block">
+					<apex:outputText value="{!PopupErrMsgText}" id="PopupErrMsgText" />
+				</apex:outputPanel>
+
+				<br/>
+
+				<apex:outputPanel layout="block">
+	                <apex:commandButton value="Ok" action="{!cancelPopupErrMsg}" rerender="popupErrMsg"/>
+				</apex:outputPanel>
+	                
+            </apex:outputPanel>
+        </apex:outputPanel>
+		<apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!ShowPopupErrMsg}"/>
+		
+	</apex:form>
+
+	<style type="text/css">
+		.customPopup
+		{
+			background-color: white;
+			border-style: solid;
+			border-width: 2px;
+			left: 50%;
+			padding:10px;
+			position: absolute;
+			z-index: 9999;
+			/* These are the 3 css properties you will need to tweak so the pop 
+			up displays in the center of the screen. First set the width. Then set 
+			margin-left to negative half of what the width is. You can also add 
+			the height property for a fixed size pop up.*/
+			width: 500px;
+			margin-left: -250px;
+			top:250px;
+        }
+    </style>
+
+	<style type="text/css">
+        .popupBackground
+        {
+			background-color:black;
+			opacity: 0.20;
+			filter:alpha(opacity=20);
+			position:absolute;
+			width: 100%;
+			height: 100%;
+			top: 0;
+			left: 0;
+			z-index: 9998;
+		}
+    </style>
+   
+</apex:page>

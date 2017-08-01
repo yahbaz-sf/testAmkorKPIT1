@@ -1,0 +1,23 @@
+<apex:page standardController="Group" extensions="RFQQueueUserViewController" showHeader="false" sidebar="false">
+<apex:pageBlock >
+	<apex:pageBlockSection title="{!g.Name}">
+		<apex:outputPanel rendered="{!users.size > 0}">
+			<apex:dataTable value="{!users}" var="rec" style="tableClass" columns="2">
+			<apex:facet name="header">Users</apex:facet>
+			<apex:column >
+				<apex:outputLink value="{!'/' + rec.Id}">{!rec.Name}</apex:outputLink>
+			</apex:column>
+			</apex:dataTable>
+		</apex:outputPanel>	
+
+		<apex:outputPanel rendered="{!groups.size > 0}">
+			<apex:dataTable value="{!groups}" var="rec" style="tableClass" columns="2">
+			<apex:facet name="header">Groups</apex:facet>
+			<apex:column >
+				<apex:outputLink value="{!'/apex/RFQQueueUserView?id=' + rec.Id}">{!rec.Name}</apex:outputLink>
+			</apex:column>
+			</apex:dataTable>
+		</apex:outputPanel>	
+	</apex:pageBlockSection>
+</apex:pageBlock>
+</apex:page>

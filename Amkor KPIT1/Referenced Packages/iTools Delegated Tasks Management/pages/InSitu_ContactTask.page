@@ -1,0 +1,67 @@
+<apex:page standardController="InSituDtm__Contact_Task__c" extensions="InSituDtm.InSitu_ContactTaskController" showHeader="true" sidebar="true" standardStylesheets="true" >
+    <apex:sectionHeader title="{!PageTitle}" ></apex:sectionHeader>    
+ <apex:form > 
+
+    <apex:pageBlock mode="maindetail">
+ 	
+		<apex:outputPanel layout="block" styleclass="message errorM3" id="Msgs" rendered="{!ShowErrorMessage}" >   
+			<table cellspacing="0" cellpadding="0" border="0" style="padding:0px;margin:0px;" class="messageTable">
+				<tbody>
+					<tr valign="top">
+						<td><img title="info" class="msgIcon" src="/s.gif" alt="info"/></td>
+						<td class="messageCell">
+							<div id="msgBody" class="messageText">
+								<span id="msgTitle">
+									<h4>{!ErrorTitle}</h4>
+								</span>
+								{!ErrorMessage}
+								<br/>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</apex:outputPanel>
+	
+	    <apex:pageBlockSection columns="1" rendered="{!ShowAll}" Title="Task Information" collapsible="false" >
+			<apex:outputField value="{!ContactTask.InSituDtm__Subject__c}"  />
+		</apex:pageBlockSection>
+		
+		<apex:pageBlockSection columns="2" rendered="{!ShowAll}">
+			<apex:outputField value="{!ContactTask.InSituDtm__Due_Date__c}"  />
+			<apex:pageBlockSectionItem >
+				<apex:outputText value="Assigned To"  />
+				<apex:outputText value="{!ContactTask.InSituDtm__Contact_Name__c}"  />
+			</apex:pageBlockSectionItem>
+			
+			<apex:outputField value="{!ContactTask.InSituDtm__Priority__c}"  />
+			<apex:pageBlockSectionItem >
+				<apex:outputText value="Assigned By"  />
+				<apex:outputText value="{!ContactTask.Owner.Name}"  />
+			</apex:pageBlockSectionItem>
+			
+			<apex:outputField value="{!ContactTask.InSituDtm__Status__c}"  />
+			<apex:pageBlockSectionItem >
+				<apex:outputText value=""  />
+				<apex:outputText value="{!ContactTask.Owner.Email}"  />
+			</apex:pageBlockSectionItem>
+			
+			<apex:outputText value=""  />
+			<apex:pageBlockSectionItem >
+				<apex:outputText value=""  />
+				<apex:outputText value="{!ContactTask.Owner.Phone}"  />
+			</apex:pageBlockSectionItem>
+			
+		</apex:pageBlockSection>
+		
+		<apex:pageBlockSection columns="1" rendered="{!ShowAll}" Title="Comments" collapsible="false" >
+			<apex:pageBlockSectionItem >
+				<apex:outputText value="Task Comments"  />
+				<apex:outputText value="{!ContactTask.InSituDtm__Description__c}"  />
+			</apex:pageBlockSectionItem>
+		</apex:pageBlockSection>
+
+	</apex:pageBlock>	
+</apex:form> 
+
+</apex:page>

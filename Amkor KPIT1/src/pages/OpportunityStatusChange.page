@@ -1,0 +1,71 @@
+<apex:page standardController="Opportunity" extensions="OpportunityStatusChangeController">
+  <apex:form id="form">
+        
+         <apex:pageBlock rendered="{!allowToGoBack}">
+              <apex:pagemessages ></apex:pagemessages>
+              <apex:pageblockButtons location="bottom">
+                 <apex:commandButton action="{!cancel}" title="Cancel" value="Back" />
+             </apex:pageblockButtons>
+         </apex:pageBlock>
+         <apex:pageBlock title="Opportunity Status Change"  id="OpptyStatusChange" rendered="{!isAbleToChange}">
+             <apex:pageBlockButtons location="bottom">
+                     <apex:commandButton action="{!save}" title="Save" value="Save"/>
+                     <apex:commandButton action="{!cancel}" title="Cancel" value="Cancel"/>
+             </apex:pageBlockButtons>
+             <apex:pageblockSection >    
+                 <apex:pageBlockSectionItem >
+                     <apex:outputLabel value="Opportunity Owner"/>
+                     <apex:outputField value="{!Opportunity.OwnerId}"/> 
+                 </apex:pageBlockSectionItem>
+                 <apex:pageBlockSectionItem >
+                     <apex:outputLabel value="Account Name"/>
+                     <apex:outputField value="{!Opportunity.Account.Name}"/>
+                 </apex:pageBlockSectionItem>
+                 <apex:pageBlockSectionItem >
+                     <apex:outputLabel value="Lead Source"/>
+                     <apex:outputField value="{!Opportunity.LeadSource}"/>
+                 </apex:pageBlockSectionItem>
+                 <apex:pageBlockSectionItem >
+                     <apex:outputLabel value="RFQ"/>
+                     <apex:outputField value="{!Opportunity.RFQ__c}"/>
+                 </apex:pageBlockSectionItem>
+                 <apex:pageBlockSectionItem >
+                     <apex:outputLabel value="Next Step"/>
+                     <apex:outputField value="{!Opportunity.NextStep}"/>
+                 </apex:pageBlockSectionItem>
+                 <apex:pageBlockSectionItem >
+                     <apex:outputLabel value="Type"/>
+                     <apex:outputField value="{!Opportunity.Type}"/>
+                 </apex:pageBlockSectionItem>
+                 <apex:pageBlockSectionItem >
+                     <apex:outputLabel value="HVM Start Date"/>
+                     <apex:outputField value="{!Opportunity.HVM_Start_Date__c}"/>
+                 </apex:pageBlockSectionItem>
+                 <apex:pageBlockSectionItem >
+                     <apex:outputLabel value="Opportunity Stage"/>
+                     <apex:outputField value="{!Opportunity.StageName}"/>
+                 </apex:pageBlockSectionItem>
+                 <apex:pageBlockSectionItem >
+                     <apex:outputLabel value="Probability"/>
+                     <apex:outputField value="{!Opportunity.Probability}"/>
+                 </apex:pageBlockSectionItem>
+                 <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Opportunity/RFQ Status"/>
+                    <apex:inputField value="{!Opportunity.Opportunity_Status__c}"/> 
+                 </apex:pageBlockSectionItem> 
+                 <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Projected Annual Revenue $"/>
+                    <apex:outputField value="{!Opportunity.Projected_Revenue__c}"/> 
+                 </apex:pageBlockSectionItem>                
+                  <apex:pageBlockSectionItem >
+                      <apex:outputLabel value="Category"/>
+                     <apex:outputField value="{!Opportunity.Category__c}"/>
+                 </apex:pageBlockSectionItem>
+                 <apex:pageBlockSectionItem >
+                     <apex:outputLabel value="Primary Campaign Source"/>
+                     <apex:outputField value="{!Opportunity.CampaignId}"/>
+                 </apex:pageBlockSectionItem>                    
+             </apex:pageblockSection>
+         </apex:pageBlock>
+     </apex:form>
+</apex:page>

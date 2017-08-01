@@ -1,0 +1,591 @@
+<!-- InSitu_AHBuilder -->
+<apex:page standardController="Account" showHeader="true" tabStyle="Account"  id="IAHBuilder" cache="false"
+           extensions="InSituCah.InSitu_AHBuilderController" >
+
+    <style>
+       .activeTab {background-color: #236FBD; color:white; background-image:none}
+       .inactiveTab {background-color: white; color:black; background-image:none}
+    </style>
+    
+    <apex:stylesheet value="/sCSS/21.0/sprites/1297816277000/Theme3/default/gc/versioning.css" />   
+    <apex:stylesheet value="/sCSS/21.0/sprites/1297816277000/Theme3/default/gc/extended.css" />
+ 
+    <apex:form id="formCanvas">
+
+    <apex:sectionHeader title="{!PageTitle}" subtitle="{!PageSubTitle}"></apex:sectionHeader>
+    <apex:messages />
+
+    <apex:panelGrid columns="2" cellpadding="1"  id="BuilderPanel" rendered="{!IsLicensed}">
+        <apex:panelGroup id="LeftSide">
+            <apex:outputPanel layout="block" id="SearchPanel" >
+                <apex:tabPanel id="UpperLeftSide" value="{!TabInFocus}" switchType="ajax" styleClass="theTabPanel" tabClass="activeTab" contentClass="tabContent" activeTabClass="activeTab" inactiveTabClass="inactiveTab">    
+                    <apex:tab label="Add Accounts" name="AddAccounts" id="AddAccounts">
+                        <apex:outputPanel layout="block" styleClass="pbSubheader tertiaryPalette">Specify Filter Criteria</apex:outputPanel>
+                        <table class="layout" >
+                            <tbody>
+                                <tr >
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:10px;">
+                                        <apex:outputPanel layout="block" >
+                                            <apex:outputLabel style="font-weight:bold;" value="Field" for="CriteriaField1a" />
+                                        </apex:outputPanel>
+                                        
+                                        <apex:outputPanel layout="block" id="CriteriaField1a">
+                                            <apex:selectList value="{!CriteriaField1a}" size="1" title="Criteria Field"  >
+                                                <apex:selectOptions value="{!CriteriaFieldOptionLista}"/>
+                                                <apex:actionSupport event="onchange" rerender="CriteriaOperator1a,CriteriaValue1a,CriteriaValueList1a"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+
+                                    </td>
+
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:10px;" >
+                                        <apex:outputPanel layout="block">
+                                            <apex:outputLabel style="font-weight:bold;" value="Operator" for="CriteriaOperator1a"  />
+                                        </apex:outputPanel>
+                
+                                        <apex:outputPanel layout="block" id="CriteriaOperator1a">
+                                            <apex:selectList value="{!CriteriaOperator1a}" size="1" title="Criteria Operator"  >
+                                                <apex:selectOptions value="{!CriteriaOperatorOptionList1a}"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                    
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:10px;" >
+                                        <apex:outputPanel layout="block">
+                                            <apex:outputLabel style="font-weight:bold;" value="Value" for="CriteriaValue1a"  />
+                                        </apex:outputPanel>
+                
+                                        <apex:outputPanel layout="block" id="CriteriaValue1a">
+                                            <apex:inputText value="{!CriteriaValue1a}" title="Criteria Value"  rendered="{!NOT(IsCriteriaValue1aBoolean)}" >
+                                            </apex:inputText>
+                                        </apex:outputPanel>
+
+                                        <apex:outputPanel layout="block" id="CriteriaValueList1a">
+                                            <apex:selectList value="{!CriteriaValue1a}" size="1" title="Criteria Value" rendered="{!IsCriteriaValue1aBoolean}" >
+                                                <apex:selectOptions value="{!CriteriaValueOptionList1a}"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+
+                                    </td>
+                                    
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:10px;" >
+                                        <apex:outputPanel layout="block">
+                                            <apex:outputText value="&nbsp;"  escape="false" />
+                                        </apex:outputPanel>
+
+                                        <apex:outputPanel layout="block">
+                                            <apex:outputText value="AND" />
+                                        </apex:outputPanel>
+                                    </td>
+                                </tr>
+                                <tr >
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;">
+                                        <apex:outputPanel layout="block" id="CriteriaField2a">
+                                            <apex:selectList value="{!CriteriaField2a}" size="1" title="Criteria Field"  >
+                                                <apex:selectOptions value="{!CriteriaFieldOptionLista}"/>
+                                                <apex:actionSupport event="onchange" rerender="CriteriaOperator2a,CriteriaValue2a,CriteriaValueList2a"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                    
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block" id="CriteriaOperator2a">
+                                            <apex:selectList value="{!CriteriaOperator2a}" size="1" title="Criteria Operator"  >
+                                                <apex:selectOptions value="{!CriteriaOperatorOptionList2a}"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                    
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block" id="CriteriaValue2a">
+                                            <apex:inputText value="{!CriteriaValue2a}" title="Criteria Value"  rendered="{!NOT(IsCriteriaValue2aBoolean)}" >
+                                            </apex:inputText>
+                                        </apex:outputPanel>
+
+                                        <apex:outputPanel layout="block" id="CriteriaValueList2a">
+                                            <apex:selectList value="{!CriteriaValue2a}" size="1" title="Criteria Value" rendered="{!IsCriteriaValue2aBoolean}" >
+                                                <apex:selectOptions value="{!CriteriaValueOptionList2a}"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                    
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block">
+                                            <apex:outputText value="AND" />
+                                        </apex:outputPanel>
+                                    </td>
+    
+                                </tr>
+                                <tr >
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;">
+                                        <apex:outputPanel layout="block" id="CriteriaField3a">
+                                            <apex:selectList value="{!CriteriaField3a}" size="1" title="Criteria Field"  >
+                                                <apex:selectOptions value="{!CriteriaFieldOptionLista}"/>
+                                                <apex:actionSupport event="onchange" rerender="CriteriaOperator3a,CriteriaValue3a,CriteriaValueList3a"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block" id="CriteriaOperator3a">
+                                            <apex:selectList value="{!CriteriaOperator3a}" size="1" title="Criteria Operator"  >
+                                                <apex:selectOptions value="{!CriteriaOperatorOptionList3a}"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                    
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block" id="CriteriaValue3a">
+                                            <apex:inputText value="{!CriteriaValue3a}" title="Criteria Value"  rendered="{!NOT(IsCriteriaValue3aBoolean)}" >
+                                            </apex:inputText>
+                                        </apex:outputPanel>
+
+                                        <apex:outputPanel layout="block" id="CriteriaValueList3a">
+                                            <apex:selectList value="{!CriteriaValue3a}" size="1" title="Criteria Value" rendered="{!IsCriteriaValue3aBoolean}" >
+                                                <apex:selectOptions value="{!CriteriaValueOptionList3a}"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                        
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block">
+                                            <apex:outputText value="AND" />
+                                        </apex:outputPanel>
+                                    </td>
+
+                                </tr>
+                                <tr >
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;">
+                                        <apex:outputPanel layout="block" id="CriteriaField4a" >
+                                            <apex:selectList value="{!CriteriaField4a}" size="1" title="Criteria Field"  >
+                                                <apex:selectOptions value="{!CriteriaFieldOptionLista}"/>
+                                                <apex:actionSupport event="onchange" rerender="CriteriaOperator4a,CriteriaValue4a,CriteriaValueList4a"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block" id="CriteriaOperator4a" >
+                                            <apex:selectList value="{!CriteriaOperator4a}" size="1" title="Criteria Operator" >
+                                                <apex:selectOptions value="{!CriteriaOperatorOptionList4a}"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                    
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block" id="CriteriaValue4a">
+                                            <apex:inputText value="{!CriteriaValue4a}" title="Criteria Value"  rendered="{!NOT(IsCriteriaValue4aBoolean)}" >
+                                            </apex:inputText>
+                                        </apex:outputPanel>
+
+                                        <apex:outputPanel layout="block" id="CriteriaValueList4a">
+                                            <apex:selectList value="{!CriteriaValue4a}" size="1" title="Criteria Value" rendered="{!IsCriteriaValue4aBoolean}" >
+                                                <apex:selectOptions value="{!CriteriaValueOptionList4a}"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                    
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block">
+                                            <apex:outputText value="&nbsp;"  escape="false" />
+                                        </apex:outputPanel>
+                                    </td>
+                                </tr>
+                                <tr >
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;">
+                                        <apex:outputPanel layout="block">
+                                            <apex:commandButton value="Go!" action="{!doSearch}" rerender="popupErrMsg, LowerLeftSide" status="statusSearch" />
+                                            <apex:outputText value="&nbsp;&nbsp;&nbsp;"  escape="false" />
+                                            <apex:actionStatus id="statusSearch" startText="Searching..." />
+                                        </apex:outputPanel>
+                                    </td>
+                                    <td class="selectCell" style="padding-bottom:2px;" >
+                                        <apex:outputPanel layout="block">
+                                            <apex:outputText value="&nbsp;"  escape="false" />
+                                        </apex:outputPanel>
+                                    </td>
+                                    <td class="selectCell" style="padding-top:2px; text-align:right;" >
+                                        <apex:outputPanel layout="block">
+                                            <apex:commandLink action="{!doClearFilters}" value="Clear Filters" style="text-align: right;" rerender="popupErrMsg,UpperLeftSide"/>
+                                        </apex:outputPanel>
+                                    </td>
+                                </tr>
+                                    
+                            </tbody>
+                        </table>
+                        </apex:Tab>
+                        
+                        <apex:tab label="Existing Accounts" name="ExistingAccounts" id="tabExistingAccount">
+                        <apex:outputPanel layout="block" styleClass="pbSubheader tertiaryPalette">Specify Filter Criteria</apex:outputPanel>
+                        <table class="layout" >
+                            <tbody>
+                                <tr >
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:10px;">
+                                        <apex:outputPanel layout="block" >
+                                            <apex:outputLabel style="font-weight:bold;" value="Field" for="CriteriaField1e" />
+                                        </apex:outputPanel>
+                                        
+                                        <apex:outputPanel layout="block" id="CriteriaField1e">
+                                            <apex:selectList value="{!CriteriaField1e}" size="1" title="Criteria Field" >
+                                                <apex:selectOptions value="{!CriteriaFieldOptionListe}"/>
+                                                <apex:actionSupport event="onchange" rerender="CriteriaOperator1e,CriteriaValue1e,CriteriaValueList1e"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+
+                                    </td>
+
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:10px;" >
+                                        <apex:outputPanel layout="block">
+                                            <apex:outputLabel style="font-weight:bold;" value="Operator" for="CriteriaOperator1e"  />
+                                        </apex:outputPanel>
+                
+                                        <apex:outputPanel layout="block" id="CriteriaOperator1e">
+                                            <apex:selectList value="{!CriteriaOperator1e}" size="1" title="Criteria Operator"  >
+                                                <apex:selectOptions value="{!CriteriaOperatorOptionList1e}"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                    
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:10px;" >
+                                        <apex:outputPanel layout="block">
+                                            <apex:outputLabel style="font-weight:bold;" value="Value" for="CriteriaValue1e"  />
+                                        </apex:outputPanel>
+                
+                                        <apex:outputPanel layout="block" id="CriteriaValue1e">
+                                            <apex:inputText value="{!CriteriaValue1e}" title="Criteria Value"  rendered="{!NOT(IsCriteriaValue1eBoolean)}" >
+                                            </apex:inputText>
+                                        </apex:outputPanel>
+
+                                        <apex:outputPanel layout="block" id="CriteriaValueList1e">
+                                            <apex:selectList value="{!CriteriaValue1e}" size="1" title="Criteria Value" rendered="{!IsCriteriaValue1eBoolean}" >
+                                                <apex:selectOptions value="{!CriteriaValueOptionList1e}"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+
+                                    </td>
+                                    
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:10px;" >
+                                        <apex:outputPanel layout="block">
+                                            <apex:outputText value="&nbsp;"  escape="false" />
+                                        </apex:outputPanel>
+
+                                        <apex:outputPanel layout="block">
+                                            <apex:outputText value="AND" />
+                                        </apex:outputPanel>
+                                    </td>
+                                </tr>
+                                <tr >
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;">
+                                        <apex:outputPanel layout="block" id="CriteriaField2e">
+                                            <apex:selectList value="{!CriteriaField2e}" size="1" title="Criteria Field"  >
+                                                <apex:selectOptions value="{!CriteriaFieldOptionListe}"/>
+                                                <apex:actionSupport event="onchange" rerender="CriteriaOperator2e,CriteriaValue2e,CriteriaValueList2e"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                    
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block" id="CriteriaOperator2e">
+                                            <apex:selectList value="{!CriteriaOperator2e}" size="1" title="Criteria Operator"  >
+                                                <apex:selectOptions value="{!CriteriaOperatorOptionList2e}"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                    
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block" id="CriteriaValue2e">
+                                            <apex:inputText value="{!CriteriaValue2e}" title="Criteria Value"  rendered="{!NOT(IsCriteriaValue2eBoolean)}" >
+                                            </apex:inputText>
+                                        </apex:outputPanel>
+
+                                        <apex:outputPanel layout="block" id="CriteriaValueList2e">
+                                            <apex:selectList value="{!CriteriaValue2e}" size="1" title="Criteria Value" rendered="{!IsCriteriaValue2eBoolean}" >
+                                                <apex:selectOptions value="{!CriteriaValueOptionList2e}"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                    
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block">
+                                            <apex:outputText value="AND" />
+                                        </apex:outputPanel>
+                                    </td>
+    
+                                </tr>
+                                <tr >
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;">
+                                        <apex:outputPanel layout="block" id="CriteriaField3e">
+                                            <apex:selectList value="{!CriteriaField3e}" size="1" title="Criteria Field"  >
+                                                <apex:selectOptions value="{!CriteriaFieldOptionListe}"/>
+                                                <apex:actionSupport event="onchange" rerender="CriteriaOperator3e,CriteriaValue3e,CriteriaValueList3e"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block" id="CriteriaOperator3e">
+                                            <apex:selectList value="{!CriteriaOperator3e}" size="1" title="Criteria Operator"  >
+                                                <apex:selectOptions value="{!CriteriaOperatorOptionList3e}"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                    
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block" id="CriteriaValue3e">
+                                            <apex:inputText value="{!CriteriaValue3e}" title="Criteria Value"  rendered="{!NOT(IsCriteriaValue3eBoolean)}" >
+                                            </apex:inputText>
+                                        </apex:outputPanel>
+
+                                        <apex:outputPanel layout="block" id="CriteriaValueList3e">
+                                            <apex:selectList value="{!CriteriaValue3e}" size="1" title="Criteria Value" rendered="{!IsCriteriaValue3eBoolean}" >
+                                                <apex:selectOptions value="{!CriteriaValueOptionList3e}"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                        
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block">
+                                            <apex:outputText value="AND" />
+                                        </apex:outputPanel>
+                                    </td>
+
+                                </tr>
+                                <tr >
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;">
+                                        <apex:outputPanel layout="block" id="CriteriaField4e" >
+                                            <apex:selectList value="{!CriteriaField4e}" size="1" title="Criteria Field"  >
+                                                <apex:selectOptions value="{!CriteriaFieldOptionListe}"/>
+                                                <apex:actionSupport event="onchange" rerender="CriteriaOperator4e,CriteriaValue4e,CriteriaValueList4e"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block" id="CriteriaOperator4e" >
+                                            <apex:selectList value="{!CriteriaOperator4e}" size="1" title="Criteria Operator" >
+                                                <apex:selectOptions value="{!CriteriaOperatorOptionList4e}"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                    
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block" id="CriteriaValue4e">
+                                            <apex:inputText value="{!CriteriaValue4e}" title="Criteria Value"  rendered="{!NOT(IsCriteriaValue4eBoolean)}" >
+                                            </apex:inputText>
+                                        </apex:outputPanel>
+
+                                        <apex:outputPanel layout="block" id="CriteriaValueList4e">
+                                            <apex:selectList value="{!CriteriaValue4e}" size="1" title="Criteria Value" rendered="{!IsCriteriaValue4eBoolean}" >
+                                                <apex:selectOptions value="{!CriteriaValueOptionList4e}"/>
+                                            </apex:selectList>
+                                        </apex:outputPanel>
+                                    </td>
+                                    
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;" >
+                                        <apex:outputPanel layout="block">
+                                            <apex:outputText value="&nbsp;"  escape="false" />
+                                        </apex:outputPanel>
+                                    </td>
+                                </tr>
+                                <tr >
+                                    <td class="selectCell" style="padding-bottom:2px;padding-top:0px;">
+                                        <apex:outputPanel layout="block">
+                                            <apex:commandButton value="Go!" action="{!doSearch}" rerender="popupErrMsg, LowerLeftSide" status="statusSearch2" />
+                                            <apex:outputText value="&nbsp;&nbsp;&nbsp;"  escape="false" />
+                                            <apex:actionStatus id="statusSearch2" startText="Searching..." />
+                                        </apex:outputPanel>
+                                    </td>
+                                    <td class="selectCell" style="padding-bottom:2px;" >
+                                        <apex:outputPanel layout="block">
+                                            <apex:outputText value="&nbsp;"  escape="false" />
+                                        </apex:outputPanel>
+                                    </td>
+                                    <td class="selectCell" style="padding-top:2px; text-align:right;" >
+                                        <apex:outputPanel layout="block">
+                                            <apex:commandLink action="{!doClearFilters}" value="Clear Filters" style="text-align: right;" rerender="popupErrMsg,UpperLeftSide"/>
+                                        </apex:outputPanel>
+                                    </td>
+                                </tr>
+                                    
+                            </tbody>
+                        </table>
+                        </apex:Tab>
+                        
+                    </apex:tabPanel>
+                    
+                <apex:outputPanel layout="block">
+                    <apex:outputText value="&nbsp;"  escape="false" />
+                </apex:outputPanel>
+                
+                <apex:pageBlock id="LowerLeftSide" >
+                    <apex:outputPanel layout="block" styleClass="pbHeader">
+                        <apex:outputPanel layout="block" styleClass="pbSubheader tertiaryPalette">{!SearchResultsHeader}</apex:outputPanel>
+                    </apex:outputPanel>
+
+                    <apex:outputPanel layout="block">
+                        <apex:commandButton value="{!AddToParentLabel}" action="{!doAddToParent}" rerender="popupErrMsg, RightSide, LowerLeftSide" />
+                    </apex:outputPanel>
+
+                    <apex:outputPanel layout="block" >
+                        <apex:dataTable value="{!SearchResults}" var="pos" id="SearchResultsList"
+                            styleClass="list tableClass"
+                            headerClass="headerRow "
+                            rowClasses="dataRow Odd Even"
+                            columnClasses="dataCell "
+                            onrowmouseover="if (window.hiOn) {hiOn(this);}"
+                            onrowmouseout="if (window.hiOff) {hiOff(this);}">
+                            
+                            <apex:facet name="caption"></apex:facet>
+                            <apex:facet name="header"></apex:facet>
+
+                            <apex:column >
+                                <apex:facet name="header" > 
+                                    <apex:inputCheckbox >
+                                        <apex:actionSupport event="onclick" onsubmit="checkAll(this)" rerender="SearchResultsList" />
+                                    </apex:inputCheckbox>
+                                </apex:facet>
+                                <apex:inputCheckbox value="{!pos.IsSelected}" id="checkedone" />
+                            </apex:column>
+
+                            <apex:column width="25%" style="white-space: nowrap; text-align: left;vertical-align:top;">
+                                <apex:facet name="header" >
+                                    <apex:commandLink value="{!AccountNameColHeading}" action="{!doSearchResultsSort}" rerender="SearchResultsList">
+                                        <apex:param name="sortColumn" value="0" assignTo="{!sortColumn}"/>
+                                        <apex:image url="{!URLFOR($Resource.InSituCah__InSitu_Sort_ASC_Arrow)}" title="Sorted Ascending" rendered="{!IF(CurrentSort = '0asc','True', 'False')}" />
+                                        <apex:image url="{!URLFOR($Resource.InSituCah__InSitu_Sort_DESC_Arrow)}" title="Sorted Ascending" rendered="{!IF(CurrentSort = '0desc','True', 'False')}" />    
+                                    </apex:commandLink>
+                                </apex:facet>
+                                <apex:outputLink value="/{!pos.AccountID}" target="_top">{!pos.AccountName}</apex:outputLink>
+                    
+                            </apex:column>
+
+                            <!-- Dynamic Member Columns -->
+                            <apex:repeat value="{!SRDataTableColumns}" rows="4" var="col">
+                                <!-- Sortable Column -->
+                                <apex:column rendered="{!col.Sortable}" style="{!col.ColumnStyle}">
+                                    <apex:facet name="header" >
+                                        <apex:commandLink value="{!col.ColumnLabel}" action="{!doSearchResultsSort}" rerender="SearchResultsList">
+                                            <apex:param name="sortColumn" value="{!col.ColumnNum}" assignTo="{!sortColumn}"/>
+                                            <apex:image url="{!URLFOR($Resource.InSituCah__InSitu_Sort_ASC_Arrow)}" title="Sorted Ascending" rendered="{!IF(CurrentSort = col.ColumnNum + 'asc','True', 'False')}" />
+                                            <apex:image url="{!URLFOR($Resource.InSituCah__InSitu_Sort_DESC_Arrow)}" title="Sorted Descending" rendered="{!IF(CurrentSort = col.ColumnNum + 'desc','True', 'False')}" />
+                                        </apex:commandLink>
+                                        
+                                    </apex:facet>
+
+                                    <!-- Kludge rendered clause because of bug in SF with outputField and dynamic visualforce binding -->
+                                    <apex:outputField value="{!pos.Obj[col.FieldName]}" rendered="{!NOT(ISBLANK(pos.Obj[col.FieldName])) && (col.DisplayType != 'BOOLEAN' || pos.Obj[col.FieldName] <> false)}" />
+                    
+                                </apex:column>
+                            </apex:repeat>
+                            
+                        </apex:dataTable>
+                        
+                    </apex:outputPanel>
+                    
+                    <apex:panelGrid columns="2" width="100%" id="NextPrevLinks">
+                        <apex:panelGroup >
+                            <apex:outputText value="{!CurrentPageDisplay}" />
+                            <apex:outputText value="&nbsp;&nbsp;&nbsp;&nbsp;" escape="false" />
+                    
+                            <apex:commandLink rerender="SearchResultsList, NextPrevLinks" rendered="{!ShowFirstLast}" action="{!first}">First</apex:commandlink>
+                            <apex:outputText value="&nbsp;&nbsp;|&nbsp;&nbsp;" rendered="{!ShowFirstLast}" escape="false" />
+                            
+                            <apex:commandLink rerender="SearchResultsList, NextPrevLinks" rendered="{!hasPrevious}" action="{!previous}">Previous</apex:commandlink>
+                            <apex:outputText value="&nbsp;&nbsp;|&nbsp;&nbsp;" rendered="{!hasPrevious}" escape="false" />
+                            
+                            <apex:commandLink rerender="SearchResultsList, NextPrevLinks" rendered="{!hasNext}" action="{!next}">Next</apex:commandlink>
+                            <apex:outputText value="&nbsp;&nbsp;|&nbsp;&nbsp;" rendered="{!hasNext}" escape="false" />
+                            
+                            <apex:commandLink rerender="SearchResultsList, NextPrevLinks" rendered="{!ShowFirstLast}" action="{!last}">Last</apex:commandlink>
+                        </apex:panelGroup>
+                
+                        <apex:outputText value="{!TotalItemsDisplay}" style="float: right;"/>
+                
+                    </apex:panelGrid>
+
+                </apex:pageBlock>
+            </apex:outputPanel>             
+
+        </apex:panelGroup>
+        
+        <apex:panelGroup id="RightSide">
+            <apex:outputPanel layout="block" id="AHPanel" >
+                <apex:pageBlock >
+                    <apex:outputPanel layout="block" styleClass="pbSubheader tertiaryPalette" >
+                        <apex:outputText value="{!labelAccount} Hierarchy" />
+                    </apex:outputPanel>
+                    <c:InSitu_AHBuilder pageControllerName="{!this}" pageID="{!PageName}" />
+                </apex:pageBlock> 
+            </apex:outputPanel>
+        </apex:panelGroup>
+        
+    </apex:panelGrid>
+
+    <apex:outputPanel id="popupErrMsg">
+        <apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!ShowPopupErrMsg}"/>
+           <apex:outputPanel styleClass="customPopup" layout="block" rendered="{!ShowPopupErrMsg}">
+
+            <apex:outputPanel layout="block">
+                <apex:outputText value="{!PopupErrMsgText}" id="PopupErrMsgText" />
+            </apex:outputPanel>
+
+            <br/>
+
+            <apex:outputPanel layout="block">
+                <apex:commandButton value="Ok" action="{!cancelPopupErrMsg}" rerender="popupErrMsg"/>
+            </apex:outputPanel>
+                
+           </apex:outputPanel>
+       </apex:outputPanel>
+    <apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!ShowPopupErrMsg}"/>
+
+    </apex:form>
+
+    <style type="text/css">
+        .customPopup
+        {
+            background-color: white;
+            border-style: solid;
+            border-width: 2px;
+            left: 50%;
+            padding:10px;
+            position: absolute;
+            z-index: 9999;
+            /* These are the 3 css properties you will need to tweak so the pop 
+            up displays in the center of the screen. First set the width. Then set 
+            margin-left to negative half of what the width is. You can also add 
+            the height property for a fixed size pop up.*/
+            width: 500px;
+            margin-left: -250px;
+            top:250px;
+        }
+    </style>
+
+    <style type="text/css">
+        .popupBackground
+        {
+            background-color:black;
+            opacity: 0.20;
+            filter:alpha(opacity=20);
+            position:absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 9998;
+        }
+    </style>
+    
+<script>
+function checkAll(cb)
+{
+    var inputElem = document.getElementsByTagName("input");
+    for(var i=0; i < inputElem.length; i++)
+    {
+        if(inputElem[i].id.indexOf("checkedone")!= -1)
+            inputElem[i].checked = cb.checked;
+    }
+}    
+</script>
+    
+</apex:page>

@@ -1,0 +1,53 @@
+<apex:page id="pg" standardController="Opportunity" extensions="Rknews.RKRSSNFR_OpportunityNewsController" tabStyle="Account" action="{!init}">
+	<apex:stylesheet value="{!URLFOR($Resource.Rknews__jQueryUI ,'css/cupertino/jquery-ui-1.8.12.custom.css')}" />
+	<apex:stylesheet value="{!URLFOR($Resource.Rknews__RKNews ,'css/Config.css')}" />
+	<apex:stylesheet value="{!URLFOR($Resource.Rknews__RKNews ,'css/NewsFeedStyle.css')}" />
+	
+ 	<apex:includeScript value="{!URLFOR($Resource.Rknews__RKNews ,'js/NewsFeedScript.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.Rknews__RKNews ,'js/NewsFeedChatter.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.Rknews__jQueryUI ,'js/jquery-1.5.1.min.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.Rknews__jQueryUI ,'js/jquery-ui-1.8.15.custom.min.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.Rknews__RKNews,'js/BaseTargetBlank.js')}" />
+	
+	<script type="text/javascript">
+		j$ = jQuery.noConflict();
+		jQuery(document).ready(function(){
+			//Displays REDKITE banner
+			j$("#redkiteSliderTab").show("slide", { direction: "right" }, "slow");
+		});
+	</script>
+		
+	<!-- Error Panel-->
+	<apex:outputPanel id="showError">
+		<apex:pageMessages />
+	</apex:outputPanel>
+	
+	<apex:form >
+	
+		<!-- REDKITE Right Slider Tab -->
+	<table cellpadding="0" cellspacing="0"  id="redkiteSliderTab" style="display: none;">
+		<tr class="slider-tab">
+			<td class="slider-tab-left">
+			<apex:outputPanel layout="block" style="height: 200px">
+				<apex:outputLink onclick="sliderTab.showMenu(); return false;" >
+					<apex:outputPanel styleClass="tab-arrow" layout="block" rendered="true" >
+						<img class="tab-icon left-arrow" src="{!URLFOR($Resource.Rknews__RKNews,'img/s.gif')}"/>
+					</apex:outputPanel>
+					<img width="43px" height="95px" src="{!URLFOR($Resource.RKNews,'img/s.gif')}"/>
+				</apex:outputLink>
+			</apex:outputPanel>
+			</td>
+			<td class="slider-tab-right">
+				<!-- main content of the Tab Menu -->
+				<apex:outputLink rendered="{!if($Profile.Name !='System Administrator',FALSE,TRUE)}" styleClass="tab-menu-item tab-menu-icon-gear" value="{!$Page.Rknews__RKRSSNFR_NewsConfiguration}" 
+							title="{!$Label.rknews__RKRSSNFR_Edit_Configuration_Tooltip}" target="_top">{!$Label.rknews__RKRSSNFR_RedHotConfiguration_Title}</apex:outputLink>
+				<apex:outputLink rendered="true" styleClass="tab-menu-item tab-menu-icon-rk" value="http://www.redkitetechnologies.com" 
+							title="{!$Label.rknews__RKRSSNFR_About_Redkite_Tooltip}" target="_blank">{!$Label.rknews__RKRSSNFR_About_Redkite}</apex:outputLink>
+			</td>
+			
+		</tr>
+	</table>
+	
+	
+	</apex:form>
+</apex:page>

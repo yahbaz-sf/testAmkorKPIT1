@@ -1,0 +1,107 @@
+<apex:page controller="RFQImportController" sidebar="false" showHeader="false" action="{!buViewRedirect}">
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+
+<apex:form id="form">
+
+	<apex:outputPanel id="containerPanel">
+		<apex:pageMessages />
+		
+		<apex:pageblock id="mainBody" title="Import Account File"> 
+		
+			<apex:pageBlockButtons location="bottom">
+				
+				<apex:commandButton value="Previous" rendered="{!currentStep == 2}" action="{!returnToMapSelect}" />
+				
+				<apex:commandButton value="Cancel" rendered="{!currentStep != 3 && currentStep != 4}" onclick="window.close()" />
+				
+				<apex:commandButton value="Next" rendered="{!currentStep == 1}" action="{!mappingSelected}" />
+				<apex:commandButton value="Import Selected File" rendered="{!currentStep == 2}" action="{!fileSelected}" />
+				
+			</apex:pageBlockButtons>
+
+			<apex:pageBlockSection title="Pending Records Found" rendered="{!currentStep == 1 && incompleteRecordsFound}">
+				<apex:outputText value="Records were found on this RFQ that were left over from an interrupted import. To delete these records, click the button below." />
+				<br/>
+				<apex:commandButton value="Delete Incomplete Records" action="{!deleteIncompleteRecords}" onclick="return confirm('Please confirm you wish to delete these records');" />
+			</apex:pageBlockSection>
+
+			<apex:pageBlockSection title="Pending Records Found" rendered="{!currentStep == 1 && unprocessedRecordsFound}">
+				<apex:outputText value="Records pending default value processing were found for this RFQ. Click the button below to resume processing these records." />
+				<br/>
+				<apex:commandButton value="Resume Processing" action="{!resumeProcessing}" />
+
+			</apex:pageBlockSection>
+			
+			
+			<apex:pageBlockSection title="Choose Account File Mapping" rendered="{!currentStep == 1}">
+			
+				<apex:pageBlockSectionItem >
+				
+				<apex:outputLabel value="Select Mapping" for="mappingSelect" />
+				
+				<apex:selectList size="1" id="mappingSelect" value="{!selectedMapId}">
+	                        <apex:selectOptions value="{!mappingOptions}" />
+	                </apex:selectList>
+				
+				</apex:pageBlockSectionItem>
+			
+			</apex:pageBlockSection>
+			
+			
+			<apex:pageBlockSection title="Upload Account File" rendered="{!currentStep == 2}">
+			
+				<apex:inputFile value="{!fileContent}" filename="{!fileName}" />
+			
+			</apex:pageBlockSection>
+
+
+			<apex:pageBlockSection title="Processing..." rendered="{!currentStep == 3}" id="processPanel" columns="1">
+
+				<apex:outputPanel >
+					<script type="text/javascript">
+						$(function() {
+							if (!{!processingStarted}) {
+								processNextBatch();
+							}
+						});
+
+						function resubmit() {
+							if ({!processingStarted}) {
+								if ({!processingCompleted}) {
+									window.location = '/apex/ImportDefaults?rfqId={!rfq.Id}';
+								}
+								else {
+									processNextBatch();
+								}
+							}
+						}
+					</script>
+				</apex:outputPanel>
+				
+
+				<apex:pageBlockSectionItem >
+						<img src="{!$Resource.Spinner}"/>
+				</apex:pageBlockSectionItem>
+
+				<apex:pageBlockSectionItem >
+						<apex:outputText value="Processed {0} of {1} records">
+							<apex:param value="{!currentLineCount}" />
+							<apex:param value="{!totalLines}" />
+						</apex:outputText>
+					</apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+			
+		
+		</apex:pageblock>
+
+	</apex:outputPanel>
+
+	<apex:actionFunction name="processNextBatch" action="{!processNextBatch}" reRender="containerPanel" oncomplete="resubmit();">
+		<apex:param name="attachId" value="{!attachmentId}" />
+		<apex:param name="accountMapId" value="{!accountMap.id}" />
+	</apex:actionFunction>
+ 
+</apex:form>
+
+</apex:page>

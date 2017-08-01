@@ -1,0 +1,30 @@
+<apex:page showHeader="true" sidebar="true" controller="RFQBUImportController">
+
+
+	<apex:pageMessages />
+
+	<apex:form >
+
+		<apex:pageBlock title="Import RFQ Item">
+
+			<apex:pageBlockButtons location="bottom">
+
+				<apex:commandButton value="Import" action="{!import}" />
+				<apex:commandButton value="Return To Item" action="{!returnToItem}" rendered="{!success && !isRfq}" />
+				<apex:commandButton value="Close Window" onclick="window.close()" rendered="{!success && isRfq}" />
+
+			</apex:pageBlockButtons>
+
+			<apex:pageBlockSection title="Choose File">
+
+				<apex:pageBlockSectionItem >
+					<apex:inputFile value="{!fileContent}" filename="{!fileName}" />
+				</apex:pageBlockSectionItem>
+
+			</apex:pageBlockSection>
+
+		</apex:pageBlock>
+
+	</apex:form>
+	
+</apex:page>

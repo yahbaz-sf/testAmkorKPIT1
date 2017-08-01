@@ -1,0 +1,36 @@
+<apex:page standardController="Opportunity" extensions="OpportunityEditController">
+      <apex:form >
+          
+         <apex:pageBlock >
+              <apex:pagemessages ></apex:pagemessages>
+              <apex:pageBlockButtons >
+                  <apex:commandButton action="{!save}" value="Save"/>
+                  <apex:commandButton action="{!cancel}" value="Cancel"/>
+              </apex:pageBlockButtons>
+                  
+              <apex:pageBlockSection title="Opportunity Detail"> 
+                    <apex:inputField value="{!Opportunity.OwnerId}"/> <br/>
+                    <apex:inputField value="{!Opportunity.AccountId}"/>
+                    <!-- <apex:inputField value="{!Opportunity.Account.Name}"/> -->
+                    <apex:inputField value="{!Opportunity.Name}"/>
+                    <apex:inputField value="{!Opportunity.LeadSource}"/>
+                    <apex:inputField value="{!Opportunity.RFQ__c}"/>                    
+                    <apex:inputField value="{!Opportunity.NextStep}"/>
+                    <apex:inputField value="{!Opportunity.CloseDate}"/>                                                   
+                    <apex:inputField value="{!Opportunity.Type}"/>
+                    <apex:inputField value="{!Opportunity.HVM_Start_Date__c}"/>
+                    <apex:inputField value="{!Opportunity.StageName}"  rendered="{!isAbleToChange}"/>
+                    <apex:outputField value="{!Opportunity.StageName}"  rendered="{!notAbleToChange}"/>
+                   <!-- <apex:inputField value="{!Opportunity.Opportunity_Status__c}"/> -->
+                    <apex:inputField value="{!Opportunity.Probability}"/>
+                    <apex:inputField value="{!Opportunity.Projected_Revenue__c}" required="True"/>
+                    <apex:inputField value="{!Opportunity.Category__c}"/>
+                    <apex:inputField value="{!Opportunity.Business_Benefit__c}"/>
+                    <apex:inputField value="{!Opportunity.CampaignId}"/>
+                    
+              </apex:pageBlockSection>
+          </apex:pageBlock>
+      </apex:form>
+      
+      
+</apex:page>

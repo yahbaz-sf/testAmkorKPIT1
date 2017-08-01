@@ -1,0 +1,47 @@
+<apex:component >
+    <apex:attribute name="relatedItems" type="RFQ_Item__c[]" description="The Related Items"/>
+    
+    <apex:pageBlockSection >
+        <apex:pageBlockTable value="{!relatedItems}"  var="item">
+            <!-- RFQ Name -->
+            <apex:column headerValue="RFQ Name">
+                <a href="/{!item.RFQ__c}">{!item.RFQ__r.RFQ_Name__c}</a>
+            </apex:columN>
+            
+            <!-- RFQ Item Number -->
+            <apex:column headerValue="RFQ Item Number">
+                <a href="/{!item.Id}">{!item.Name}</a>
+            </apex:column>
+
+            <!-- Status -->
+            <apex:column value="{!item.Status__c}" />
+            
+            <!-- Package Family -->
+            <apex:column value="{!item.Package_Family__r.Name}" />
+            
+            <!-- Account -->
+            <apex:column value="{!item.RFQ__r.SBU_Name__c}" />
+            
+            <!--  Project_Device__c -->
+            <apex:column value="{!item.Project_Device__c}" />
+            
+            <!--  Price to Customer -->
+            <apex:column value="{!item.Price_To_Customer__c}" />
+            
+            <!--  BU Price -->
+            <apex:column value="{!item.BU_Price__c}" />
+            
+            <!--  Customer Target Price -->
+            <apex:column value="{!item.Customer_Target_Price__c}" />
+            
+            <!-- Ashish 26-June-2017 : Salesforce 225 -Similar RFQ Items feature. -->
+            <!-- Created Date -->
+            <apex:column value="{!item.CreatedDate}" />
+            
+            <!-- Ashish N 6-July-2017 : Salesforce 225 -Similar RFQ Items feature. -->
+            <!-- BU Responce Date -->
+            <apex:column value="{!item.Price_Completion_Date__c}" />
+            
+        </apex:pageBlockTable>
+    </apex:pageBlockSection>
+</apex:component>

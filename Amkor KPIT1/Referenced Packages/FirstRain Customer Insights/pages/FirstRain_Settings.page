@@ -1,0 +1,83 @@
+<apex:page controller="firstrain.FRSettingsController">
+    <apex:outputLink style="text-decoration:none;color:#16B6D5;font-weight:bold;font-size:12px;" value="/0A3?setupid=ImportedPackage&retURL=%2Fui%2Fsetup%2FSetup%3Fsetupid%3DStudio">&lt;&lt; Go back</apex:outputLink>
+    <apex:sectionHeader title="FirstRain Package Configuration Page"/>
+    <head>
+        <script type='text/javascript'> 
+            var valueChanged = false;
+            function saveNeeded()
+            {
+                valueChanged = true;
+            }
+            function saveNotNeeded()
+            {
+                valueChanged = false;
+            }
+            window.onbeforeunload = function()
+            {
+                if(valueChanged == true || document.getElementById("{!$Component.myForm.myPageBlock.fieldsEdit.accesstoken}").value==""||document.getElementById("{!$Component.myForm.myPageBlock.fieldsEdit.enterpriseid}")=="")
+                {
+                    return "Your change is not saved.";
+                }
+            };
+        </script>
+    </head>
+    <style>
+      .bPageBlock .labelCol  { font-size:12px;}
+      .textField { line-height:22px;margin:0;display:block;padding:0 5px;border:1px solid#999; }
+      .data2Col { font-size:12px; }
+   </style>
+    <apex:form id="myForm">
+        <apex:pageBlock mode="edit" id="myPageBlock">
+            <apex:pageMessages />
+            <apex:pageBlockSection columns="1" rendered="{!isEdit}" >
+                <br/>
+                <span style="font-size:16px;display:block;margin-bottom: 10px;">Step 1:</span>
+                <p style="font-size:12px;line-height:1.5;">
+                    If you already have your access credentials, go to Step 2. Otherwise, click on the “Request Access” button below to request your access credentials. A FirstRain representative will email you with your access credentials if you are a FirstRain Customer authorized for the Salesforce FirstRain Package. If you are not a FirstRain Customer,  a FirstRain representative will contact you to discuss how to gain access to the FirstRain solutions. 
+                </p>
+                <br/>
+                <span style="font-size:16px;display:block;margin-bottom: 10px;">Step 2:</span>
+                <p style="font-size:12px;line-height:1.5;">
+                Once you receive access credentials, please enter them in the fields below and click Save.
+                </p>
+            </apex:pageBlockSection>
+            
+            <apex:pageBlockSection id="fieldsEdit" columns="1" rendered="{!isEdit}">
+                <apex:inputField styleClass="textField" value="{!firstrain.firstrain__Accesstoken__c}" id="accesstoken" style="width:450px" onchange="saveNeeded();"/>
+                <apex:inputField styleClass="textField" value="{!firstrain.firstrain__EnterpriseId__c}" id="enterpriseid"  onchange="saveNeeded();"/>
+            </apex:pageBlockSection>
+            
+            <apex:pageBlockSection columns="1" rendered="{!isEdit}">
+                <br/>
+               <span style="font-size:16px;display:block;margin-bottom: 10px;">Step 3:</span>
+               <p style="font-size:12px;line-height:1.5;">
+               Follow the <a href="http://firstrain.com/sfdcsetup/"  target="_blank">Salesforce FirstRain Package installation instructions</a> to finalize installation.
+               If you encounter any technical difficulties, please contact <a href="mailto:support@firstrain.com" target="_blank">support@firstrain.com</a>
+               </p>
+            </apex:pageBlockSection>
+            
+            
+            <apex:pageBlockSection columns="1" rendered="{!isView}" >
+                <br/>
+               <p style="font-size:12px;line-height:1.5;">
+               Follow the <a href="http://firstrain.com/sfdcsetup/"  target="_blank">Salesforce FirstRain Package installation instructions</a> to finalize installation.
+               If you encounter any technical difficulties, please contact <a href="mailto:support@firstrain.com" target="_blank">support@firstrain.com</a>
+               </p>
+            </apex:pageBlockSection>
+            
+            <apex:pageBlockSection id="fieldsView" columns="1" rendered="{!isView}" >
+                <span style="dataField">
+                <apex:outputField styleClass="dataField" value="{!firstrain.firstrain__Accesstoken__c}" id="accesstokenView" style="width:450px"/>
+                <apex:outputField styleClass="dataField" value="{!firstrain.firstrain__EnterpriseId__c}" id="enterpriseidView"/>
+                </span>
+            </apex:pageBlockSection>
+            
+            <apex:pageBlockButtons id="buttons" location="bottom">
+                <apex:commandButton value="Request Access" rendered="{!isEdit}" action="{!email}"/>
+                <apex:commandButton id="save" value="Save" rendered="{!isEdit}" action="{!save}" onclick="saveNotNeeded();"/>
+                <apex:commandButton id="edit" value="Change My Crendentials" rendered="{!isView}" action="{!edit}" />
+                <apex:commandButton id="done" value="Done" rendered="{!isView}" action="{!back}" />
+            </apex:pageBlockButtons>
+            </apex:pageBlock>
+    </apex:form>
+    </apex:page>

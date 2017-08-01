@@ -1,0 +1,49 @@
+<apex:page controller="RFQItemViewRelatedController">
+
+<apex:pageMessages />
+
+<apex:form id="form" >
+	<apex:sectionHeader subtitle="Similar RFQ Items" description="On this page you can view RFQ items that are associated with the same CPN" />
+	
+	<p>
+
+		<apex:outputLink value="/apex/RFQItemView">
+			&lt; Return to RFQ Item
+			<apex:param name="id" value="{!sourceRfqItemId}" />
+		</apex:outputLink>
+	</p>
+	
+	<apex:pageBlock title="Search Parameters" rendered="{!isAdvancedSearch}" >
+	
+		<apex:pageBlockSection columns="1">
+			<!--  Using placeholder fields for input values, since apex:inputFields cannot work on raw apex class properties -->
+			<apex:inputField value="{!startDateHolder.SBU_Name__c}" label="Account" required="false"/>
+			<apex:inputField value="{!startDateHolder.Due_Date__c}" label="Created Start Date" />
+			<apex:inputField value="{!endDateHolder.Due_Date__c}" label="Created End Date" />
+			
+		</apex:pageBlockSection>
+		
+		<apex:pageBlockButtons location="bottom">
+			<apex:commandButton value="Search" action="{!performSearch}" />
+		</apex:pageBlockButtons>
+	
+	</apex:pageBlock>
+	
+	<apex:pageBlock title="Similar Items">
+		<!-- No Results Panel -->
+		<apex:outputPanel rendered="{!results != null && results.size == 0}">
+			<i>No results found</i>
+		</apex:outputPanel>
+		
+		<!-- Input Required Panel --> 
+		<apex:outputPanel rendered="{!isAdvancedSearch && results == null}">
+			<i>Please enter some search criteria above</i>
+		</apex:outputPanel>
+		
+		<c:RFQItemRelatedItemList relatedItems="{!results}" rendered="{!IF(results != null && results.size > 0, true, false)}" />
+	
+	</apex:pageBlock>
+	
+	
+</apex:form>
+</apex:page>

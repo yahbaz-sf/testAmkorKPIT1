@@ -1,0 +1,500 @@
+<apex:page docType="html-5.0" standardController="RFQ_Item__c" extensions="RFQBUItemAttributeEditController" action="{!reloadClone}">
+
+
+<c:RFQItemViewStyle /> 
+
+<script>
+
+    var inProgress = false;
+    var needsReprice = false;
+
+    function resetProgress() {
+        inProgress = false;
+    }
+
+    function changedAttribute() {
+        needsReprice = true;
+    }
+
+    function canApprove() {
+        if(needsReprice) {
+            alert('You have modified attributes and must click Re-Price before you can approve this line item');
+            return false;
+        }
+        if(inProgress){
+            return true;
+        }
+        return true; 
+    }
+
+    function repriceClicked() {
+        needsReprice = false;
+        showProgress();    
+    }
+
+    function onChange(fieldAPIName,action) {
+        
+        if("BU_Price_Perc_GM__c,BU_Price__c,BU_Price_Perc_Delta_To_Target__c,Subs_Markup_Perc__c,Assembly_GM_wo_Substrate__c".indexOf(fieldAPIName) != -1 || action=="recalc") {
+            showProgress();
+            recalculatePrice(fieldAPIName);
+        }   
+            
+    }
+
+    function fieldChangeEventHook(doCallback,fieldAPIName, sObjectId, script) {
+        if(doCallback) {
+
+            if(script) {
+                eval(script);
+            }
+            else {
+                showProgress();
+                onDefaultDriverChangeClone(fieldAPIName,sObjectId);
+            }
+        }        
+    }
+
+    function showProgress() {
+        inProgress = true;
+        document.getElementById('fade').style.display='block';
+    }
+
+    function hideProgress() {
+        document.getElementById('fade').style.display='none';
+        inProgress = false;
+
+    }
+
+
+</script>
+
+
+<!-- css hackishly overriding sf css to get pretty columns -->
+<c:RFQStyleComponent rendered="{!layout.buColumns > 3}"/>
+
+<apex:form id="form" >
+    <apex:sectionHeader title="View/Edit Attributes for this line item" subtitle="{!cloneItem.rfqItem.Name}" description="On this page you can view cost/price model output and additonal data about the line item"/>
+    <apex:pageBlock id="head"> 
+        <apex:pageBlockSection showHeader="false" columns="4" rendered="{!layout.enabledSections['BU Header']}">
+            <apex:repeat value="{!layout.sectionMap['BU Header'].attributes}" var="attribute">
+                <apex:outputField value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" rendered="{!!attribute.isEditable && attribute.objectAPIName != 'RFQ_Item__c'}"/>
+                <apex:inputField value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" rendered="{!attribute.isEditable && attribute.objectAPIName != 'RFQ_Item__c'}"/>
+                <apex:outputField value="{!cloneItem.rfqItem[attribute.fieldAPIName]}" rendered="{!!attribute.isEditable && attribute.objectAPIName == 'RFQ_Item__c'}"/>
+                <apex:inputField value="{!cloneItem.rfqItem[attribute.fieldAPIName]}" rendered="{!attribute.isEditable && attribute.objectAPIName == 'RFQ_Item__c'}"/>
+            </apex:repeat>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+    
+    <apex:pageMessages escape="false" id="messages"/>  
+    <apex:pageblock id="mainBody">
+
+
+        <div id="fade">
+            <img id ="spinner" src="{!$Resource.ProgressBar}"/>
+        </div>
+    
+        <apex:pageBlockButtons >
+            <apex:commandButton value="Re-Calculate Price" oncomplete="hideProgress();" onclick="repriceClicked();" action="{!reCalculatePriceWithRerun}" reRender="output, CostModelReference, messages, multiVolume1, multiVolume2"/>
+            <apex:commandButton value="Reload Original" action="{!reloadOriginal}"/>
+            <apex:commandButton value="Save As Draft" action="{!saveAsDraft}"/>
+            <apex:commandButton value="Approve" onClick="if(!canApprove()) return false; if (inProgress) return false; inProgress = true;" action="{!saveAsNewRfqItem}" oncomplete="resetProgress();" rerender="messages"/>
+            <apex:commandButton value="Approve & Clone" onClick="if(!canApprove()) return false; if (inProgress) return false; inProgress = true;" action="{!saveAsNewRfqItemAndClone}" oncomplete="resetProgress();" rerender="messages"/>
+            <apex:commandButton value="Cancel" action="{!cancelEditAttributes}"/>
+        </apex:pageBlockButtons> 
+         
+        <!-- Cost and Price Section -->
+        <apex:outputPanel id="output">
+            <apex:pageBlockSection id="pbsCost" title="Cost and Price" columns="1" rendered="{!layout.enabledSections['Cost and Price'] && !PostTestServiceOnlyTestType}">
+            <apex:pageBlockSection columns="4" title="{!buPriceSummary}">
+                <apex:repeat value="{!layout.sectionMap['Cost and Price'].attributes}" var="attribute">
+                    <apex:outputText value="" rendered="{!attribute.isBlank}" />
+                    <apex:pageBlockSectionItem rendered="{!!attribute.isEditable && !attribute.isBlank}" helpText="{!$ObjectType[attribute.objectAPIName].fields[attribute.fieldAPIName].inlineHelpText}">
+                        <apex:outputLabel for="pfOutput" value="{!$ObjectType[attribute.objectAPIName].fields[attribute.fieldAPIName].Label}" />
+                        <apex:outputField id="pfOutput" value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!attribute.isEditable && !attribute.isBlank}">
+                        <apex:outputLabel styleClass="{!attribute.labelStyleClass}"  for="pfInput" value="{!$ObjectType[attribute.objectAPIName].fields[attribute.fieldAPIName].Label}" />
+                        <apex:inputField id="pfInput" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}" onChange="onChange('{!attribute.fieldAPIName}');" value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" onkeypress="return noenter(event);"/>
+                    </apex:pageBlockSectionItem>
+                </apex:repeat> 
+                
+                <!-- Ashish S 02-June-2017 : Salesforce 116 -Add Amkor Preferred picklist value under Factory for RFQI. -->
+                <!-- Added a new Field BU Factory -->
+                <apex:pageBlockSectionItem rendered="{!IF(renderFactorySection && isAttributesEditableState && showBUFactoryField, true, false)}">
+                        <apex:outputLabel styleClass="customRequiredField" for="FactoryPl" value="BU Factory" />
+                            <apex:selectList id="FactoryPl" size="1" value="{!wrapper.specificRfqItem['BU_Factory__c']}" onChange="fieldChangeEventHook(true,'BU_Factory__c','{!wrapper.specificRfqItem['Id']}');">
+                                <apex:selectOptions value="{!BUFactoryOptions}"/>
+                            </apex:selectList> 
+                </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+            </apex:pageBlockSection>
+
+        <!-- AMK-2351, test multivolume moved to below insertion description, so do not render this section -->
+        <!-- Make sure that if you make any changes to this section, you also change the multiVolume2 section below-->
+        <apex:pageBlockSection id="multiVolume1" title="Additional Volume Configurations" columns="1" rendered="{!!cloneItem.packageFamily.Show_Multi_Volume_Below_Description__c && cloneItem.packageFamily.Show_Multi_Volume__c && !IsTestAddedServicePostTestOnly}">
+        <script> if ({!cloneItem.volumeList.size == 0}) twistSection(document.getElementById("{!$Component.multiVolume1}").childNodes[0].childNodes[0]); </script>
+            <c:RFQMultiVolumeSection wrapper="{!cloneItem}" edit="true" layout="{!layout}" builder="{!builder}" isBUPage="true" isEngineeringService="{!IsEngineeringService}" PostTestServiceOnly="{!PostTestServiceOnlyTestType}" isLayoutDeprecated="{!isLayoutDeprecated}" buPriceSummary="{!buPriceSummary}"/>
+        </apex:pageBlockSection>
+
+        <!-- BU Attributes Section -->
+        <apex:outputPanel id="buAttrib" >
+            <apex:pageBlockSection id="pbsBUAttrib" title="BU Attributes" columns="4" rendered="{!layout.enabledSections['BU Attributes']}">               
+                <apex:repeat value="{!layout.sectionMap['BU Attributes'].attributes}" var="attribute">
+                    <apex:outputField value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" rendered="{!!attribute.isEditable && !attribute.isBlank}"/>
+                    <apex:inputField required="{!attribute.isRequired}" value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" rendered="{!attribute.isEditable && !attribute.isBlank}"/>
+                </apex:repeat> 
+            </apex:pageBlockSection>
+        </apex:outputPanel>
+               
+        <!-- Package Description Section -->
+        <apex:pageBlockSection title="{!projectDesc}"  columns="{!layout.BUColumns}" rendered="{!layout.enabledSections['Package Description']}">
+            <apex:repeat value="{!layout.sectionMap['Package Description'].attributes}" var="attribute">
+                <apex:inputField onchange="fieldChangeEventHook({!attribute.doCallBack},'{!attribute.fieldAPIName}','{!cloneItem.specificRfqItem['Id']}','{!attribute.onChangeScript}'); changedAttribute()" value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}"/>
+            </apex:repeat>  
+
+            <apex:pageBlockSectionItem rendered="{!renderFactorySection}">
+            <!-- Ashish 15-June-2017 : Salesforce 116 -Add Amkor Preferred picklist value under Factory for RFQI. -->
+            <!-- Changed the Output Label Value from Factory to Sales Factory and SelectOptions value to salesFactoryOptions and onchange on SelectList-->
+                <apex:outputLabel for="FactoryPl" value="Sales Factory"/> 
+                <apex:selectList onchange="changedAttribute();fieldChangeEventHook(true,'Factory__c','{!wrapper.specificRfqItem['Id']}');" styleClass="customRequiredField" id="FactoryPl" size="1" value="{!cloneItem.specificRfqItem['Factory__c']}">
+                    <apex:selectOptions value="{!salesFactoryOptions}"/>
+                </apex:selectList>
+            </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+        
+        <!-- CPN Drivers Section -->
+        <apex:pageBlockSection title="CPN Drivers" columns="{!layout.BUColumns}" rendered="{!layout.enabledSections['CPN Drivers']}">
+            <apex:repeat value="{!layout.sectionMap['CPN Drivers'].attributes}" var="attribute">
+                <apex:inputField onchange="changedAttribute()" value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}"/>
+            </apex:repeat>  
+        </apex:pageBlockSection>
+    
+        <!-- Substrate Description Section -->
+        <apex:outputPanel layout="block" styleClass="oneColumnHack">
+        <apex:pageBlockSection id="substrateSection" title="Substrate Description" columns="{!layout.BUColumns}" rendered="{!layout.enabledSections['Substrate Description']}">
+        <apex:inputField value="{!cloneItem.rfqItem.Consigned__c}">
+            <apex:actionSupport event="onchange" rerender="substrateSection"/> 
+        </apex:inputField>
+        <apex:repeat value="{!layout.sectionMap['Substrate Description'].attributes}" var="attribute">
+        <apex:inputField value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" onchange="fieldChangeEventHook({!attribute.doCallBack},'{!attribute.fieldAPIName}','{!cloneItem.specificRfqItem['Id']}','{!attribute.onChangeScript}'); changedAttribute()" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}"/>
+        </apex:repeat>  
+        </apex:pageBlockSection>
+        </apex:outputPanel>
+
+        <!-- Wire Description Section -->
+        <apex:pageBlockSection title="Wire Description" id="wireSection" columns="1" rendered="{!layout.enabledSections['Wire Description']}">
+            <apex:repeat value="{!cloneItem.wireConfigurations}"  var="wireConfiguration">    
+                <apex:pageBlockSection columns="{!layout.BUColumns}">
+                    <!-- <apex:repeat value="{!layout.sectionMap['Wire Description'].attributes}" var="attribute"> -->
+                    <apex:repeat value="{!cloneItem.childObjectSections[wireConfiguration.Id].attributes}" var="attribute">
+                        <apex:inputField onchange="fieldChangeEventHook({!attribute.doCallBack},'{!attribute.fieldAPIName}','{!wireConfiguration['Id']}','{!attribute.onChangeScript}'); changedAttribute()" value="{!wireConfiguration[attribute.fieldAPIName]}" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}"/>
+                    </apex:repeat>
+                </apex:pageBlockSection>                
+                <apex:pageBlockSection columns="2">
+                    <apex:commandLink id="removeWireConfLink" value="Remove Wire Configuration" action="{!removeWireConfigurationById}" reRender="wireSection, multiVolume1, multiVolume2" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();" styleClass="wireDieLinks">
+                        <apex:param name="wireConfigId" value="{!wireConfiguration.Id}"/>
+                    </apex:commandLink>
+                    <apex:commandLink id="saveWireConfLink" value="Recalculate Wire Lengths" action="{!saveWireConfigurationById}" reRender="wireSection" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();" styleClass="wireDieLinks">
+                       <apex:param name="saveWireConfigId" value="{!wireConfiguration.Id}"/>
+                    </apex:commandLink>
+                </apex:pageBlockSection> 
+            </apex:repeat>
+        </apex:pageBlockSection>
+        
+        <apex:pageBlockSection showHeader="false" columns="2" id="wireCommandPbs" rendered="{!layout.enabledSections['Wire Description']}">
+                <apex:commandButton value="Add Wire Configuration" action="{!addWireConfiguration}" reRender="wireSection" />
+        </apex:pageBlockSection>
+        
+        <!-- Die Description -->
+        <apex:pageBlockSection title="Die Description" id="dieSection" columns="1" rendered="{!layout.enabledSections['Die Description']}" >  
+            <apex:pageMessage summary="{!dieConfigMessage}" severity="info"/>  
+            <apex:repeat value="{!cloneItem.dieConfigurations}"  var="dieConfiguration">    
+                 <apex:pageBlockSection columns="{!layout.BUColumns}">
+                     <!-- <apex:repeat value="{!layout.sectionMap['Die Description'].attributes}" var="attribute"> -->
+                     <apex:repeat value="{!cloneItem.childObjectSections[dieConfiguration.Id].attributes}" var="attribute">
+                         <apex:inputField onchange="fieldChangeEventHook({!attribute.doCallBack},'{!attribute.fieldAPIName}','{!dieConfiguration['Id']}','{!attribute.onChangeScript}'); changedAttribute()" value="{!dieConfiguration[attribute.fieldAPIName]}" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}"/>
+                     </apex:repeat>
+                 </apex:pageBlockSection>
+                 <apex:commandLink id="removeDieLink" value="Remove Die Configuration" action="{!removeDieConfigurationById}" reRender="dieSection" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();">
+                    <apex:param name="dieConfigId" value="{!dieConfiguration.Id}"/>
+                </apex:commandLink>  
+            </apex:repeat>
+        </apex:pageBlockSection>
+        
+            <apex:pageBlockSection showHeader="false" columns="2" id="dieCommandPbs" rendered="{!layout.enabledSections['Die Description']}">
+                <apex:commandButton value="Add Die Configuration" action="{!addDieConfiguration}" reRender="dieSection" />    
+            </apex:pageBlockSection>
+    
+
+        <!-- Passive Description -->
+        <apex:pageBlockSection title="Passive Description" id="passiveSection" columns="1" rendered="{!layout.enabledSections['Passive Description']}" >  
+        <apex:repeat value="{!cloneItem.passiveConfigurations}"  var="passiveConfiguration">    
+            <apex:pageBlockSection columns="{!layout.BUColumns}">
+                 <!-- <apex:repeat value="{!layout.sectionMap['Passive Description'].attributes}" var="attribute"> -->
+                 <apex:repeat value="{!cloneItem.childObjectSections[passiveConfiguration.Id].attributes}" var="attribute">
+                     <apex:inputField onchange="fieldChangeEventHook({!attribute.doCallBack},'{!attribute.fieldAPIName}','{!passiveConfiguration['Id']}','{!attribute.onChangeScript}'); changedAttribute()" value="{!passiveConfiguration[attribute.fieldAPIName]}" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}"/>
+                 </apex:repeat>
+             </apex:pageBlockSection>
+                 <apex:commandLink id="removePassiveLink" value="Remove Passive Configuration" action="{!removePassiveConfigurationById}" reRender="passiveSection" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();">
+                    <apex:param name="passiveConfigId" value="{!passiveConfiguration.Id}"/>
+                </apex:commandLink>  
+            </apex:repeat>
+        </apex:pageBlockSection>
+        
+        <apex:pageBlockSection showHeader="false" columns="2" id="passiveCommandPbs" rendered="{!layout.enabledSections['Passive Description']}">
+            <apex:commandButton value="Add Passive Configuration" action="{!addPassiveConfiguration}" reRender="passiveSection" />    
+        </apex:pageBlockSection>
+    
+
+        <!-- Insertion Description -->
+        <apex:pageBlockSection title="Test Configuration Summary" id="insertionSection" columns="1" rendered="{!layout.enabledSections['Insertion Description'] && !PostTestServiceOnlyTestType}" >  
+        <apex:repeat value="{!cloneItem.wpInsertConfs}"  var="insertionConfiguration">
+            <apex:pageBlockSection columns="1" title="Test Configuration Detail #{!insertionConfiguration.index}">    
+            <apex:pageBlockSection columns="{!layout.BUColumns}">
+                 <!-- <apex:repeat value="{!layout.sectionMap['Insertion Description'].attributes}" var="attribute"> -->
+                 <apex:repeat value="{!cloneItem.childObjectSections[insertionConfiguration.conf.Id].attributes}" var="attribute">
+                     <apex:inputField onchange="fieldChangeEventHook({!attribute.doCallBack},'{!attribute.fieldAPIName}','{!insertionConfiguration.conf['Id']}','{!attribute.onChangeScript}'); changedAttribute()" value="{!insertionConfiguration.conf[attribute.fieldAPIName]}" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}" rendered="{!attribute.belongsToSubSection == 'Plant Information' && attribute.isEditable}"/>
+                     <apex:outputField value="{!insertionConfiguration.conf[attribute.fieldAPIName]}" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}" rendered="{!attribute.belongsToSubSection == 'Plant Information' && !attribute.isEditable}"/>
+                 </apex:repeat>
+                 <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="" />
+                        <apex:outputText value=""/>
+                    </apex:pageBlockSectionItem>
+             </apex:pageBlockSection>
+             <hr/>
+              <apex:pageBlockSection columns="{!layout.BUColumns}">
+                 <!-- <apex:repeat value="{!layout.sectionMap['Insertion Description'].attributes}" var="attribute"> -->
+                 <apex:repeat value="{!cloneItem.childObjectSections[insertionConfiguration.conf.Id].attributes}" var="attribute">
+                     <apex:inputField onchange="fieldChangeEventHook({!attribute.doCallBack},'{!attribute.fieldAPIName}','{!insertionConfiguration.conf['Id']}','{!attribute.onChangeScript}'); changedAttribute()" value="{!insertionConfiguration.conf[attribute.fieldAPIName]}" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}" rendered="{!attribute.belongsToSubSection == 'Tester Information'}"/>
+                 </apex:repeat>
+             </apex:pageBlockSection>
+             <hr/>
+              <apex:pageBlockSection columns="{!layout.BUColumns}">
+                 <!-- <apex:repeat value="{!layout.sectionMap['Insertion Description'].attributes}" var="attribute"> -->
+                 <apex:repeat value="{!cloneItem.childObjectSections[insertionConfiguration.conf.Id].attributes}" var="attribute">
+                     <apex:inputField onchange="fieldChangeEventHook({!attribute.doCallBack},'{!attribute.fieldAPIName}','{!insertionConfiguration.conf['Id']}','{!attribute.onChangeScript}'); changedAttribute()" value="{!insertionConfiguration.conf[attribute.fieldAPIName]}" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}" rendered="{!attribute.belongsToSubSection == 'Handler Information'}"/>
+                 </apex:repeat>
+             </apex:pageBlockSection>
+             <hr/>
+             <apex:pageBlockSection id="testConfigSection" columns="4" rendered="{!layout.enabledSections['Minimum Tester Configuration']}" >
+                    <apex:repeat value="{!layout.sectionMap['Minimum Tester Configuration'].attributes}" var="attribute">
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel for="pfInput" styleClass="{!attribute.labelStyleClass}" value="{!$ObjectType[attribute.objectAPIName].fields[attribute.fieldAPIName].Label}" />
+                            <apex:inputField onchange="fieldChangeEventHook({!attribute.doCallBack},'{!attribute.fieldAPIName}','{!insertionConfiguration.conf['Id']}','{!attribute.onChangeScript}'); changedAttribute()" value="{!insertionConfiguration.conf[attribute.fieldAPIName]}" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}"/>
+                        </apex:pageBlockSectionItem>
+                    </apex:repeat>
+                </apex:pageBlockSection>
+                <hr/>
+                <apex:pageBlockSection id="insertionCost" columns="4" rendered="{!layout.enabledSections['Insertion Cost and Price']}">               
+                <apex:repeat value="{!layout.sectionMap['Insertion Cost and Price'].attributes}" var="attribute">
+                    <apex:outputText value="" rendered="{!attribute.isBlank}" />
+                    <apex:outputField value="{!insertionConfiguration.conf[attribute.fieldAPIName]}" rendered="{!!attribute.isEditable && !attribute.isBlank}"/>
+                    <apex:inputField required="{!attribute.isRequired}" onChange="onChange('{!attribute.fieldAPIName}');" value="{!insertionConfiguration.conf[attribute.fieldAPIName]}" rendered="{!attribute.isEditable && !attribute.isBlank}" onkeypress="return noenter(event);"/>
+                </apex:repeat> 
+            </apex:pageBlockSection>
+                <apex:commandLink value="Clone Test Configuration" action="{!cloneInsertionConfiguration}" reRender="insertionSection,messages" onclick="showProgress();" oncomplete="hideProgress();" title="Clone the current Test Configuration" rendered="{!cloneItem.packageFamily.Name == 'Test'}">
+                        <apex:param name="insertionConfigId" value="{!insertionConfiguration.conf.Id}"/>
+                </apex:commandLink>
+                 <apex:commandLink id="removeInsertionLink" value="Remove Configuration" action="{!removeInsertionConfigurationById}" reRender="insertionSection" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();">
+                    <apex:param name="insertionConfigId" value="{!insertionConfiguration.conf.Id}"/>
+                </apex:commandLink> 
+                </apex:pageBlockSection> 
+            </apex:repeat>
+        </apex:pageBlockSection>
+        
+            <apex:pageBlockSection showHeader="false" columns="2" id="insertionCommandPbs" rendered="{!layout.enabledSections['Insertion Description'] && !PostTestServiceOnlyTestType}">
+                <apex:commandButton value="Add Test Configuration" action="{!addInsertionConfiguration}" reRender="insertionSection,messages" onclick="showProgress();" oncomplete="hideProgress();" title="Add tester configurations for each test insertion or wafer reprobe"/>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="" />
+                    <apex:outputText value="" />
+                </apex:pageBlockSectionItem>
+                <apex:pageMessage summary="{!insertionConfigMessage}" severity="info"/>         
+            </apex:pageBlockSection>
+
+        <!-- Service Description -->
+        <apex:pageBlockSection title="Service Description" id="serviceSection" columns="1" rendered="{!layout.enabledSections['Service Description']}" >  
+        <apex:repeat value="{!cloneItem.serviceConfigurations}"  var="serviceConfiguration">    
+            <apex:pageBlockSection columns="{!layout.BUColumns}">
+                 <!-- <apex:repeat value="{!layout.sectionMap['Insertion Description'].attributes}" var="attribute"> -->
+                 <apex:repeat value="{!cloneItem.childObjectSections[serviceConfiguration.Id].attributes}" var="attribute">
+                     <apex:inputField onchange="fieldChangeEventHook({!attribute.doCallBack},'{!attribute.fieldAPIName}','{!serviceConfiguration['Id']}','{!attribute.onChangeScript}'); changedAttribute()" value="{!serviceConfiguration[attribute.fieldAPIName]}" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}"/>
+                 </apex:repeat>
+                 <apex:inputField value="{!serviceConfiguration['Sub_Total__c']}" onChange="fieldChangeEventHook(true,'Sub_Total__c','{!serviceConfiguration['Id']}');" style="background-color: #CCFFFF;"/>
+             </apex:pageBlockSection>
+                 <apex:commandLink id="removeServiceLink" value="Remove Service Configuration" action="{!removeServiceConfigurationById}" reRender="serviceSection" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();">
+                    <apex:param name="serviceConfigId" value="{!serviceConfiguration.Id}"/>
+                </apex:commandLink>  
+            </apex:repeat>
+        </apex:pageBlockSection>
+        
+            <apex:pageBlockSection showHeader="false" columns="2" id="serviceCommandPbs" rendered="{!layout.enabledSections['Service Description']}">
+                <apex:commandButton value="Add Service Configuration" action="{!addServiceConfiguration}" reRender="serviceSection" onclick="showProgress();" oncomplete="hideProgress();"/>    
+            </apex:pageBlockSection>   
+
+        <!-- Make sure that if you make any changes to this section, you also change the multiVolume1 section above-->
+        <apex:pageBlockSection id="multiVolume2" title="Additional Volume Configurations" columns="1" rendered="{!cloneItem.packageFamily.Show_Multi_Volume_Below_Description__c && cloneItem.packageFamily.Show_Multi_Volume__c && !IsTestAddedServicePostTestOnly}">
+        <script> if ({!cloneItem.volumeList.size == 0}) twistSection(document.getElementById("{!$Component.multiVolume2}").childNodes[0].childNodes[0]); </script>
+            <c:RFQMultiVolumeSection wrapper="{!cloneItem}" edit="true" layout="{!layout}" builder="{!builder}" isBUPage="true" isEngineeringService="{!IsEngineeringService}" PostTestServiceOnly="{!PostTestServiceOnlyTestType}" isLayoutDeprecated="{!isLayoutDeprecated}" buPriceSummary="{!buPriceSummary}"/>
+        </apex:pageBlockSection> 
+
+        <!-- Post Test Services BU Price to Sales -->
+        <apex:pageBlockSection id="ptsCost" title="Post Test Services BU Price to Sales" columns="1" rendered="{!layout.enabledSections['Post Test Services Cost and Price']}">
+            <apex:pageBlockSection columns="{!layout.BUColumns}">
+                <apex:repeat value="{!layout.sectionMap['Post Test Services Cost and Price'].attributes}" var="attribute">
+                    <apex:outputField value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" rendered="{! !attribute.isEditable && !attribute.isBlank}"/>
+                    <apex:inputField onChange="onChange('{!attribute.fieldAPIName}');" value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" rendered="{!attribute.isEditable && !attribute.isBlank}" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}"/>
+                </apex:repeat> 
+            </apex:pageBlockSection>
+
+            <apex:pageBlockSection rendered="{!PostTestServiceOnlyTestType}" columns="{!layout.salesColumns}"> 
+                <apex:outputText value="{!cloneItem.specificRfqItem['BU_Post_Test_Price_Unit__c']}"/>
+                <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="" />
+                            <apex:outputText value=""/>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="" />
+                            <apex:outputText value=""/>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="" />
+                            <apex:outputText value=""/>
+                        </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:pageBlockSection>
+        
+        <!-- Adder Section -->
+        <apex:pageBlockSection title="Adders" columns="{!layout.BUColumns}" rendered="{!layout.enabledSections['Adders']}">
+            <apex:repeat value="{!layout.sectionMap['Adders'].attributes}" var="attribute">
+                <apex:inputField onchange="fieldChangeEventHook({!attribute.doCallBack},'{!attribute.fieldAPIName}','{!cloneItem.specificRfqItem['Id']}','{!attribute.onChangeScript}'); changedAttribute()" value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}"/>
+            </apex:repeat>  
+        </apex:pageBlockSection>
+
+        <!-- Post Test Services Section -->
+        <apex:pageBlockSection title="Post Test Services" columns="1" rendered="{!layout.enabledSections['Post Test Services'] && !IsWaferTestType}">
+            <apex:pageBlockSection rendered="{!PostTestServiceOnlyTestType}" columns="{!layout.salesColumns}"> 
+                <apex:inputField value="{!cloneItem.specificRfqItem['Post_Test_Factory__c']}"/>
+                <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="" />
+                            <apex:outputText value=""/>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="" />
+                            <apex:outputText value=""/>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="" />
+                            <apex:outputText value=""/>
+                        </apex:pageBlockSectionItem>
+            </apex:pageBlockSection> 
+            <apex:pageBlockSection columns="{!layout.BUColumns}">
+                <apex:repeat value="{!layout.sectionMap['Post Test Services'].attributes}" var="attribute">
+                    <apex:inputField onchange="fieldChangeEventHook({!attribute.doCallBack},'{!attribute.fieldAPIName}','{!cloneItem.specificRfqItem['Id']}','{!attribute.onChangeScript}'); changedAttribute()" value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}"/>
+                </apex:repeat>  
+            </apex:pageBlockSection>
+            <!-- Post Test Services Burn In Subsection -->
+            <apex:pageBlockSection columns="{!layout.BUColumns}" rendered="{!layout.enabledSections['Post Test Services Burn In']}">
+                <apex:repeat value="{!layout.sectionMap['Post Test Services Burn In'].attributes}" var="attribute">
+                    <apex:inputField onchange="fieldChangeEventHook({!attribute.doCallBack},'{!attribute.fieldAPIName}','{!cloneItem.specificRfqItem['Id']}','{!attribute.onChangeScript}'); changedAttribute()" value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}"/>
+                </apex:repeat>
+            </apex:pageBlockSection>
+            <!-- Post Test Services Prices Subsection -->
+            <apex:pageBlockSection columns="{!layout.BUColumns}" rendered="{!layout.enabledSections['Post Test Services Prices']}">
+                <apex:repeat value="{!layout.sectionMap['Post Test Services Prices'].attributes}" var="attribute">
+                    <apex:outputField value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}"/>                
+                </apex:repeat>
+            </apex:pageBlockSection>
+        </apex:pageBlockSection>
+
+         <!-- Post Test Services Section for Wafer Probe-->
+        <apex:pageBlockSection title="Post Test Services" columns="{!layout.BUColumns}" rendered="{!layout.enabledSections['Post Test Services - Wafer Probe'] && IsWaferTestType}">            
+                <apex:repeat value="{!layout.sectionMap['Post Test Services - Wafer Probe'].attributes}" var="attribute">
+                    <apex:inputField onchange="fieldChangeEventHook({!attribute.doCallBack},'{!attribute.fieldAPIName}','{!cloneItem.specificRfqItem['Id']}','{!attribute.onChangeScript}'); changedAttribute()" value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" styleClass="{!attribute.fieldAPIName} {!attribute.styleClass}"/>
+                </apex:repeat>  
+        </apex:pageBlockSection>
+       
+<!--         <apex:pageBlockSection title="NRE" columns="4" rendered="{!layout.enabledSections['NRE']}" >
+                <apex:repeat value="{!layout.sectionMap['NRE'].attributes}" var="attribute">
+                    <apex:outputField rendered="{!IF(isAttributesEditableState,false,true)}" value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" />
+                    <apex:inputField rendered="{!IF(isAttributesEditableState && (attribute.isDefaultDriver || attribute.controlsFactory),true,false)}" onChange="changedAttribute(); onFieldChange('{!attribute.fieldAPIName}','{!cloneItem.specificRfqItem[attribute.fieldAPIName]}');"  style="{!IF(attribute.isDefaultDriver,'background-color: #CCFFFF','')}" value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" required="{!attribute.isRequired}"/>
+                    <apex:inputField rendered="{!IF(isAttributesEditableState && NOT(attribute.isDefaultDriver || attribute.controlsFactory),true,false)}" onChange="changedAttribute();" style="{!IF(attribute.isDefaultDriver,'background-color: #CCFFFF','')}" value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" required="{!attribute.isRequired}"/>
+                </apex:repeat>  
+        </apex:pageBlockSection>  -->
+
+        <!--NRE Section-->
+        <apex:outputPanel id="nreOutput" layout="block" styleClass="oneColumnHack">
+            <apex:pageBlockSection id="nreSection" title="NRE" columns="2" >
+                <apex:inputField value="{!cloneItem.rfqItem.NRE_Inclusion__c}">
+                    <apex:actionSupport event="onchange" rerender="nreOutput" oncomplete="changedAttribute()"/> 
+                </apex:inputField>
+            </apex:pageBlockSection>
+
+            <apex:pageBlockSection rendered="{!showNREAttributes}" columns="1">
+            <apex:pageBlockSection columns="2">
+                <apex:outputText value="NRE Description:" style="float:right; font-weight: bold;"/>
+                <apex:outputText value="$NRE Value:" style="float:left; font-weight: bold;"/>
+            </apex:pageBlockSection>
+
+                <apex:pageBlockSection columns="1" rendered="{!layout.enabledSections['NRE']}">
+                    <apex:repeat value="{!layout.sectionMap['NRE'].attributes}" var="attribute">
+                        <apex:outputField rendered="{!!isBuNreEditableState}" value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" />
+                        <apex:inputField onchange="changedAttribute()" rendered="{!IF(isBuNreEditableState && (attribute.isDefaultDriver || attribute.controlsFactory),true,false)}" style="{!IF(attribute.isDefaultDriver,'background-color: #CCFFFF','')};" value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" required="{!attribute.isRequired}" />
+                        <apex:inputField onchange="changedAttribute()" rendered="{!IF(isBuNreEditableState && NOT(attribute.isDefaultDriver || attribute.controlsFactory),true,false)}" style="{!IF(attribute.isDefaultDriver,'background-color: #CCFFFF','')};" value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" required="{!attribute.isRequired}"/>
+                    </apex:repeat>
+                </apex:pageBlockSection> 
+
+                <apex:repeat value="{!cloneItem.nreConfigurations}"  var="nreConfiguration"> 
+                    <apex:pageBlockSection columns="2">
+                        <apex:outputText value="{!nreConfiguration['Description__c']}" style="float:right;"  label="" rendered="{!!isBuNreEditableState}"/>
+                        <apex:outputText value="{!nreConfiguration['Price_New__c']}" style="float:left;"  label="" rendered="{!!isBuNreEditableState}"/>  
+                        <apex:inputText value="{!nreConfiguration['Description__c']}" style="float:right;"  label="" rendered="{!isBuNreEditableState}"/>
+                        <apex:inputField value="{!nreConfiguration['Price_New__c']}" style="float:left;"  label="" rendered="{!isBuNreEditableState}"  /> 
+                        <apex:commandLink id="removeNRELink" value="Remove NRE Other" action="{!removeNREConfigurationById}" reRender="nreOutput" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();">
+                            <apex:param name="nreConfigId" value="{!nreConfiguration.Id}"/>
+                        </apex:commandLink>  
+                    </apex:pageBlockSection>
+                </apex:repeat>
+            </apex:pageBlockSection>
+
+            <apex:pageBlockSection showHeader="false" columns="2" id="nreCommandPbs" rendered="{!isBuNreEditableState && showNREAttributes}">
+                <apex:commandButton value="Add NRE Other" action="{!addNREConfiguration}" reRender="nreOutput,messages" onclick="showProgress();" oncomplete="hideProgress();"/>
+            </apex:pageBlockSection>
+
+        </apex:outputPanel>
+
+        <apex:pageBlockSection title="Additional Information" rendered="{!layout.enabledSections['Additional Information'] && !isLayoutDeprecated}" columns="1">
+            <apex:repeat value="{!layout.sectionMap['Additional Information'].attributes}" var="attribute">
+                <apex:outputText value="{!cloneItem.specificRfqItem[attribute.fieldAPIName]}" label=""/>
+            </apex:repeat>
+        </apex:pageBlockSection>
+
+        </apex:outputPanel>
+        
+        <apex:outputPanel id="CostModelReference" >
+            <apex:pageBlockSection title="Cost Model Reference" columns="{!layout.BUColumns}" rendered="true">                            
+            </apex:pageBlockSection>    
+                <c:CMFCMDisplay fcmB="{!builder}" isEditMode="true" noCM="{!noCostModel}" rendered="{!(cmType == 'CMMLFBuilder' || cmType == 'CMDualBuilder' || cmType == 'CMQuadBuilder')}"/>
+                <c:CMPBGADisplay pbgaB="{!builder}" rendered="{!(cmType == 'CMPBGABuilder')}"/>
+                <c:CMFCDisplay fcB="{!builder}" rendered="{!(cmType == 'CMFCBuilder')}"/>                                                  
+                <c:CMOthersDisplay othersB="{!builder}" rendered="{!(cmType == 'CMOthersBuilder')}"/>
+                <c:CMDefaultDisplay defaultB="{!builder}" rendered="{!(cmType == 'CMDefaultBuilder')}"/>
+        </apex:outputPanel>
+
+
+    </apex:pageblock>
+
+
+
+     <apex:actionFunction name="recalculatePrice" action="{!reCalculatePriceById}" oncomplete="hideProgress();" reRender="output, messages">        
+            <apex:param id="atrib" name="attrib" value="" />                
+     </apex:actionFunction>     
+
+
+        <apex:actionFunction name="onDefaultDriverChangeClone" action="{!onDefaultDriverChangeClone}" reRender="output" oncomplete="hideProgress();">
+            <apex:param name="fieldName" value="" />
+            <apex:param name="objectId" value="" />
+        </apex:actionFunction>
+
+</apex:form>
+
+</apex:page>

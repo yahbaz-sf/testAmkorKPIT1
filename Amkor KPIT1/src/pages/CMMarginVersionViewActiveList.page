@@ -1,0 +1,3 @@
+<apex:page standardController="CM_Margin_Version__c" recordSetVar="versions" extensions="CMMarginVersionController" action="{!viewActiveListAction}">
+CM Margin Version View Active List 
+</apex:page>

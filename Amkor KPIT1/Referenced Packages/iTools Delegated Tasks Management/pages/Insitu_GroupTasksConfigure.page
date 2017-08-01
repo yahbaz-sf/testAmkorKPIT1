@@ -1,0 +1,47 @@
+<apex:page Controller="InSituDtm.InSitu_ConfigureGroupTask_Controller" showHeader="true" tabStyle="InSituGen__InSitu_AppSetting__c" >
+    <apex:sectionHeader title="Group Tasks" subtitle="Configuration"></apex:sectionHeader>
+    <apex:pageMessages />
+    
+    <apex:form >
+        <apex:pageBlock mode="detail" title="Settings">
+         
+            <apex:pageBlockButtons location="Top">
+                <apex:commandButton action="{!save}" value="Save" />
+                <apex:commandButton action="{!returnToSettingView}" value="Cancel" />   
+            </apex:pageBlockButtons>
+           
+            <apex:outputPanel style="line-height: 3.0;">
+                <apex:inputCheckbox value="{!FeatureActive}" id="xbEnable"/>
+                <apex:outputLabel value="Enable the Group Tasks feature" for="xbEnable"/>   
+            </apex:outputPanel>     
+            
+            <apex:pageBlockSection id="GeneralSettings" Title="General Settings" columns="1" collapsible="false" >
+            
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Rows per Page"/>
+                    <apex:inputText value="{!RowsPerPage}" style="width: 50px;" />
+                </apex:pageBlockSectionItem>
+                    
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Default Scope"/>
+                    <apex:selectList value="{!DefaultScope}" size="1" title="Default Scope" id="theDefaultScope" >
+                        <apex:selectOptions value="{!DefaultScopeOptions}" />
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Maximum Days Overdue"/>
+                    <apex:inputText value="{!MaxDaysOverdue}" style="width: 50px;" />
+                </apex:pageBlockSectionItem>
+                
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Recently Closed Days"/>
+                    <apex:inputText value="{!RecentlyClosedDays}" style="width: 50px;" />
+                </apex:pageBlockSectionItem>
+                
+            </apex:pageBlockSection>
+            
+        </apex:pageBlock>
+    </apex:form>
+
+</apex:page>

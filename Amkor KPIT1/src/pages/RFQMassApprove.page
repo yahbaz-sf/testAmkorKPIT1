@@ -1,0 +1,120 @@
+<apex:page sidebar="false" controller="RFQMassApproveController" >
+
+<script type = "text/javascript">
+    function checkAll(cb)
+	{
+		var inputElem = document.getElementsByTagName("input");
+		for(var i=0; i<inputElem.length; i++){
+			if(inputElem[i].id.indexOf("checkedone")!=-1)
+				inputElem[i].checked = cb.checked;
+		}
+	}   
+
+</script>
+
+<body>
+	<apex:form >
+	
+		<apex:sectionHeader title="" subtitle="RFQ Mass Approve" description=""/>
+
+		<apex:pageMessages id="messages"/>
+
+		<apex:pageBlock id="output">
+		
+			<apex:pageBlockButtons location="bottom" rendered="{!!startedApproval}">
+				<apex:commandButton value="Approve Selected" action="{!massApprove}" reRender="messages" oncomplete="submitNextItemApprove();" disabled="{!startedApproval}"/>
+				<apex:commandButton value="Reject Selected" action="{!massApprove}" reRender="messages" oncomplete="submitNextItemReject();" disabled="{!startedApproval}" />
+				<apex:commandButton value="No Bid Selected" action="{!massApprove}" reRender="messages" oncomplete="submitNextItemNoBid();" disabled="{!startedApproval}" />
+				<apex:commandButton value="Cancel" action="{!returnToRfq}" />
+			</apex:pageBlockButtons>
+
+			<apex:pageBlockSection title="Product Group Select" rendered="{!!startedApproval}">
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Product Group" />
+					<apex:selectList value="{!selectedProductGroup}" multiselect="false" size="1">
+						<apex:selectOptions value="{!ProductGroupOptions}" />
+						<apex:actionSupport event="onchange" action="{!setItemList}" rerender="itemsPbs" />
+					</apex:selectList>
+				</apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+
+			<apex:outputPanel id="itemsPbs">
+			<apex:pageBlockSection title="Items to Approve" >
+				<apex:outputPanel rendered="{!currentItems == null || currentItems.size == 0 && !startedApproval}">
+					<i>There are no items, in this RFQ, for the product group selected, which has been imported and under review</i>
+				</apex:outputPanel>
+				<apex:outputPanel rendered="{!currentItems != null && currentItems.size > 0 && !startedApproval}">
+		        	<apex:pageBlockTable value="{!currentItems}" var="row" style="width: 80%">
+		        		<apex:column >
+		        			<apex:facet name="header"> 
+		        			<apex:inputCheckbox >
+								<apex:actionSupport event="onclick" onsubmit="checkAll(this)" rerender="itemsPbs"/>
+							</apex:inputCheckbox>
+							</apex:facet>
+		        			<apex:inputCheckbox value="{!row.selected}" id="checkedone" />
+		        		</apex:column>
+		        		<apex:column value="{!row.item.Name}" />
+		        		<apex:column value="{!row.item.Package_Family__c}" />
+		        		<apex:column value="{!row.item.Project_Device__c}" />
+		        		<apex:column value="{!row.item.Dim_XY__c}" />
+		        		<apex:column value="{!row.item.Price_To_Customer__c}" />
+		        		<apex:column value="{!row.item.BU_Price__c}" />
+		        		<apex:column title="Approval Comment" headerValue="Approval Comment" width="300px" >
+		        			<apex:inputText size="50" value="{!row.approvalComment}"/>
+		        		</apex:column>
+		        	</apex:pageBlockTable>
+	        	</apex:outputPanel>
+			</apex:pageBlockSection>
+
+			<apex:pageBlockSection title="Mass Approve Comment" id="comment" rendered="{!currentItems != null && currentItems.size > 0 && !startedApproval}">
+		        <apex:inputTextarea label="Comments" cols="140" rows="10" value="{!approvalComment}"/>
+		    </apex:pageBlockSection>
+
+		    <apex:pageBlockSection title="Approving Items and Generating CPNs" id="approveItems" rendered="{!numberRemaining > 0 && startedApproval}">
+		    <div class="narrow">
+				<script type="text/javascript">
+					function resubmitApprove() {
+						submitNextItemApprove();
+					}
+					function resubmitReject() {
+						submitNextItemReject();
+					}
+					function resubmitNoBid() {
+						submitNextItemNoBid();
+					}
+				</script>
+
+				<apex:pageBlockSection >
+					<apex:outputText value="{0} records remaining">
+						<apex:param value="{!numberRemaining}" />
+						<img src="{!$Resource.Spinner}"/>
+					</apex:outputText>
+				</apex:pageBlockSection>
+			</div>
+		    </apex:pageBlockSection>
+
+		    <apex:pageBlockSection rendered="{!numberRemaining == 0 && startedApproval}" title="All records processed, you may now close this window">
+			<script type="text/javascript">
+				function resubmitApprove() {
+					// All done, no action necessary
+				}
+				function resubmitReject() {
+					// All done, no action necessary
+				}
+				function resubmitNoBid() {
+					// All done, no action necessary
+				}
+			</script>
+			<button type="button" onclick="window.close()">Close Window</button>
+			</apex:pageBlockSection>
+
+		    </apex:outputPanel>
+		</apex:pageBlock>
+
+	<apex:actionFunction name="submitNextItemApprove" action="{!submitNextItemApprove}" reRender="output" oncomplete="resubmitApprove();"/>	
+	<apex:actionFunction name="submitNextItemReject" action="{!submitNextItemReject}" reRender="output" oncomplete="resubmitReject();"/>	
+	<apex:actionFunction name="submitNextItemNoBid" action="{!submitNextItemNoBid}" reRender="output" oncomplete="resubmitNoBid();"/>	
+
+	</apex:form>
+</body>
+</apex:page>

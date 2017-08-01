@@ -1,0 +1,147 @@
+<apex:component >
+    <apex:attribute name="quoteSummaryItems" type="RFQQuoteSummaryItem[]" description="The Related Items" />
+    <apex:attribute name="showAdderDetailColumn" type="Boolean" description="showAdderDetailColumn"/>
+    <apex:attribute name="productGroupName" type="String" description="productGroupName" />
+    <apex:attribute name="factories" type="map" description="map of all factories" />
+
+    <apex:dataTable value="{!quoteSummaryItems}" var="item" styleClass="summaryTable" border="1">
+            <!-- Bhanu 25 feb 2016  575798 - SFDC PDF RFQ - Volume Config out of sequence issue
+            adding Package Family Name column to show existing sorting logic -->
+            <apex:column >
+                <apex:facet name="header">Package Family Name</apex:facet>
+                <apex:outputText value="{!item.packageFamilyName}" />
+            </apex:column>
+            <!-- -------------------------- -->
+            
+            <apex:column >
+                <apex:facet name="header">Customer Project/Device Name</apex:facet>
+                <apex:outputText value="{!item.projectDeviceName}" />
+            </apex:column>
+
+            <apex:column style="{!item.style}">
+                <apex:facet name="header">Service Type</apex:facet>
+                <apex:outputText value="{!item.serviceType}"/>
+            </apex:column>
+
+            <apex:column >
+                <apex:facet name="header">Plant</apex:facet>
+                 <apex:outputText value="{!item.factoryName}"/> 
+            </apex:column>
+
+            <apex:column >
+                <apex:facet name="header">Description</apex:facet>
+                 <apex:outputText value="{!item.description}"/> 
+            </apex:column>
+
+            <apex:column headerValue="QTY" rendered="{!productGroupName == 'Engineering Services'}">
+                <apex:outputText value="{!item.engSvcsQuantity}" />
+            </apex:column>
+            
+            <!-- Bhanu 10 feb 2016  575798 - SFDC PDF RFQ - Volume Config out of sequence issue
+            adding Forecast Median and Parent Volume/RFQ Item columns to show existing sorting logic -->
+            
+            <apex:column >
+                <apex:facet name="header">Forecast Median</apex:facet>
+                 <apex:outputText value="{!item.forecastMed}"/> 
+            </apex:column>
+            
+            <apex:column >
+                <apex:facet name="header">Parent Volume/RFQ Item</apex:facet>
+                 <apex:outputText value="{!item.parentMultiVolName}"/> 
+            </apex:column>
+            <!-- -------------------------- -->
+            
+            <apex:column rendered="{!productGroupName != 'Engineering Services'}">
+                <apex:facet name="header">Volume K/Wk</apex:facet>
+                <apex:outputText value="{!item.volumePerWk}" />
+            </apex:column>
+
+            <apex:column rendered="{!productGroupName == 'Engineering Services'}">
+                <apex:facet name="header" >Price ($)</apex:facet>
+                <apex:outputText value="{0, number, ###,##0.00}">
+                    <apex:param value="{!item.price}" />
+                </apex:outputText>
+            </apex:column>
+
+            <apex:column rendered="{!productGroupName != 'Engineering Services'}">
+                <apex:facet name="header">Amkor Quoted Unit Price ($)</apex:facet>
+                <apex:outputText value="{0, number, ###,##0.00000}" rendered="{!item.price != null}">
+                    <apex:param value="{!item.price}" />
+                </apex:outputText>
+                <apex:outputText value="Included" rendered="{!item.price == null && item.serviceType == 'Post Test Services'}"/>
+            </apex:column>
+
+            <apex:column >
+                <apex:facet name="header">UOM</apex:facet>
+                <apex:outputText value="{!item.uom}" />
+            </apex:column>
+
+            <apex:column >
+                <apex:facet name="header">NRE Total</apex:facet>
+                <apex:outputText value="{0, number, ###,##0.00}">
+                    <apex:param value="{!item.nreTotal}" />
+                </apex:outputText>
+            </apex:column> 
+
+            <apex:column >
+                <apex:facet name="header">CPN</apex:facet>
+                <apex:outputText value="{!item.cpn}" />
+            </apex:column>
+
+            <apex:column >
+                <apex:facet name="header">RFQI</apex:facet>
+                <apex:outputText value="{!item.rfqiName}" />
+            </apex:column>
+
+    </apex:dataTable>
+
+    <!-- <apex:dataTable value="{!quoteSummaryItems}" var="item" styleClass="summaryTable" columnClasses="sCol1,sCol2,sCol3,sCol4,sCol5,sCol6,sCol7,sCol8,sCol9" border="1" rendered="{!productGroupName == 'Engineering Services'}">
+        <apex:column >
+            <apex:facet name="header">Customer Project/Device Name</apex:facet>
+            <apex:outputText value="{!item.projectDeviceName}" />
+        </apex:column>
+
+        <apex:column >
+            <apex:facet name="header">Service Type</apex:facet>
+            <apex:outputText value="{!item.serviceType}"/>
+        </apex:column>
+
+        <apex:column>
+            <apex:facet name="header">Description</apex:facet>
+             <apex:outputText value="{!item.description}"/> 
+        </apex:column>
+
+        <apex:column headerValue="QTY">
+            <apex:outputText value="{!item.engSvcsQuantity}" />
+        </apex:column>
+
+        <apex:column>
+            <apex:facet name="header">Price ($)</apex:facet>
+            <apex:outputText value="{0, number, ###,##0.00}">
+                <apex:param value="{!item.price}" />
+            </apex:outputText>
+        </apex:column>
+
+        <apex:column>
+            <apex:facet name="header">UOM</apex:facet>
+            <apex:outputText value="{!item.uom}" />
+        </apex:column>
+
+        <apex:column>
+            <apex:facet name="header">NRE Total</apex:facet>
+            <apex:outputText value="{0, number, ###,##0.00}">
+                <apex:param value="{!item.nreTotal}" />
+            </apex:outputText>
+        </apex:column> 
+
+        <apex:column >
+            <apex:facet name="header">CPN</apex:facet>
+            <apex:outputText value="{!item.cpn}" />
+        </apex:column>
+
+        <apex:column >
+            <apex:facet name="header">RFQI</apex:facet>
+            <apex:outputText value="{!item.rfqiName}" />
+        </apex:column>
+    </apex:dataTable> -->
+</apex:component>

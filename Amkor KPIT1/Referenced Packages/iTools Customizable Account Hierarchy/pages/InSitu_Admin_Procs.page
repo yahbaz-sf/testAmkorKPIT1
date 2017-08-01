@@ -1,0 +1,156 @@
+<apex:page controller="InSituCah.InSitu_AHAdminProcsController" standardStylesheets="true" showHeader="true" tabStyle="InSituGen__InSitu_AppSetting__c">
+
+   	<apex:sectionHeader title="{!HeadingAHAdminProcs}" subtitle="{!SubHeadingAHAdminProcs}"></apex:sectionHeader>
+    <apex:messages />
+	<apex:form id="AHAdminProcsForm">
+
+		<apex:outputPanel layout="block" id="History" >
+	        <apex:pageBlock title="History"  >
+
+	            <apex:pageBlockSection columns="1"  >
+	                <apex:pageBlockSectionItem >
+	                    <apex:outputLabel value="{!UPCalcHistoryCaption}"/>
+	                </apex:pageBlockSectionItem>
+
+		            <apex:pageBlockSectionItem id="Summary" >
+						<apex:outputPanel layout="block" >
+							<apex:outputLabel value="Summary:" for="SummaryField" />
+						</apex:outputPanel>
+						<apex:outputPanel layout="block" id="SummaryField" >
+							<apex:outputLabel value="{!UPCalcSummary}" />
+						</apex:outputPanel>
+				  	</apex:pageBlockSectionItem>
+            
+		            <apex:pageBlockSectionItem rendered="{!NOT(IsError)}">
+						<apex:outputPanel layout="block" >
+							<apex:outputLabel value="Log Information:" for="LogNoErrs" />
+						</apex:outputPanel>
+						<apex:outputPanel layout="block" id="LogNoErrs" >
+							<apex:outputLabel value="{!UPCalcLogNoErrs}"  />
+						</apex:outputPanel>
+				  	</apex:pageBlockSectionItem>
+
+		            <apex:pageBlockSectionItem rendered="{!IsError}">
+						<apex:outputPanel layout="block" >
+							<apex:outputLabel value="Description:" for="ErrDescription" />
+						</apex:outputPanel>
+						<apex:outputPanel layout="block" id="ErrDescription">
+							<apex:outputLabel value="{!ErrPanel1}" escape="false"/>
+						</apex:outputPanel>
+				  	</apex:pageBlockSectionItem>
+
+		            <apex:pageBlockSectionItem rendered="{!IsError}">
+						<apex:outputPanel layout="block" >
+							<apex:outputLabel value="Errors:" for="ErrList" />
+						</apex:outputPanel>
+						
+						<apex:outputPanel layout="block" id="ErrList">
+							<apex:outputPanel layout="block" >
+								<apex:outputLabel value="{!ErrListCaption}"  />
+							</apex:outputPanel>
+						    <apex:dataTable value="{!ErrData}" var="row" id="ErrDataList"
+						        styleClass="list tableClass"
+						        headerClass="headerRow "
+						        rowClasses="dataRow Odd Even"
+						        columnClasses="dataCell "
+						        onrowmouseover="if (window.hiOn) {hiOn(this);}"
+						        onrowmouseout="if (window.hiOff) {hiOff(this);}">
+						        
+
+					            <apex:column headerValue="ID" width="40">
+						            <apex:outputLink value="/{!row.ObjID}" target="_top">{!row.ObjID}</apex:outputLink>
+					            </apex:column>
+
+					            <apex:column headerValue="Status Code" width="40">
+						            <apex:outputText value="{!row.StatusCode}" />
+					            </apex:column>
+
+					            <apex:column headerValue="Message" >
+						            <apex:outputText value="{!row.ErrMsg}" />
+					            </apex:column>
+						
+						    </apex:dataTable>
+						</apex:outputPanel>
+				  	</apex:pageBlockSectionItem>
+
+	            </apex:pageBlockSection>
+	        </apex:pageBlock>
+		</apex:outputPanel>
+
+		<apex:outputPanel layout="block" >
+	        <apex:pageBlock mode="edit" title="Action">
+	            <apex:pageBlockSection columns="1">
+	                <apex:pageBlockSectionItem >
+	                    <apex:outputLabel value="{!ConfirmAdminProcPrompt}"/>
+	                </apex:pageBlockSectionItem>
+	            </apex:pageBlockSection>
+	
+	            <apex:pageBlockSection columns="1" rendered="{!IsRunUPCalc}">
+	                <apex:pageBlockSectionItem >
+	 					<apex:outputPanel id="AdvancedOptionLinks" layout="block" >
+		            		<apex:commandLink value="Show Advanced Options" action="{!doShowAdvanced}" rendered="{!DisplayShowAdvancedLink}" rerender="AdvancedOptionLinks,AdvancedOptions"/>
+							<apex:commandLink value="Hide Advanced Options" action="{!doHideAdvanced}" rendered="{!DisplayHideAdvancedLink}" rerender="AdvancedOptionLinks,AdvancedOptions"/>
+	 					</apex:outputPanel>
+	                </apex:pageBlockSectionItem>
+	            </apex:pageBlockSection>
+	        </apex:pageBlock>
+		</apex:outputPanel>
+
+		<apex:outputPanel layout="block" id="AdvancedOptions" rendered="{!IsRunUPCalc}" >
+	        <apex:pageBlock title="Advanced Options" mode="edit" rendered="{!IsAdvanced}" >
+
+	            <apex:pageBlockSection columns="1"  >
+	                <apex:pageBlockSectionItem >
+	                    <apex:outputLabel value="{!AdvancedOptionsText}"/>
+	                </apex:pageBlockSectionItem>
+            
+	                <apex:pageBlockSectionItem >
+						<apex:outputPanel layout="block">
+							<apex:outputLabel value="&nbsp;"  escape="false" />
+						</apex:outputPanel>
+	                </apex:pageBlockSectionItem>
+
+		            <apex:pageBlockSectionItem id="BatchSize" >
+						<apex:outputPanel layout="block" >
+							<apex:outputLabel value="Batch Size:" for="BatchSizeField" />
+						</apex:outputPanel>
+						<apex:outputPanel layout="block" id="BatchSizeField" >
+							<apex:inputText value="{!JobBatchSize}" style="width: 50px" />
+						</apex:outputPanel>
+				  	</apex:pageBlockSectionItem>
+            
+		            <apex:pageBlockSectionItem id="QueryLimit" >
+						<apex:outputPanel layout="block" >
+							<apex:outputLabel value="Record Limit:" for="QueryLimitField" />
+						</apex:outputPanel>
+						<apex:outputPanel layout="block" id="QueryLimitField" >
+							<apex:inputText value="{!QueryLimit}" style="width: 50px" />
+						</apex:outputPanel>
+				  	</apex:pageBlockSectionItem>
+
+		            <apex:pageBlockSectionItem id="QueryCriteria" >
+						<apex:outputPanel layout="block" >
+							<apex:outputLabel value="Selection Criteria:" for="QueryCriteriaField" />
+						</apex:outputPanel>
+						<apex:outputPanel layout="block" id="QueryCriteriaField" >
+							<apex:inputTextArea value="{!QueryCriteria}" rows="3" cols="125" />
+						</apex:outputPanel>
+				  	</apex:pageBlockSectionItem>
+
+
+	            </apex:pageBlockSection>
+	        </apex:pageBlock>
+		</apex:outputPanel>
+            
+		<apex:outputPanel layout="block" >
+	        <apex:pageBlock mode="edit">
+	            <apex:pageBlockButtons location="Bottom">
+	                <apex:commandButton value="Start" action="{!doProc}"/>
+	                <apex:commandButton value="Cancel" action="{!returnToManage}"/>
+	            </apex:pageBlockButtons>
+	
+	        </apex:pageBlock>
+		</apex:outputPanel>
+
+    </apex:form>
+</apex:page>

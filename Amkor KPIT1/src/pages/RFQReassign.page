@@ -1,0 +1,30 @@
+<apex:page controller="RFQReassignController" showHeader="true" sidebar="true" action="{!loadAction}">
+<script type="text/javascript">
+var inProgress = false;
+    function resetProgress() {
+        inProgress = false;
+    }
+    </script>
+	<apex:form >
+	<apex:pageMessages id="error" escape="false" />
+	<apex:actionFunction name="UpdateLookup" action="{!updateIsUser}" rerender="opPanel" />
+		<apex:pageBlock title="Reassign Approval Request">
+			<apex:pageBlockButtons >
+				<apex:commandButton value="Reassign Approval Request" action="{!Reassign}" onclick="if (inProgress) return false; inProgress = true;" oncomplete="resetProgress();"/>
+				<apex:commandButton value="Cancel" action="{!Cancel}" />
+			</apex:pageBlockButtons>
+			<apex:selectList value="{!isUserStr}" multiselect="false" size="1" onChange="UpdateLookup();"  >
+				<apex:selectOption itemLabel="User" itemValue="User" />
+				<apex:selectOption itemLabel="Queue" itemValue="Queue" />
+			</apex:selectList>
+			<apex:outputPanel id="opPanel" >
+				<apex:inputField label="New Approver" value="{!workItem.ActorId}" required="false" rendered="{!isApproverUser}" />
+				<apex:selectList label="Queue"  value="{!workItem.ActorId}" size="1" rendered="{!!isApproverUser}" >
+					<apex:selectOptions value="{!queuesList}"></apex:selectOptions>
+				</apex:selectList> 
+			</apex:outputPanel>
+			<br />
+		<!-- 	<apex:inputTextArea label="Comments" value="{!comments}" rows="10" cols="100"/> <br />  Taking this out until we can get comments working-->
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>

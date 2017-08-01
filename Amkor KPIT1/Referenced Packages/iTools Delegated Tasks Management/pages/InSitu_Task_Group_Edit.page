@@ -1,0 +1,86 @@
+<apex:page standardController="InSituDtm__Task_Group__c" 
+           extensions="InSituDtm.InSitu_EditTaskGroup_Controller" 
+           showHeader="true" 
+           sidebar="true" 
+           standardStylesheets="true"
+           tabStyle="Group_Tasks__tab">
+    <apex:sectionHeader title="Task Group Edit" subtitle="{!PageSubTitle}"></apex:sectionHeader>
+    <apex:pageMessages />     
+ <apex:form > 
+    
+    <apex:pageBlock title="Task Group Edit" mode="edit" >
+     
+        <apex:pageBlockButtons location="Top" id="DefaultButtons">
+            <apex:commandButton action="{!save}" value="Save" rendered="{!ShowDetails}"/>
+            <apex:commandButton action="{!cancel}" value="Cancel" immediate="true"/>
+        </apex:pageBlockButtons>
+          
+        <apex:pageBlockSection columns="1" id="GeneralFields" title="Information" rendered="{!ShowDetails}" >
+            <apex:inputField value="{!TaskGroup.Name}" required="true" style="width: 200px" />
+            
+            <apex:inputField value="{!TaskGroup.InSituDtm__Initially_Assigned_To__c}" />
+            
+            <apex:pageBlockSectionItem >
+                <apex:outputLabel value="Associated Task Status" />
+                <apex:outputPanel styleClass="requiredInput" layout="block" >
+                    <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                    <apex:selectList value="{!TaskGroup.InSituDtm__Associated_Task_Status__c}" size="1" title="Task Status"  >
+                        <apex:selectOptions value="{!StatusOptions}"/>
+                    </apex:selectList> 
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem rendered="{!LEN(TGSErrorMessage)>0}" >
+                <apex:outputLabel value=" "/>
+                <apex:outputPanel style="color: #CC0000">
+                    <b>Error: </b>
+                    <apex:outputText value="{!TGSErrorMessage}" />
+                </apex:outputPanel> 
+            </apex:pageBlockSectionItem>
+            
+            <apex:pageBlockSectionItem >
+                <apex:outputLabel value="Additional Administrators Group" />
+                <apex:selectList value="{!TaskGroup.InSituDtm__Additional_Administrators_Group__c}" size="1" title="Additional Administrators"  >
+                    <apex:selectOptions value="{!AdditionalAdminOptions}"/>
+                </apex:selectList> 
+            </apex:pageBlockSectionItem>
+            
+        </apex:pageBlockSection>
+        
+        <apex:pageBlockSection columns="1" id="SummaryReportFields" title="Summary Report" rendered="{!ShowDetails}" >
+            <apex:inputField value="{!TaskGroup.InSituDtm__Generate_Summary_Report__c}" required="true" />
+            <apex:inputField value="{!TaskGroup.InSituDtm__Send_Summary_Report_To__c}" required="true" />
+            <apex:outputField value="{!TaskGroup.InSituDtm__Summary_Report_Last_Run__c}" />
+        </apex:pageBlockSection> 
+        
+        <apex:pageBlockSection columns="1" id="InitialGridSort" title="Initial Grid Sort" rendered="{!ShowDetails}" >
+        	<apex:pageBlockSectionItem >
+        		<apex:outputLabel value="Primary Sort" />
+        		<apex:selectList value="{!TaskGroup.InSituDtm__Grid_Sort_Primary__c}" size="1" title="Primary Sort" id="thePrimarySortList" >
+                    <apex:selectOptions value="{!PrimaryGridSortOptions}"/>
+                </apex:selectList> 
+             </apex:pageBlockSectionItem>
+             <apex:pageBlockSectionItem >
+        		<apex:outputLabel value="Secondary Sort" />
+        		<apex:selectList value="{!TaskGroup.InSituDtm__Grid_Sort_Secondary__c}" size="1" title="Secondary Sort" id="theSecondarySortList" >
+                    <apex:selectOptions value="{!SecondaryGridSortOptions}"/>
+                </apex:selectList> 
+             </apex:pageBlockSectionItem>
+             <apex:pageBlockSectionItem >
+        		<apex:outputLabel value="Tertiary Sort" />
+        		<apex:selectList value="{!TaskGroup.InSituDtm__Grid_Sort_Tertiary__c}" size="1" title="Tertiary Sort" id="theTertiarySortList" >
+                    <apex:selectOptions value="{!TertiaryGridSortOptions}"/>
+                </apex:selectList> 
+             </apex:pageBlockSectionItem>     
+        </apex:pageBlockSection>
+        
+        <apex:pageBlockSection columns="2" id="E2GTFields" title="Email to Group Task" rendered="{!ShowDetails}" >
+            <apex:inputField value="{!TaskGroup.InSituDtm__E2GT_Email_Address__c}" style="width: 300px;"/>
+            <apex:inputField value="{!TaskGroup.InSituDtm__E2GT_Days_to_Complete__c}" style="width: 25px;"/>
+            <apex:inputField value="{!TaskGroup.InSituDtm__E2GT_Remove_From_Subject__c}" />
+            <apex:inputField value="{!TaskGroup.InSituDtm__E2GT_Accept_Attachments__c}" />
+        </apex:pageBlockSection> 
+        
+    </apex:pageBlock> 
+ 
+ </apex:form>
+</apex:page>

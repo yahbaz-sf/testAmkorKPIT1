@@ -1,0 +1,24 @@
+<apex:component >
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+<script type="text/javascript">
+$(function() {
+    updateQueueLinks();
+});
+
+function updateQueueLinks()
+{
+    var elementArray = new Array();
+    elementArray = $('a[href*="/setup/own/groupdetail.jsp?"]');
+
+    var id;
+    for (i = 0; i < elementArray.length; i++)
+    {
+        id = elementArray[i].href.split('id=')[1];  
+        elementArray[i].href = '/apex/RFQQueueUserView?id=' + id;
+        elementArray[i].target="_blank";
+    }
+}
+    
+</script>
+</apex:component>

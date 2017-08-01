@@ -1,0 +1,43 @@
+<apex:page showHeader="false" sidebar="false" controller="RFQSubmitSelectController">
+
+<apex:form >
+	<apex:pageMessages />
+
+	<apex:pageBlock rendered="{!exportAvailable}" title="Submit All Ready To Price">
+		<apex:pageBlockButtons location="bottom">
+			<apex:commandButton value="Submit" action="{!submitItems}"/>
+		</apex:pageBlockButtons>
+
+		<apex:pageBlockSection >
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel for="selectRadio" value="Items To Submit"/> 
+				<apex:selectRadio id="selectRadio" value="{!selectionMode}">
+		            <apex:selectOptions value="{!exportOptions}"/>
+		            <apex:actionSupport event="onchange" rerender="selectionPbs"/> 
+		        </apex:selectRadio>
+	    	</apex:pageBlockSectionItem>
+    	</apex:pageBlockSection>
+
+    	<apex:outputPanel id="selectionPbs">
+	        <apex:pageBlockSection rendered="{!selectionMode == 'ONLY_SELECTED'}" title="Items to Submit">
+	        	<apex:pageBlockTable value="{!rfqItems}" var="row">
+	        		<apex:column >
+	        			<apex:inputCheckbox value="{!row.selected}" />
+	        		</apex:column>
+
+	        		<apex:column value="{!row.item.Name}" />
+	        		<apex:column value="{!row.item.Package_Family__c}" />
+	        		<apex:column value="{!row.item.Project_Device__c}" />
+	        		<apex:column value="{!row.item.Dim_XY__c}" />
+	        		<apex:column value="{!row.item.Price_To_Customer__c}" />
+	        		<apex:column value="{!row.item.Status__c}" />
+	        	</apex:pageBlockTable>
+
+	        </apex:pageBlockSection>
+        </apex:outputPanel>
+
+	</apex:pageBlock>
+
+</apex:form> 
+	
+</apex:page>

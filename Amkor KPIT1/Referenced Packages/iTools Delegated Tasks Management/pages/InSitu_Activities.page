@@ -1,0 +1,5 @@
+<apex:page standardController="Task" 
+		   extensions="InSituDtm.InSitu_ActivitiesTab_Controller" 
+		   tabStyle="InSituDtm__Activities__tab" >
+    <apex:enhancedList type="Activity" height="800" rowsPerPage="{!RowsPerPage}"/>
+</apex:page>

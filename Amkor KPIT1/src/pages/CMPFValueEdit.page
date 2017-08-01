@@ -1,0 +1,33 @@
+<apex:page standardController="CM_PF_Value__c" extensions="CMPFValueController" action="{!setupAction}">
+<apex:form >
+<apex:sectionHeader title="PF Value" subtitle="Edit CM Package Family Values"/>
+<apex:pageBlock >
+	<apex:pageBlockButtons >
+		<apex:commandButton value="Save" action="{!saveAction}"/>
+		<apex:commandButton value="Cancel" action="{!cancelAction}" immediate="true"/>
+	</apex:pageBlockButtons>
+	<apex:pageBlockSection columns="1">
+		<apex:inputField value="{!rec.Name}"/>
+		<apex:inputField value="{!rec.Package_Family__c}"/>
+	</apex:pageBlockSection>
+	<apex:pageBlockSection columns="2" title="Values">
+		<apex:inputField value="{!rec.FPP_Rate__c}"/>
+		<apex:inputField value="{!rec.RSSB__c}"/>
+		<apex:inputField value="{!rec.Subs_Markup_Perc__c}"/>
+		<apex:inputField value="{!rec.Assembly_GM_wo_Substrate__c}"/>
+		<apex:inputField value="{!rec.Base_Customer_Au_Price__c}"/>
+		<apex:inputField value="{!rec.Cutting_Speed__c}"/>
+		<apex:inputField value="{!rec.Good_Die_Density__c}"/>
+		<apex:inputField value="{!rec.GDPW_Die_Yield__c}"/>
+		<apex:inputField value="{!rec.DA_Thickness__c}"/>
+		<apex:inputField value="{!rec.Groove_Width__c}"/>
+		<apex:inputField value="{!rec.Substrate_Perimeter_Clearance__c}"/>
+		<apex:inputField value="{!rec.Mold_Cap_Taper__c}"/>
+		<apex:inputField value="{!rec.EMC_Cost_Per_Gram__c}"/>
+		<apex:inputField value="{!rec.Pellet_Volume__c}"/>
+		<apex:inputField value="{!rec.Capacitor_UPH_Multiplier__c}"/>
+		<apex:inputField value="{!rec.Capacitor_UPH_Adder__c}"/>
+	</apex:pageBlockSection>
+</apex:pageBlock>
+</apex:form>
+</apex:page>

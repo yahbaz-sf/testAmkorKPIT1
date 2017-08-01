@@ -1,0 +1,100 @@
+<apex:component >
+
+<style>
+ 
+    body .bPageBlock .pbBody .labelCol, body .bPageBlock .pbBody .dataCol, body .bPageBlock .pbBody .data2Col {
+        padding-top: 5px;
+        padding-bottom: 5px;
+        width: 12%;
+    }
+   
+    .dataCol.empty {
+        display: none;
+    }
+   
+    .labelCol.empty {
+        display: none;
+    }
+   
+    /*.dataCol.first.last {
+        text-align: center;
+    }*/
+
+
+    label.customRequiredField {
+        border-right: 3px solid #f00;
+        padding-right: 4px;
+        padding-bottom: 4px;
+    }
+
+    input.customRequiredField, textarea.customRequiredField, select.customRequiredField {
+        border-left: 5px solid #f00;
+    }
+
+    label.customMERField {
+        border-right: 3px solid #00f;
+        padding-right: 4px;
+        padding-bottom: 4px;
+    }
+
+    input.customMERField, textarea.customMERField, select.customMERField {
+        border-left: 5px solid #00f;
+    }
+
+    
+    input.defaultDriver, textarea.defaultDriver, select.defaultDriver {
+        background-color: #CCFFFF;
+    }
+    
+    
+
+    .factorySection {
+    	width: 100%;
+     }
+
+    .oneColumnHack {
+    	width: 100%;
+    }
+
+    .oneColumnHack .dataCol.empty {
+        display: block;
+    }
+    
+    .oneColumnHack .labelCol.empty {
+        display: block;
+    }
+    
+    .oneColumnHack .dataCol.first.last {
+        text-align: left !important;
+    }
+
+    #fade {
+        display: none;  /* ensures it’s invisible until it’s called */
+        position: absolute;  /* makes the div go into a position that’s absolute to the browser viewing area */
+        left: 0%; /* makes the div span all the way across the viewing area */
+        top: 0%; /* makes the div span all the way across the viewing area */
+        background-color: black;
+        -moz-opacity: 0.7; /* makes the div transparent, so you have a cool overlay effect */
+        opacity: .7;
+        
+        width: 100%;
+        height: 100%;
+        z-index: 90; /* makes the div the second most top layer, so it’ll lay on top of everything else EXCEPT for divs with a higher z-index (meaning the #overlay ruleset) */
+    }
+    #spinner {
+         width: 15%;   
+         position: fixed;
+         left: 45%;
+         top: 40%;
+         z-index: 91;
+    }
+
+    div.noAction a.actionLink { display: none; }
+    a.Button {
+        text-align: center;
+        font-size: 1.0em;
+    }
+
+</style>
+
+</apex:component>

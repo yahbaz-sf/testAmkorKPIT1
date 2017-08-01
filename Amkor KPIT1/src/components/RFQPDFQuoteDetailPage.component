@@ -1,0 +1,211 @@
+<apex:component >
+	<apex:attribute name="showAdderDetailColumn" type="Boolean" description="showAdderDetailColumn"/>
+	<apex:attribute name="breakoutPostTestPriceMap" type="map" description="Breakout item's post test service?"/>
+	<apex:attribute name="wrapper" type="RFQItemWrapper" description="Item Wrapper"/>
+	<apex:attribute name="pfLayouts" type="map" description="Section Layout Map"/>
+	<apex:attribute name="dummyList" type="String[]" description="Dummy String"/>
+	<apex:attribute name="specificItemMap" type="map" description="specific item Map"/>
+	<apex:attribute name="wrapperLayouts" type="map" description="wrapper item Map"/>
+	<apex:attribute name="rfqisWithIncludedPrices" type="String" description="RFQIs that should have their Post Test Svcs Price as Included"/>
+	<apex:attribute name="includedPriceKeys" type="String" description="Concatenated string of RFQIs that have a separate price in the controller map"/>
+	<apex:attribute name="testTotalPrices" type="map" description="Total price for TEST RFQIs that have Post Test Svcs included"/>
+	<apex:attribute name="RFQItemNameMap" type="map" description="String of RFQ Item Names" />
+
+	<h4>
+		<!-- <apex:outputText value="{!wrapper.rfqItem.Name}" /> -->
+		<!-- <apex:outputText rendered="{!wrapper.rfqItem.Parent_RFQ_Item__c != null && RFQItemNameMap[wrapper.rfqItem.Id] == null}" value=" as an added service to {!wrapper.rfqItem.Parent_RFQ_Item__r.Name}" /> -->
+		<apex:outputText value="{!RFQItemNameMap[wrapper.parentVolId]}" rendered="{!RFQItemNameMap[wrapper.parentVolId] != null}"/>
+	</h4>
+
+	<c:QuoteSummaryTableTest quoteSummaryItems="{!specificItemMap[wrapper.parentVolId]}" showAdderDetailColumn="{!showAdderDetailColumn}" productGroupName="{!wrapper.packageFamily.Product_Group_Name__c}"/>
+
+	<br/>
+
+	<apex:pageBlockSection >
+		<apex:repeat rendered="{!pfLayouts[wrapper.packageFamily.Id].enabledSections['Additional Information']}" value="{!wrapperLayouts[wrapper.rfqItem.Id].sectionMap['Additional Information'].attributes}" var="attribute">   
+            <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"  rendered="{!attribute.includeOnQuote && wrapper.specificRfqItem[attribute.fieldAPIName] != null}"/>
+        </apex:repeat> 
+	</apex:pageBlockSection>
+
+	<br/>
+	<!-- Package information section -->
+
+
+
+	
+	<apex:pageBlockSection columns="3" >
+		<!-- <apex:pageBlockSectionItem rendered="{!!CONTAINS(includedPriceKeys, wrapper.rfqItem.Name) && wrapper.packageFamily.Product_Group_Name__c != 'Engineering Services'}">
+			<apex:outputLabel value="Amkor Quoted Unit Price" />
+			<apex:outputText value="{0, number, ###,##0.00000} {1}">
+				<apex:param value="{!wrapper.rfqItem['Price_To_Customer__c']}" />
+				<!--Adds a label like ' / Minute' to the Price to customer - AMK-1825-->
+				<!-- <apex:param value="{!wrapper.rfqItem.BU_Price_Label__c}" />
+			</apex:outputText>
+		</apex:pageBlockSectionItem>
+
+		<apex:pageBlockSectionItem rendered="{!wrapper.packageFamily.Product_Group_Name__c == 'Engineering Services'}">
+			<apex:outputLabel value="Amkor Quoted Unit Price" />
+			<apex:outputText value="{0, number, ###,##0.00} {1}">
+				<apex:param value="{!wrapper.rfqItem['Price_To_Customer__c']}" /> -->
+				<!--Adds a label like ' / Minute' to the Price to customer - AMK-1825-->
+				<!--<apex:param value="{!wrapper.rfqItem.BU_Price_Label__c}" />
+			</apex:outputText>
+		</apex:pageBlockSectionItem>
+
+		<apex:pageBlockSectionItem rendered="{!wrapper.packageFamily.Name == 'Test' && CONTAINS(includedPriceKeys, wrapper.rfqItem.Name)}">
+			<apex:outputLabel value="Amkor Quoted Unit Price" />
+			<apex:outputText value="{0, number, ###,##0.00000} {1}" rendered="{!CONTAINS(includedPriceKeys, wrapper.rfqItem.Name)}">
+				<apex:param value="{!testTotalPrices[wrapper.rfqItem.Name]}" />
+				<apex:param value="{!wrapper.rfqItem.BU_Price_Label__c}" />
+			</apex:outputText>
+		</apex:pageBlockSectionItem>
+
+		<apex:pageBlockSectionItem rendered="{!wrapper.packageFamily.Name == 'Test' && !CONTAINS(includedPriceKeys, wrapper.rfqItem.Name) && wrapper.rfqItem['Test_Type__c'] != 'Post-Test Services Only'}">
+			<apex:outputLabel value="Amkor Post Test Services Price" />
+			<apex:outputText value="{0, number, ###,##0.00000}">
+				<apex:param value="{!wrapper.specificRfqItem['Post_Price_To_Customer__c']}" />
+			</apex:outputText>
+		</apex:pageBlockSectionItem>
+
+		<apex:pageBlockSectionItem rendered="{!wrapper.packageFamily.Name == 'Test' && CONTAINS(includedPriceKeys, wrapper.rfqItem.Name)}">
+			<apex:outputLabel value="Amkor Post Test Services Price" />
+				<apex:outputText value="Included"/>
+		</apex:pageBlockSectionItem> -->
+
+		<apex:pageBlockSectionItem rendered="{!wrapper.packageFamily.Product_Group_Name__c != 'Engineering Services' && wrapper.packageFamily.Product_Group_Name__c != 'ATM'}">
+			<apex:outputLabel value="Plant" />
+				<apex:outputText value="{!wrapper.factoryName}"/>
+		</apex:pageBlockSectionItem>
+
+		<apex:repeat rendered="{!pfLayouts[wrapper.packageFamily.Id].enabledSections['Quote Information']}" value="{!wrapperLayouts[wrapper.rfqItem.Id].sectionMap['Quote Information'].attributes}" var="attribute">
+		    <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" rendered="{!attribute.includeOnQuote && attribute.objectAPIName != 'RFQ_Item__c'}" />
+    		<apex:outputField value="{!wrapper.rfqItem[attribute.fieldAPIName]}" rendered="{!attribute.includeOnQuote && attribute.objectAPIName == 'RFQ_Item__c'}" />
+		</apex:repeat>  
+		
+		<apex:repeat rendered="{!pfLayouts[wrapper.packageFamily.Id].enabledSections['Package Description']}" value="{!wrapperLayouts[wrapper.rfqItem.Id].sectionMap['Package Description'].attributes}" var="attribute">
+    		<apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" rendered="{!attribute.includeOnQuote}" />
+        </apex:repeat>
+
+        <apex:repeat rendered="{!pfLayouts[wrapper.packageFamily.Id].enabledSections['CPN Drivers']}" value="{!wrapperLayouts[wrapper.rfqItem.Id].sectionMap['CPN Drivers'].attributes}" var="attribute">
+    		<apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" rendered="{!attribute.includeOnQuote}" />
+        </apex:repeat>
+
+        <apex:repeat rendered="{!pfLayouts[wrapper.packageFamily.Id].enabledSections['Substrate Description']}" value="{!wrapperLayouts[wrapper.rfqItem.Id].sectionMap['Substrate Description'].attributes}" var="attribute">
+    		<apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}" rendered="{!attribute.includeOnQuote}" />
+        </apex:repeat>
+	     
+	     <apex:repeat rendered="{!pfLayouts[wrapper.packageFamily.Id].enabledSections['Adders']}" value="{!wrapperLayouts[wrapper.rfqItem.Id].sectionMap['Adders'].attributes}" var="attribute">   
+            <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"  rendered="{!attribute.includeOnQuote}"/>
+        </apex:repeat>
+
+        <apex:repeat rendered="{!pfLayouts[wrapper.packageFamily.Id].enabledSections['Post Test Services']}" value="{!wrapperLayouts[wrapper.rfqItem.Id].sectionMap['Post Test Services'].attributes}" var="attribute">   
+            <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"  rendered="{!attribute.includeOnQuote && wrapper.specificRfqItem[attribute.fieldAPIName] != null}"/>
+        </apex:repeat> 
+
+        <apex:repeat rendered="{!pfLayouts[wrapper.packageFamily.Id].enabledSections['Post Test Services - Wafer Probe']}" value="{!wrapperLayouts[wrapper.rfqItem.Id].sectionMap['Post Test Services - Wafer Probe'].attributes}" var="attribute">   
+            <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"  rendered="{!attribute.includeOnQuote && wrapper.specificRfqItem[attribute.fieldAPIName] != null}"/>
+        </apex:repeat> 
+
+        <apex:repeat rendered="{!pfLayouts[wrapper.packageFamily.Id].enabledSections['Post Test Services Cost and Price']}" value="{!wrapperLayouts[wrapper.rfqItem.Id].sectionMap['Post Test Services Cost and Price'].attributes}" var="attribute">   
+            <apex:outputField value="{!wrapper.specificRfqItem[attribute.fieldAPIName]}"  rendered="{!attribute.includeOnQuote && wrapper.specificRfqItem[attribute.fieldAPIName] != null && breakoutPostTestPriceMap[wrapper.parentVolId]}"/>
+        </apex:repeat> 
+
+	</apex:pageBlockSection>
+
+	
+	<!-- Wire config section -->
+	
+	<apex:outputPanel rendered="{!pfLayouts[wrapper.packageFamily.Id].enabledSections['Wire Description'] && wrapper.wireConfigurations.size > 0}">
+		<h4>Wire Configurations</h4>
+		
+		<apex:repeat value="{!wrapper.wireConfigurations}" var="wireConfig" >
+			<apex:pageBlockSection columns="4">
+		     	<apex:repeat value="{!wrapper.childObjectSections[wireConfig.Id].attributes}" var="attribute">
+		     		<apex:outputField value="{!wireConfig[attribute.fieldAPIName]}" rendered="{!attribute.includeOnQuote}"/>
+		     	</apex:repeat>
+			</apex:pageBlockSection>
+			
+			<br />
+		</apex:repeat>
+	</apex:outputPanel>
+
+	<!-- Die Config section -->
+
+	<apex:outputPanel rendered="{!pfLayouts[wrapper.packageFamily.Id].enabledSections['Die Description'] && wrapper.dieConfigurations.size > 0}">
+		<h4>Die Configurations</h4>
+
+		<apex:repeat value="{!wrapper.dieConfigurations}" var="dieConfig">
+			<apex:pageBlockSection columns="4">
+				<apex:repeat value="{!wrapper.childObjectSections[dieConfig.Id].attributes}" var="attribute">
+		     		<apex:outputField value="{!dieConfig[attribute.fieldAPIName]}" rendered="{!attribute.includeOnQuote}"/>
+		     	</apex:repeat>
+			</apex:pageBlockSection>
+			
+			<br />
+		</apex:repeat>
+	</apex:outputPanel>
+
+	<!-- Passive config section -->
+
+	<apex:outputPanel rendered="{!pfLayouts[wrapper.packageFamily.Id].enabledSections['Passive Description'] && wrapper.passiveConfigurations.size > 0}">
+		<h4>Passive Configurations</h4>
+
+		<apex:repeat value="{!wrapper.passiveConfigurations}" var="passiveConfig">
+			<apex:pageBlockSection columns="4">
+				<apex:repeat value="{!wrapper.childObjectSections[passiveConfig.Id].attributes}" var="attribute">
+		     	<!--	<apex:outputField value="{!passiveConfig[attribute.fieldAPIName]}" rendered="{!attribute.includeOnQuote}"/> -
+		     	//Abhay - 02-01-2017 : Salesforce-146 : Passive section not visble on print Quote Salesforce-146-->
+		     	
+		     	<apex:outputField value="{!passiveConfig[attribute.fieldAPIName]}" rendered="{!attribute.includeOnQuote}"/>
+		     	</apex:repeat>
+			</apex:pageBlockSection>
+			
+			<br />
+		</apex:repeat>
+	</apex:outputPanel>
+
+	<!-- Insertion config section -->
+
+    <apex:outputPanel rendered="{!pfLayouts[wrapper.packageFamily.Id].enabledSections['Insertion Description'] && wrapper.insertionConfigurations.size > 0}">
+
+        <h4>Insertion Configurations</h4>
+
+        <apex:repeat value="{!wrapper.insertionConfigurations}" var="insertionConfig">
+            <apex:pageBlockSection columns="4">
+                <apex:repeat value="{!wrapper.childObjectSections[insertionConfig.Id].attributes}" var="attribute">
+                    <apex:outputField value="{!insertionConfig[attribute.fieldAPIName]}" rendered="{!attribute.includeOnQuote}"/>
+                </apex:repeat>
+            </apex:pageBlockSection>
+            
+
+            <apex:pageBlockSection columns="4" rendered="{!pfLayouts[wrapper.packageFamily.Id].enabledSections['Minimum Tester Configuration']}">
+                <apex:repeat value="{!wrapperLayouts[wrapper.rfqItem.Id].sectionMap['Minimum Tester Configuration'].attributes}" var="attribute">
+                    <apex:outputField value="{!insertionConfig[attribute.fieldAPIName]}" rendered="{!attribute.includeOnQuote && insertionConfig[attribute.fieldAPIName] != null}"/>
+                </apex:repeat>
+            </apex:pageBlockSection>
+            <br />
+        </apex:repeat>
+    </apex:outputPanel>
+
+
+	<apex:outputPanel rendered="{!pfLayouts[wrapper.packageFamily.Id].enabledSections['Service Description'] && wrapper.serviceConfigurations != null && wrapper.serviceConfigurations.size > 0}" >
+		<h4>Service Configurations</h4>
+		<apex:repeat value="{!wrapper.serviceConfigurations}" var="serviceConfig">
+			<apex:pageBlockSection columns="4" >
+				<apex:repeat value="{!wrapper.childObjectSections[serviceConfig.Id].attributes}" var="attribute">
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel value="{!$ObjectType[attribute.objectAPIName].fields[attribute.fieldAPIName].Label}" style="display:block; width:50%;"/>
+			     		<apex:outputText value="{!serviceConfig[attribute.fieldAPIName]}" rendered="{!attribute.includeOnQuote}" style="display:block; width:50%;" label=""/>
+			     	</apex:pageBlockSectionItem> 
+		     	</apex:repeat>
+		     	<apex:pageBlockSectionItem >
+		     		<apex:outputLabel value="Sub Total" style="display:block; width:15%;"/>
+		     		<apex:outputText value="{!serviceConfig['Sub_Total__c']}" style="display:block; width:15%;" label=""/>
+		     	</apex:pageBlockSectionItem> 
+			</apex:pageBlockSection>
+			<hr />
+			</apex:repeat>
+	</apex:outputPanel>
+	
+	<br />
+</apex:component>
